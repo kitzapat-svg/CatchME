@@ -111,3 +111,4 @@ ALL TEST CASES PASSED SUCCESSFULLY! 100% REGRESSION COMPLIANT.
   * เพิ่ม Fallback กล่องข้อความพิมพ์แทนเมื่อเบราว์เซอร์ไม่รองรับเสียงหรือผู้ใช้ต้องการพิมพ์
   * เชื่อมต่อผลลัพธ์การ Parse เข้าสู่หน้าจอ **Confirmation Card** และ **Clarification Card** ตามดีไซน์ Sweet Cotton Candy & Berry ของ Google Stitch
   * จัดการหน้าจอ **Cat B Hard Stop Alert Modal** เมื่อผู้ใช้พูดว่ายาถึงผู้ป่วยแล้ว
+

@@ -1,56 +1,61 @@
 <script>
 /**
- * CatchME Client-side Controller (Phase 0 Foundation)
+ * CatchME Client-side Controller (Milestone 2 - Web Speech API & End-to-End Quick Report)
  */
 const CatchME = (function() {
   const STORAGE_KEYS = {
     MODE: 'catchmeMode',
     ALIAS: 'catchmeReporterAlias',
-    DEVICE_ID: 'catchmeDeviceId'
+    DEVICE_ID: 'catchmeDeviceId',
+    RECENT_REPORTS: 'catchmeRecentReports'
   };
 
   let state = {
     mode: 'OPD',
     alias: '',
     deviceId: '',
-    selectedInitialMode: 'OPD'
+    currentParsed: null,
+    isRecording: false,
+    isSaving: false,
+    recognition: null,
+    capturedTranscript: ''
   };
 
   /**
-   * Initializes local state and checks first-use requirement.
+   * Initializes local state, speech recognition, and preferences.
    */
   function init() {
     ensureDeviceId();
     loadPreferences();
+    initSpeechRecognition();
 
     const storedMode = localStorage.getItem(STORAGE_KEYS.MODE);
     if (!storedMode) {
       showScreen('screen-first-use');
     } else {
       updateHeaderUI();
-      updateDebugUI();
+      renderRecentReports();
       showScreen('screen-quick-report');
     }
 
-    // Ping backend to verify Google Apps Script connectivity
+    // Ping backend to check version and connectivity
     if (window.google && google.script && google.script.run) {
       google.script.run
         .withSuccessHandler(function(serverState) {
           console.log('CatchME Backend Connected:', serverState);
-          const badge = document.getElementById('foundation-status-badge');
-          if (badge) {
-            badge.innerText = 'ONLINE v' + serverState.version;
-          }
         })
         .withFailureHandler(function(err) {
           console.warn('Backend connection notice:', err);
         })
         .getInitialAppState(state.deviceId);
+
+      // Load remote recent reports
+      loadRemoteRecentReports();
     }
   }
 
   /**
-   * Generates or retrieves a persistent pseudo-random UUID for this device/browser.
+   * Generates or retrieves a persistent pseudo-random UUID for this device.
    */
   function ensureDeviceId() {
     let id = localStorage.getItem(STORAGE_KEYS.DEVICE_ID);
@@ -74,10 +79,599 @@ const CatchME = (function() {
   }
 
   /**
-   * Shows a specific screen by ID and hides others.
+   * Initializes the Web Speech API recognition instance.
+   */
+  function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn('Web Speech API is not supported in this browser.');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'th-TH';
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+      recognition.continuous = false;
+
+      recognition.onstart = function() {
+        state.isRecording = true;
+        state.capturedTranscript = '';
+        showScreen('screen-recording');
+        const preview = document.getElementById('live-transcript-preview');
+        if (preview) {
+          preview.innerHTML = '<span style="color: var(--color-primary-dark); font-weight: 600;">กำลังฟัง... (พูดได้เลย)</span>';
+        }
+      };
+
+      recognition.onresult = function(event) {
+        let interim = '';
+        let final = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            final += event.results[i][0].transcript;
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+
+        const currentText = final || interim;
+        if (currentText) {
+          state.capturedTranscript = currentText;
+          const preview = document.getElementById('live-transcript-preview');
+          if (preview) {
+            preview.innerText = '"' + currentText + '"';
+          }
+        }
+      };
+
+      recognition.onerror = function(event) {
+        console.warn('Speech recognition error:', event.error);
+        state.isRecording = false;
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          alert('ไม่สามารถเข้าถึงไมโครโฟนได้ กรุณาอนุญาตสิทธิ์ หรือใช้ปุ่ม "พิมพ์ข้อความแทน"');
+          showScreen('screen-quick-report');
+        }
+      };
+
+      recognition.onend = function() {
+        state.isRecording = false;
+        if (state.capturedTranscript && state.capturedTranscript.trim()) {
+          showScreen('screen-processing');
+          setTimeout(function() {
+            processTranscript(state.capturedTranscript.trim());
+          }, 300);
+        } else {
+          showScreen('screen-quick-report');
+        }
+      };
+
+      state.recognition = recognition;
+    } catch (e) {
+      console.warn('SpeechRecognition initialization failed:', e);
+    }
+  }
+
+  /**
+   * Starts speech capture or fallbacks to text modal.
+   */
+  function startSpeechCapture() {
+    if (!state.recognition) {
+      alert('เบราว์เซอร์นี้ไม่รองรับการบันทึกเสียง กรุณาใช้การพิมพ์ข้อความแทน');
+      openTextFallback();
+      return;
+    }
+
+    try {
+      state.recognition.start();
+    } catch (err) {
+      console.warn('Recognition start exception:', err);
+      try {
+        state.recognition.stop();
+        setTimeout(function() {
+          state.recognition.start();
+        }, 150);
+      } catch (e) {
+        openTextFallback();
+      }
+    }
+  }
+
+  /**
+   * Stops recording manually.
+   */
+  function stopSpeechCapture() {
+    if (state.recognition && state.isRecording) {
+      try {
+        state.recognition.stop();
+      } catch (e) {}
+    }
+  }
+
+  /**
+   * Cancels recording and returns to home.
+   */
+  function cancelSpeechCapture() {
+    state.capturedTranscript = '';
+    if (state.recognition && state.isRecording) {
+      try {
+        state.recognition.abort();
+      } catch (e) {}
+    }
+    showScreen('screen-quick-report');
+  }
+
+  /**
+   * Processes the transcript using Parser (Client-side or Server-side fallback).
+   */
+  function processTranscript(text) {
+    if (!text || !text.trim()) {
+      showScreen('screen-quick-report');
+      return;
+    }
+
+    // Client-side parser invocation if available
+    if (typeof parseMedicationError === 'function') {
+      try {
+        const parsed = parseMedicationError(text, state.mode);
+        handleParsedResult(parsed);
+        return;
+      } catch (e) {
+        console.warn('Client parser error, attempting server fallback:', e);
+      }
+    }
+
+    // Server-side fallback via google.script.run
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(parsed) {
+          handleParsedResult(parsed);
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาดในการวิเคราะห์: ' + (err.message || err));
+          showScreen('screen-quick-report');
+        })
+        .apiParseMedicationError(text, state.mode);
+    } else {
+      // Standalone simulation fallback
+      alert('ไม่พบ Parser Engine กรุณาลองใหม่อีกครั้ง');
+      showScreen('screen-quick-report');
+    }
+  }
+
+  /**
+   * Routes the parsed result to the appropriate screen.
+   */
+  function handleParsedResult(parsed) {
+    state.currentParsed = parsed;
+
+    // 1. Safety Gate Check (Hard Stop)
+    if (!parsed.catBEligible || parsed.patientReached === 'Yes') {
+      const reasonEl = document.getElementById('hardstop-reason');
+      if (reasonEl) {
+        reasonEl.innerText = parsed.safetyStopReason || 'พบสัญญาณว่ายาอาจถึงตัวผู้ป่วยแล้ว';
+      }
+      openModal('modal-catb-hardstop');
+      showScreen('screen-quick-report');
+      return;
+    }
+
+    // 2. Clarification Check
+    if (parsed.requiresClarification && parsed.clarification) {
+      renderClarificationScreen(parsed);
+      showScreen('screen-clarification');
+      return;
+    }
+
+    // 3. Normal Confirmation Screen
+    renderConfirmationScreen(parsed);
+    showScreen('screen-confirmation');
+  }
+
+  /**
+   * Renders the Confirmation Card UI.
+   */
+  function renderConfirmationScreen(parsed) {
+    document.getElementById('confirm-risk-code').innerText = parsed.legacyCode || 'Cat B';
+    document.getElementById('confirm-error-type').innerText = parsed.errorType || 'Medication Error';
+    
+    // Medications
+    let drugs = '-';
+    if (parsed.extractedEntities && parsed.extractedEntities.drugs && parsed.extractedEntities.drugs.length > 0) {
+      drugs = parsed.extractedEntities.drugs.join(', ');
+    }
+    document.getElementById('confirm-drug-name').innerText = drugs;
+
+    // Process & Stage
+    document.getElementById('confirm-process-stage').innerText = (parsed.process || '') + (parsed.processStage ? ' (' + parsed.processStage + ')' : '');
+
+    // Detail: Actual vs Expected
+    const detailLabel = document.getElementById('confirm-detail-label');
+    const actualSpan = document.getElementById('confirm-actual');
+    const expectedSpan = document.getElementById('confirm-expected');
+    const detailSection = document.getElementById('confirm-detail-section');
+
+    const actualVal = parsed.extractedEntities ? parsed.extractedEntities.actual : '';
+    const expectedVal = parsed.extractedEntities ? parsed.extractedEntities.expected : '';
+
+    if (actualVal || expectedVal) {
+      detailSection.classList.remove('hidden');
+      detailLabel.innerText = parsed.errorType || 'รายละเอียด';
+      actualSpan.innerText = 'จัดจริง/สั่งจริง: ' + (actualVal || '-');
+      expectedSpan.innerText = 'ควรเป็น: ' + (expectedVal || '-');
+    } else {
+      detailLabel.innerText = parsed.errorType || 'รายละเอียด';
+      actualSpan.innerText = 'โหมด: ' + parsed.mode;
+      expectedSpan.innerText = 'ความมั่นใจ: ' + parsed.confidence;
+    }
+
+    // Detected stage
+    document.getElementById('confirm-detected-stage').innerText = (parsed.detectedStage || 'DS01') + ' — ' + (parsed.detectedStageName || 'ตรวจพบก่อนถึงผู้ป่วย');
+
+    // Raw transcript
+    document.getElementById('confirm-raw-transcript').innerText = '"' + (parsed.rawTranscript || '') + '"';
+
+    // Reset save button state
+    const saveBtn = document.getElementById('btn-save-report');
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<span>บันทึก (Save)</span><span>✓</span>';
+    }
+  }
+
+  /**
+   * Renders the Clarification Screen with Bento Grid options.
+   */
+  function renderClarificationScreen(parsed) {
+    const titleEl = document.getElementById('clarification-question-title');
+    const subEl = document.getElementById('clarification-question-sub');
+    const gridEl = document.getElementById('clarification-options-grid');
+
+    const clarify = parsed.clarification;
+    titleEl.innerText = clarify.question || 'ต้องการข้อมูลเพิ่มเติม';
+    subEl.innerText = 'แตะเลือก 1 คำตอบเพื่อจำแนกรหัสความเสี่ยงที่ถูกต้อง';
+    gridEl.innerHTML = '';
+
+    const choices = clarify.choices || [];
+    choices.forEach(function(choiceText) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bento-card-btn';
+      btn.innerHTML = `
+        <div>
+          <div class="bento-card-title">${choiceText}</div>
+          <div class="bento-card-sub">แตะเพื่อระบุขั้นตอนนี้</div>
+        </div>
+        <span style="font-size: 20px; color: var(--color-primary);">→</span>
+      `;
+      btn.onclick = function() {
+        resolveClarification(choiceText);
+      };
+      gridEl.appendChild(btn);
+    });
+  }
+
+  /**
+   * Resolves clarification answer and transitions to Confirmation.
+   */
+  function resolveClarification(choiceText) {
+    if (!state.currentParsed) return;
+
+    // Apply specific code mappings from clarification choices
+    if (choiceText.indexOf('A10') !== -1 || choiceText.indexOf('แพทย์สั่ง') !== -1) {
+      state.currentParsed.legacyCode = 'A10';
+      state.currentParsed.process = 'Prescribing';
+      state.currentParsed.processStage = 'PS01';
+      state.currentParsed.errorType = 'ผิดจำนวน/ปริมาณ';
+      state.currentParsed.detectedStage = 'DS01';
+    } else if (choiceText.indexOf('B08') !== -1 || choiceText.indexOf('ห้องยาคีย์') !== -1) {
+      state.currentParsed.legacyCode = 'B08';
+      state.currentParsed.process = 'Pre-dispensing';
+      state.currentParsed.processStage = 'PS02';
+      state.currentParsed.errorType = 'ผิดจำนวน/ปริมาณ';
+      state.currentParsed.detectedStage = 'DS02';
+    } else if (choiceText.indexOf('B29') !== -1 || choiceText.indexOf('คนจัดยา') !== -1) {
+      state.currentParsed.legacyCode = 'B29';
+      state.currentParsed.process = 'Pre-dispensing';
+      state.currentParsed.processStage = 'PS04';
+      state.currentParsed.errorType = 'ผิดจำนวน/ปริมาณ';
+      state.currentParsed.detectedStage = 'DS04';
+    } else if (choiceText.indexOf('B22') !== -1 || choiceText.indexOf('ไม่ได้รับคำสั่ง STAT') !== -1) {
+      state.currentParsed.legacyCode = 'B22';
+      state.currentParsed.process = 'Pre-dispensing';
+      state.currentParsed.processStage = 'PS03';
+      state.currentParsed.errorType = 'ตกหล่นคำสั่ง STAT/ด่วน';
+      state.currentParsed.detectedStage = 'DS05';
+    } else if (choiceText.indexOf('E11') !== -1 || choiceText.indexOf('ไม่ได้ติดป้าย STAT') !== -1) {
+      state.currentParsed.legacyCode = 'E11';
+      state.currentParsed.process = 'Transcribing';
+      state.currentParsed.processStage = 'PS07';
+      state.currentParsed.errorType = 'ตกหล่นคำสั่ง STAT/ด่วน';
+      state.currentParsed.detectedStage = 'DS05';
+    } else if (choiceText.indexOf('B25') !== -1 || choiceText.indexOf('ทั้งชุด') !== -1) {
+      state.currentParsed.legacyCode = 'B25';
+      state.currentParsed.process = 'Pre-dispensing';
+      state.currentParsed.processStage = 'PS04';
+      state.currentParsed.errorType = 'ผิดผู้ป่วย';
+      state.currentParsed.detectedStage = 'DS04';
+    } else if (choiceText.indexOf('B34') !== -1 || choiceText.indexOf('ปนบางรายการ') !== -1) {
+      state.currentParsed.legacyCode = 'B34';
+      state.currentParsed.process = 'Pre-dispensing';
+      state.currentParsed.processStage = 'PS04';
+      state.currentParsed.errorType = 'ผิดผู้ป่วย';
+      state.currentParsed.detectedStage = 'DS04';
+    }
+
+    state.currentParsed.confidence = 'High';
+    state.currentParsed.neededClarification = true;
+    renderConfirmationScreen(state.currentParsed);
+    showScreen('screen-confirmation');
+  }
+
+  /**
+   * Skips clarification question.
+   */
+  function skipClarification() {
+    if (state.currentParsed) {
+      renderConfirmationScreen(state.currentParsed);
+      showScreen('screen-confirmation');
+    } else {
+      showScreen('screen-quick-report');
+    }
+  }
+
+  /**
+   * Opens minimal edit modal.
+   */
+  function openMinimalEdit() {
+    if (!state.currentParsed) return;
+    document.getElementById('edit-risk-code').value = state.currentParsed.legacyCode || '';
+    
+    let drugs = '';
+    if (state.currentParsed.extractedEntities && state.currentParsed.extractedEntities.drugs) {
+      drugs = state.currentParsed.extractedEntities.drugs.join(', ');
+    }
+    document.getElementById('edit-drug-name').value = drugs;
+    document.getElementById('edit-actual').value = state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.actual : '';
+    document.getElementById('edit-expected').value = state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.expected : '';
+
+    openModal('modal-minimal-edit');
+  }
+
+  /**
+   * Applies minimal edit changes.
+   */
+  function applyMinimalEdit() {
+    if (!state.currentParsed) return;
+    const newCode = document.getElementById('edit-risk-code').value.trim();
+    const newDrug = document.getElementById('edit-drug-name').value.trim();
+    const newActual = document.getElementById('edit-actual').value.trim();
+    const newExpected = document.getElementById('edit-expected').value.trim();
+
+    if (newCode) state.currentParsed.legacyCode = newCode;
+    if (!state.currentParsed.extractedEntities) state.currentParsed.extractedEntities = {};
+    if (newDrug) state.currentParsed.extractedEntities.drugs = [newDrug];
+    state.currentParsed.extractedEntities.actual = newActual;
+    state.currentParsed.extractedEntities.expected = newExpected;
+
+    closeModal('modal-minimal-edit');
+    renderConfirmationScreen(state.currentParsed);
+  }
+
+  /**
+   * Saves the confirmed report to Google Sheets or local mock.
+   */
+  function saveReport() {
+    if (state.isSaving || !state.currentParsed) return;
+    state.isSaving = true;
+
+    const saveBtn = document.getElementById('btn-save-report');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span>กำลังบันทึก...</span>';
+    }
+
+    const payload = {
+      deviceSessionId: state.deviceId,
+      reporterAlias: state.alias || 'Anon',
+      mode: state.mode,
+      rawTranscript: state.currentParsed.rawTranscript,
+      normalizedTranscript: state.currentParsed.normalizedTranscript,
+      parserVersion: state.currentParsed.parserVersion || '1.0.0',
+      confidence: state.currentParsed.confidence,
+      neededClarification: state.currentParsed.neededClarification || false,
+      clarificationId: state.currentParsed.clarification ? state.currentParsed.clarification.id : '',
+      process: state.currentParsed.process,
+      processStage: state.currentParsed.processStage,
+      errorType: state.currentParsed.errorType,
+      legacyCode: state.currentParsed.legacyCode,
+      detectedStage: state.currentParsed.detectedStage,
+      drugName: state.currentParsed.extractedEntities && state.currentParsed.extractedEntities.drugs ? state.currentParsed.extractedEntities.drugs.join(', ') : '',
+      actual: state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.actual : '',
+      expected: state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.expected : '',
+      catBEligible: true,
+      patientReached: 'No'
+    };
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          state.isSaving = false;
+          if (res && res.success) {
+            handleSaveSuccess(res.recordId, payload);
+          } else {
+            alert('ไม่สามารถบันทึกได้: ' + (res ? res.error : 'Unknown error'));
+            if (saveBtn) {
+              saveBtn.disabled = false;
+              saveBtn.innerHTML = '<span>บันทึก (Save)</span><span>✓</span>';
+            }
+          }
+        })
+        .withFailureHandler(function(err) {
+          state.isSaving = false;
+          alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + (err.message || err));
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<span>บันทึก (Save)</span><span>✓</span>';
+          }
+        })
+        .apiSaveQuickReport(payload);
+    } else {
+      // Local preview standalone fallback
+      setTimeout(function() {
+        state.isSaving = false;
+        const mockRecordId = 'local-' + Date.now().toString(36);
+        handleSaveSuccess(mockRecordId, payload);
+      }, 500);
+    }
+  }
+
+  /**
+   * Handles successful save event and displays success screen.
+   */
+  function handleSaveSuccess(recordId, payload) {
+    document.getElementById('success-record-id').innerText = recordId;
+    document.getElementById('success-risk-code').innerText = payload.legacyCode || 'Cat B';
+    document.getElementById('success-timestamp').innerText = new Date().toLocaleTimeString('th-TH');
+
+    // Save locally for device recent reports
+    addRecentReport({
+      recordId: recordId,
+      time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+      legacyCode: payload.legacyCode || 'Cat B',
+      errorType: payload.errorType,
+      drugName: payload.drugName
+    });
+
+    state.currentParsed = null;
+    showScreen('screen-success');
+  }
+
+  /**
+   * Manages recent reports stored locally on this device.
+   */
+  function addRecentReport(report) {
+    let recent = [];
+    try {
+      recent = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]');
+    } catch (e) {}
+    recent.unshift(report);
+    if (recent.length > 10) recent = recent.slice(0, 10);
+    localStorage.setItem(STORAGE_KEYS.RECENT_REPORTS, JSON.stringify(recent));
+    renderRecentReports();
+  }
+
+  function renderRecentReports() {
+    let recent = [];
+    try {
+      recent = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]');
+    } catch (e) {}
+
+    const badge = document.getElementById('recent-count-badge');
+    const list = document.getElementById('recent-reports-list');
+    if (!list) return;
+
+    if (badge) badge.innerText = recent.length;
+
+    if (recent.length === 0) {
+      list.innerHTML = '<div style="font-size: 13px; color: var(--color-text-muted); text-align: center; padding: 10px 0;">ยังไม่มีรายการที่บันทึกวันนี้</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    recent.slice(0, 5).forEach(function(item) {
+      const itemEl = document.createElement('div');
+      itemEl.style.cssText = 'background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;';
+      itemEl.innerHTML = `
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: var(--color-text-primary);">${item.errorType || item.legacyCode}</div>
+          <div style="font-size: 12px; color: var(--color-text-secondary);">${item.drugName || '-'}</div>
+        </div>
+        <div style="text-align: right;">
+          <span style="font-size: 13px; font-weight: 800; color: var(--color-primary-dark);">${item.legacyCode}</span>
+          <div style="font-size: 11px; color: var(--color-text-muted);">${item.time || ''}</div>
+        </div>
+      `;
+      list.appendChild(itemEl);
+    });
+  }
+
+  function loadRemoteRecentReports() {
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(remoteReports) {
+          if (remoteReports && remoteReports.length > 0) {
+            const formatted = remoteReports.map(function(r) {
+              return {
+                recordId: r.recordId,
+                time: new Date(r.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+                legacyCode: r.legacyCode,
+                errorType: r.errorType,
+                drugName: r.drugName
+              };
+            });
+            localStorage.setItem(STORAGE_KEYS.RECENT_REPORTS, JSON.stringify(formatted));
+            renderRecentReports();
+          }
+        })
+        .apiGetRecentReports(state.deviceId, 5);
+    }
+  }
+
+  /**
+   * Text Fallback Modal handlers.
+   */
+  function openTextFallback() {
+    document.getElementById('fallback-text-input').value = '';
+    openModal('modal-text-fallback');
+  }
+
+  function submitTextFallback() {
+    const text = document.getElementById('fallback-text-input').value.trim();
+    if (!text) {
+      alert('กรุณากรอกข้อความ');
+      return;
+    }
+    closeModal('modal-text-fallback');
+    showScreen('screen-processing');
+    setTimeout(function() {
+      processTranscript(text);
+    }, 200);
+  }
+
+  /**
+   * Redirects user to hospital incident system (Hard stop).
+   */
+  function handleRedirectToIncident() {
+    alert('กำลังนำคุณไปยังระบบรายงานอุบัติการณ์ความเสี่ยงโรงพยาบาล...');
+    closeModal('modal-catb-hardstop');
+    goHome();
+  }
+
+  /**
+   * Navigates back to Quick Report home.
+   */
+  function goHome() {
+    state.currentParsed = null;
+    showScreen('screen-quick-report');
+  }
+
+  /**
+   * Shows a specific screen and manages header back button.
    */
   function showScreen(screenId) {
-    const screens = ['screen-first-use', 'screen-quick-report'];
+    const screens = [
+      'screen-first-use',
+      'screen-quick-report',
+      'screen-recording',
+      'screen-processing',
+      'screen-confirmation',
+      'screen-clarification',
+      'screen-success'
+    ];
+
     screens.forEach(function(id) {
       const el = document.getElementById(id);
       if (el) {
@@ -88,17 +682,69 @@ const CatchME = (function() {
         }
       }
     });
+
+    const backBtn = document.getElementById('header-back-btn');
+    if (backBtn) {
+      if (screenId === 'screen-confirmation' || screenId === 'screen-clarification') {
+        backBtn.classList.remove('hidden');
+      } else {
+        backBtn.classList.add('hidden');
+      }
+    }
   }
 
   /**
-   * Handles mode selection on the First-use screen.
+   * Modal helper functions.
    */
-  function selectInitialMode(mode) {
-    state.selectedInitialMode = mode;
+  function openModal(modalId) {
+    const el = document.getElementById(modalId);
+    if (el) el.classList.remove('hidden');
+  }
+
+  function closeModal(modalId) {
+    const el = document.getElementById(modalId);
+    if (el) el.classList.add('hidden');
+  }
+
+  /**
+   * Toggles mode between OPD and IPD.
+   */
+  function toggleMode() {
+    state.mode = (state.mode === 'OPD') ? 'IPD' : 'OPD';
+    localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
+    updateHeaderUI();
+  }
+
+  /**
+   * Updates header UI with current mode and alias.
+   */
+  function updateHeaderUI() {
+    const modeBadge = document.getElementById('header-mode-badge');
+    const modeText = document.getElementById('mode-text');
+    const aliasText = document.getElementById('alias-text');
+
+    if (modeBadge && modeText) {
+      modeText.innerText = state.mode;
+      if (state.mode === 'IPD') {
+        modeBadge.className = 'mode-badge ipd';
+      } else {
+        modeBadge.className = 'mode-badge opd';
+      }
+    }
+
+    if (aliasText) {
+      aliasText.innerText = state.alias ? state.alias : 'Anon';
+    }
+  }
+
+  /**
+   * Handles first-use setup save.
+   */
+  function selectInitialMode(m) {
+    state.mode = m;
     const opdCard = document.getElementById('select-opd-card');
     const ipdCard = document.getElementById('select-ipd-card');
-
-    if (mode === 'OPD') {
+    if (m === 'OPD') {
       opdCard.classList.add('selected');
       ipdCard.classList.remove('selected');
     } else {
@@ -107,113 +753,51 @@ const CatchME = (function() {
     }
   }
 
-  /**
-   * Saves first-use preferences and proceeds to Quick Report screen.
-   */
   function saveInitialSetup() {
     const aliasInput = document.getElementById('setup-alias-input');
-    const aliasValue = aliasInput ? aliasInput.value.trim().toUpperCase() : '';
-
-    state.mode = state.selectedInitialMode;
-    state.alias = aliasValue;
+    const alias = aliasInput ? aliasInput.value.trim() : '';
 
     localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
-    if (state.alias) {
-      localStorage.setItem(STORAGE_KEYS.ALIAS, state.alias);
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.ALIAS);
-    }
+    localStorage.setItem(STORAGE_KEYS.ALIAS, alias);
+    state.alias = alias;
 
     updateHeaderUI();
-    updateDebugUI();
     showScreen('screen-quick-report');
   }
 
-  /**
-   * Instantly toggles between OPD and IPD working modes.
-   */
-  function toggleMode() {
-    state.mode = (state.mode === 'OPD') ? 'IPD' : 'OPD';
-    localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
-    updateHeaderUI();
-    updateDebugUI();
-  }
-
-  /**
-   * Allows modifying alias / resetting preferences.
-   */
   function openSettings() {
-    const currentAlias = state.alias || '';
-    const newAlias = prompt('แก้ไขชื่อย่อ / รหัสผู้บันทึก (เช่น P03):', currentAlias);
-    if (newAlias !== null) {
-      state.alias = newAlias.trim().toUpperCase();
-      if (state.alias) {
-        localStorage.setItem(STORAGE_KEYS.ALIAS, state.alias);
-      } else {
-        localStorage.removeItem(STORAGE_KEYS.ALIAS);
-      }
+    const current = state.alias || '';
+    const updated = prompt('ระบุรหัสย่อผู้รายงาน (Reporter Alias):', current);
+    if (updated !== null) {
+      state.alias = updated.trim();
+      localStorage.setItem(STORAGE_KEYS.ALIAS, state.alias);
       updateHeaderUI();
-      updateDebugUI();
     }
-  }
-
-  /**
-   * Updates Header mode and alias pills.
-   */
-  function updateHeaderUI() {
-    const badge = document.getElementById('header-mode-badge');
-    const modeText = document.getElementById('mode-text');
-    const aliasBadge = document.getElementById('header-alias-badge');
-    const aliasText = document.getElementById('alias-text');
-
-    if (badge && modeText) {
-      modeText.innerText = state.mode;
-      if (state.mode === 'OPD') {
-        badge.className = 'mode-badge opd';
-      } else {
-        badge.className = 'mode-badge ipd';
-      }
-    }
-
-    if (aliasBadge && aliasText) {
-      aliasText.innerText = state.alias || 'ไม่ระบุ';
-    }
-  }
-
-  /**
-   * Updates debug panel information.
-   */
-  function updateDebugUI() {
-    const devEl = document.getElementById('debug-device-id');
-    const modeEl = document.getElementById('debug-mode');
-    const aliasEl = document.getElementById('debug-alias');
-
-    if (devEl) devEl.innerText = state.deviceId;
-    if (modeEl) modeEl.innerText = state.mode;
-    if (aliasEl) aliasEl.innerText = state.alias || '(ไม่มี)';
-  }
-
-  function handleMicClick() {
-    alert('🎙️ Phase 0 Foundation: เชื่อมต่อ Web App เรียบร้อย\nระบบบันทึกเสียงและ Rule-based Parser จะเปิดใช้งานใน Milestone 1 & 2');
-  }
-
-  function handleTypingFallback() {
-    alert('⌨️ Phase 0 Foundation: ระบบพิมพ์ข้อความแทน จะเปิดใช้งานพร้อมกันใน Milestone 1 & 2');
   }
 
   return {
     init: init,
+    toggleMode: toggleMode,
     selectInitialMode: selectInitialMode,
     saveInitialSetup: saveInitialSetup,
-    toggleMode: toggleMode,
     openSettings: openSettings,
-    handleMicClick: handleMicClick,
-    handleTypingFallback: handleTypingFallback
+    startSpeechCapture: startSpeechCapture,
+    stopSpeechCapture: stopSpeechCapture,
+    cancelSpeechCapture: cancelSpeechCapture,
+    openTextFallback: openTextFallback,
+    submitTextFallback: submitTextFallback,
+    openMinimalEdit: openMinimalEdit,
+    applyMinimalEdit: applyMinimalEdit,
+    saveReport: saveReport,
+    skipClarification: skipClarification,
+    handleRedirectToIncident: handleRedirectToIncident,
+    goHome: goHome,
+    openModal: openModal,
+    closeModal: closeModal
   };
 })();
 
-// Boot on DOM ready
-document.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', function() {
   CatchME.init();
 });
 </script>

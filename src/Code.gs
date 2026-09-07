@@ -3,7 +3,7 @@
  * Main Entry Point (Web App)
  */
 
-const APP_VERSION = '0.1.0';
+const APP_VERSION = '0.2.0';
 
 /**
  * Serves the HTML web app for the CatchME user interface.
@@ -44,4 +44,25 @@ function getInitialAppState(deviceId) {
     status: 'READY',
     serverTime: new Date().toISOString()
   };
+}
+
+/**
+ * Client-callable endpoint to parse medication error speech/text.
+ */
+function apiParseMedicationError(transcript, mode) {
+  return parseMedicationError(transcript, mode);
+}
+
+/**
+ * Client-callable endpoint to save quick Cat B report.
+ */
+function apiSaveQuickReport(reportData) {
+  return saveQuickReport(reportData);
+}
+
+/**
+ * Client-callable endpoint to retrieve recent reports for this device.
+ */
+function apiGetRecentReports(deviceSessionId, limit) {
+  return getRecentReports(deviceSessionId, limit);
 }

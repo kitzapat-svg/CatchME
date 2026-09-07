@@ -5,6 +5,23 @@ All notable changes to the CatchME project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-09-07
+### Added
+- Web Speech API integration in `src/Scripts.html` supporting Thai (`th-TH`) voice recording.
+- Full UI screens and modals based on Google Stitch *Sweet Cotton Candy & Berry* design system (`src/App.html`, `src/Styles.html`):
+  - Quick Report Home with responsive thumb-zone microphone trigger.
+  - Recording state with pulsing waveform animation and real-time transcript preview.
+  - Processing state with smooth transition indicator.
+  - Confirmation Card displaying Category B status, Risk Code, Error Type, Medication, and comparison.
+  - Clarification Bento Grid allowing 1-tap disambiguation for ambiguous speech reports.
+  - Cat B Safety Gate Hard Stop Modal alerting users when medication has reached the patient.
+  - Minimal Manual Correction Sheet for quick field edits before saving.
+  - Save Success screen with unique record ID and next report action.
+  - Text Input Fallback Modal for environments without microphone support.
+- Backend report persistence in `src/Reports.gs` (`saveQuickReport` and `getRecentReports`) writing to Google Sheets `ME_Log` and `Audit_Log` with `LockService`.
+- Client-callable API wrappers in `src/Code.gs` (`apiParseMedicationError`, `apiSaveQuickReport`, `apiGetRecentReports`).
+- Standalone local browser preview in `tests/preview.html` with embedded parser and mock storage.
+
 ## [0.2.0] - 2026-09-07
 ### Added
 - Deterministic Rule-Based Parser in `src/Parser.gs` supporting both OPD and IPD workflows.
