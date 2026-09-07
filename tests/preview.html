@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CatchME — Cat B Quick Reporter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+  :root {
+    /* Brand Tokens (Sweet Cotton Candy & Berry) */
+    --color-primary: #FF8FAB;
+    --color-primary-dark: #9B3356;
+    --color-primary-deep: #8B2B49;
+    --color-primary-container: #FFE5EC;
+    --color-surface: #FFFFFF;
+    --color-background: #FFF8F9;
+    --color-surface-subtle: #FFF0F3;
+    
+    /* Functional Mode Tokens */
+    --color-opd-bg: #EAF4FF;
+    --color-opd-border: #A2D2FF;
+    --color-opd-text: #1E4F8A;
+    --color-opd-badge: #BDE0FE;
+
+    --color-ipd-bg: #FFF0F4;
+    --color-ipd-border: #FFB3C6;
+    --color-ipd-text: #C94B6E;
+    --color-ipd-badge: #FFE5EC;
+
+    /* Typography & Contrast */
+    --color-text-primary: #1E293B;
+    --color-text-secondary: #64748B;
+    --color-text-muted: #94A3B8;
+
+    /* Status Tokens */
+    --color-catb-badge: #FFE5EC;
+    --color-catb-text: #9B3356;
+    --color-alert-bg: #FEE2E2;
+    --color-alert-border: #FCA5A5;
+    --color-alert-text: #B91C1C;
+    --color-success-bg: #D8F3DC;
+    --color-success-text: #2D6A4F;
+
+    /* Elevation & Shapes */
+    --radius-card: 24px;
+    --radius-pill: 9999px;
+    --radius-button: 16px;
+    --shadow-card: 0 8px 24px -4px rgba(255, 143, 171, 0.15);
+    --shadow-mic: 0 10px 28px -2px rgba(255, 143, 171, 0.45);
+    --shadow-float: 0 12px 32px rgba(30, 41, 59, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* Centered Mobile Container (360px - 440px) */
+  .app-container {
+    width: 100%;
+    max-width: 440px;
+    min-height: 100vh;
+    background-color: var(--color-background);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
+  }
+
+  /* Header */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 248, 249, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 224, 230, 0.8);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-primary-dark);
+    letter-spacing: -0.5px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Mode Badge Pill */
+  .mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid transparent;
+  }
+
+  .mode-badge:active {
+    transform: scale(0.96);
+  }
+
+  .mode-badge.opd {
+    background-color: var(--color-opd-bg);
+    color: var(--color-opd-text);
+    border-color: var(--color-opd-border);
+  }
+
+  .mode-badge.ipd {
+    background-color: var(--color-ipd-bg);
+    color: var(--color-ipd-text);
+    border-color: var(--color-ipd-border);
+  }
+
+  .alias-badge {
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    background-color: var(--color-surface-subtle);
+    color: var(--color-text-secondary);
+  }
+
+  /* Screen Content */
+  .screen-content {
+    flex: 1;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Card Component */
+  .catchme-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-card);
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(255, 224, 230, 0.7);
+    margin-bottom: 18px;
+  }
+
+  /* Typography Utilities */
+  .title-lg {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+  }
+
+  /* First-Use Mode Selection Cards */
+  .mode-select-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .mode-select-card {
+    background: var(--color-surface);
+    border: 2px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 20px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mode-select-card.selected.opd {
+    border-color: #3B82F6;
+    background: var(--color-opd-bg);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+  }
+
+  .mode-select-card.selected.ipd {
+    border-color: #EC4899;
+    background: var(--color-ipd-bg);
+    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.15);
+  }
+
+  .mode-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  .mode-card-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+  }
+
+  /* Inputs */
+  .input-group {
+    margin-bottom: 18px;
+  }
+
+  .input-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid #CBD5E1;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    background: var(--color-surface);
+  }
+
+  .input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(255, 143, 171, 0.2);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-dark);
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(155, 51, 86, 0.25);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+    background: var(--color-primary-deep);
+  }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    border: 1px solid #CBD5E1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  /* Microphone Circle */
+  .mic-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 0 24px;
+  }
+
+  .mic-button {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF8FAB 0%, #FB6F92 100%);
+    border: none;
+    box-shadow: var(--shadow-mic);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mic-button:active {
+    transform: scale(0.93);
+  }
+
+  .mic-icon {
+    font-size: 46px;
+    color: #FFFFFF;
+  }
+
+  .mic-prompt {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-top: 18px;
+    text-align: center;
+  }
+
+  .mic-subtext {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  /* Tagline Footer */
+  .tagline-footer {
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-primary-dark);
+    letter-spacing: 0.2px;
+  }
+
+  /* Utility display */
+  .hidden {
+    display: none !important;
+  }
+</style>
+
+</head>
+<body>
+  <div class="app-container">
+  <!-- Sticky Header -->
+  <header class="app-header">
+    <div class="brand-group">
+      <span class="brand-title">CatchME</span>
+    </div>
+    <div class="header-actions">
+      <!-- Mode Badge Pill -->
+      <div id="header-mode-badge" class="mode-badge opd" onclick="CatchME.toggleMode()" title="แตะเพื่อสลับ OPD / IPD">
+        <span id="mode-text">OPD</span>
+        <span style="font-size: 11px;">⇄</span>
+      </div>
+      <!-- Reporter Alias Badge -->
+      <div id="header-alias-badge" class="alias-badge" onclick="CatchME.openSettings()" title="แตะเพื่อแก้ไขรหัสผู้บันทึก">
+        <span id="alias-text">-</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="screen-content">
+    
+    <!-- Screen 1: First-time Setup Screen -->
+    <section id="screen-first-use" class="hidden">
+      <div class="catchme-card">
+        <h1 class="title-lg">ตั้งค่าการใช้งาน CatchME</h1>
+        <p class="subtitle">เลือกหน่วยงานเพื่อจัดหมวดหมู่ความคลาดเคลื่อนทางยา (สามารถเปลี่ยนได้ตลอดเวลา)</p>
+
+        <div class="mode-select-grid">
+          <div id="select-opd-card" class="mode-select-card selected opd" onclick="CatchME.selectInitialMode('OPD')">
+            <div style="font-size: 32px;">🏥</div>
+            <div class="mode-card-title" style="color: #1E4F8A;">OPD</div>
+            <div class="mode-card-desc">ผู้ป่วยนอก / ห้องยา</div>
+          </div>
+          <div id="select-ipd-card" class="mode-select-card ipd" onclick="CatchME.selectInitialMode('IPD')">
+            <div style="font-size: 32px;">🛏️</div>
+            <div class="mode-card-title" style="color: #C94B6E;">IPD</div>
+            <div class="mode-card-desc">ผู้ป่วยใน / หอผู้ป่วย</div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="setup-alias-input">ชื่อย่อ / รหัสผู้บันทึก (ระบุหรือไม่ก็ได้)</label>
+          <input type="text" id="setup-alias-input" class="input-field" placeholder="เช่น P03, ARM, RX-IPD" maxlength="15">
+        </div>
+
+        <button type="button" class="btn-primary" onclick="CatchME.saveInitialSetup()">
+          <span>เริ่มใช้งาน CatchME</span>
+          <span>→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 2: Quick Report Home Shell (Milestone 0 Foundation) -->
+    <section id="screen-quick-report" class="hidden">
+      <div class="catchme-card" style="text-align: center; padding: 28px 20px;">
+        <div class="mic-section">
+          <button id="mic-trigger-btn" class="mic-button" onclick="CatchME.handleMicClick()">
+            <span class="mic-icon">🎙️</span>
+          </button>
+          <div class="mic-prompt">กดเพื่อบันทึก Medication Error</div>
+          <div class="mic-subtext">พูดสั้น ๆ ว่าเกิดอะไรขึ้น เช่น "คนจัด amlodipine 30 เม็ด แต่ต้อง 60"</div>
+        </div>
+
+        <button type="button" class="btn-secondary" onclick="CatchME.handleTypingFallback()">
+          <span>⌨️ พิมพ์ข้อความแทน</span>
+        </button>
+      </div>
+
+      <!-- Quick Foundation Status Card -->
+      <div class="catchme-card" style="background: var(--color-surface-subtle); border: 1px dashed var(--color-primary-dark);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--color-primary-dark);">สถานะระบบ (Phase 0 Foundation)</span>
+          <span id="foundation-status-badge" style="font-size: 12px; font-weight: 700; color: #2D6A4F; background: #D8F3DC; padding: 2px 8px; border-radius: 9999px;">READY</span>
+        </div>
+        <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 8px;">
+          <div>• Device ID: <span id="debug-device-id" style="font-family: monospace; font-size: 11px;">-</span></div>
+          <div>• โหมดปัจจุบัน: <strong id="debug-mode">-</strong> | ผู้บันทึก: <strong id="debug-alias">-</strong></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Tagline Footer -->
+  <footer class="tagline-footer">
+    Catch ME before it reaches the patient.
+  </footer>
+</div>
+
+  <script>
+/**
+ * CatchME Client-side Controller (Phase 0 Foundation)
+ */
+const CatchME = (function() {
+  const STORAGE_KEYS = {
+    MODE: 'catchmeMode',
+    ALIAS: 'catchmeReporterAlias',
+    DEVICE_ID: 'catchmeDeviceId'
+  };
+
+  let state = {
+    mode: 'OPD',
+    alias: '',
+    deviceId: '',
+    selectedInitialMode: 'OPD'
+  };
+
+  /**
+   * Initializes local state and checks first-use requirement.
+   */
+  function init() {
+    ensureDeviceId();
+    loadPreferences();
+
+    const storedMode = localStorage.getItem(STORAGE_KEYS.MODE);
+    if (!storedMode) {
+      showScreen('screen-first-use');
+    } else {
+      updateHeaderUI();
+      updateDebugUI();
+      showScreen('screen-quick-report');
+    }
+
+    // Ping backend to verify Google Apps Script connectivity
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(serverState) {
+          console.log('CatchME Backend Connected:', serverState);
+          const badge = document.getElementById('foundation-status-badge');
+          if (badge) {
+            badge.innerText = 'ONLINE v' + serverState.version;
+          }
+        })
+        .withFailureHandler(function(err) {
+          console.warn('Backend connection notice:', err);
+        })
+        .getInitialAppState(state.deviceId);
+    }
+  }
+
+  /**
+   * Generates or retrieves a persistent pseudo-random UUID for this device/browser.
+   */
+  function ensureDeviceId() {
+    let id = localStorage.getItem(STORAGE_KEYS.DEVICE_ID);
+    if (!id) {
+      if (window.crypto && crypto.randomUUID) {
+        id = crypto.randomUUID();
+      } else {
+        id = 'dev-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+      }
+      localStorage.setItem(STORAGE_KEYS.DEVICE_ID, id);
+    }
+    state.deviceId = id;
+  }
+
+  /**
+   * Loads saved preferences from localStorage.
+   */
+  function loadPreferences() {
+    state.mode = localStorage.getItem(STORAGE_KEYS.MODE) || 'OPD';
+    state.alias = localStorage.getItem(STORAGE_KEYS.ALIAS) || '';
+  }
+
+  /**
+   * Shows a specific screen by ID and hides others.
+   */
+  function showScreen(screenId) {
+    const screens = ['screen-first-use', 'screen-quick-report'];
+    screens.forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        if (id === screenId) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  /**
+   * Handles mode selection on the First-use screen.
+   */
+  function selectInitialMode(mode) {
+    state.selectedInitialMode = mode;
+    const opdCard = document.getElementById('select-opd-card');
+    const ipdCard = document.getElementById('select-ipd-card');
+
+    if (mode === 'OPD') {
+      opdCard.classList.add('selected');
+      ipdCard.classList.remove('selected');
+    } else {
+      ipdCard.classList.add('selected');
+      opdCard.classList.remove('selected');
+    }
+  }
+
+  /**
+   * Saves first-use preferences and proceeds to Quick Report screen.
+   */
+  function saveInitialSetup() {
+    const aliasInput = document.getElementById('setup-alias-input');
+    const aliasValue = aliasInput ? aliasInput.value.trim().toUpperCase() : '';
+
+    state.mode = state.selectedInitialMode;
+    state.alias = aliasValue;
+
+    localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
+    if (state.alias) {
+      localStorage.setItem(STORAGE_KEYS.ALIAS, state.alias);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.ALIAS);
+    }
+
+    updateHeaderUI();
+    updateDebugUI();
+    showScreen('screen-quick-report');
+  }
+
+  /**
+   * Instantly toggles between OPD and IPD working modes.
+   */
+  function toggleMode() {
+    state.mode = (state.mode === 'OPD') ? 'IPD' : 'OPD';
+    localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
+    updateHeaderUI();
+    updateDebugUI();
+  }
+
+  /**
+   * Allows modifying alias / resetting preferences.
+   */
+  function openSettings() {
+    const currentAlias = state.alias || '';
+    const newAlias = prompt('แก้ไขชื่อย่อ / รหัสผู้บันทึก (เช่น P03):', currentAlias);
+    if (newAlias !== null) {
+      state.alias = newAlias.trim().toUpperCase();
+      if (state.alias) {
+        localStorage.setItem(STORAGE_KEYS.ALIAS, state.alias);
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.ALIAS);
+      }
+      updateHeaderUI();
+      updateDebugUI();
+    }
+  }
+
+  /**
+   * Updates Header mode and alias pills.
+   */
+  function updateHeaderUI() {
+    const badge = document.getElementById('header-mode-badge');
+    const modeText = document.getElementById('mode-text');
+    const aliasBadge = document.getElementById('header-alias-badge');
+    const aliasText = document.getElementById('alias-text');
+
+    if (badge && modeText) {
+      modeText.innerText = state.mode;
+      if (state.mode === 'OPD') {
+        badge.className = 'mode-badge opd';
+      } else {
+        badge.className = 'mode-badge ipd';
+      }
+    }
+
+    if (aliasBadge && aliasText) {
+      aliasText.innerText = state.alias || 'ไม่ระบุ';
+    }
+  }
+
+  /**
+   * Updates debug panel information.
+   */
+  function updateDebugUI() {
+    const devEl = document.getElementById('debug-device-id');
+    const modeEl = document.getElementById('debug-mode');
+    const aliasEl = document.getElementById('debug-alias');
+
+    if (devEl) devEl.innerText = state.deviceId;
+    if (modeEl) modeEl.innerText = state.mode;
+    if (aliasEl) aliasEl.innerText = state.alias || '(ไม่มี)';
+  }
+
+  function handleMicClick() {
+    alert('🎙️ Phase 0 Foundation: เชื่อมต่อ Web App เรียบร้อย\nระบบบันทึกเสียงและ Rule-based Parser จะเปิดใช้งานใน Milestone 1 & 2');
+  }
+
+  function handleTypingFallback() {
+    alert('⌨️ Phase 0 Foundation: ระบบพิมพ์ข้อความแทน จะเปิดใช้งานพร้อมกันใน Milestone 1 & 2');
+  }
+
+  return {
+    init: init,
+    selectInitialMode: selectInitialMode,
+    saveInitialSetup: saveInitialSetup,
+    toggleMode: toggleMode,
+    openSettings: openSettings,
+    handleMicClick: handleMicClick,
+    handleTypingFallback: handleTypingFallback
+  };
+})();
+
+// Boot on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  CatchME.init();
+});
+</script>
+
+</body>
+</html>

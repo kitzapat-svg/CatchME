@@ -1,0 +1,9 @@
+﻿# Ignore all files by default
+**/*
+
+# Whitelist files to push to Apps Script
+!appsscript.json
+!src/**
+!src/**/*.gs
+!src/**/*.html
+!src/**/*.js

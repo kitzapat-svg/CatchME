@@ -1,0 +1,355 @@
+<style>
+  :root {
+    /* Brand Tokens (Sweet Cotton Candy & Berry) */
+    --color-primary: #FF8FAB;
+    --color-primary-dark: #9B3356;
+    --color-primary-deep: #8B2B49;
+    --color-primary-container: #FFE5EC;
+    --color-surface: #FFFFFF;
+    --color-background: #FFF8F9;
+    --color-surface-subtle: #FFF0F3;
+    
+    /* Functional Mode Tokens */
+    --color-opd-bg: #EAF4FF;
+    --color-opd-border: #A2D2FF;
+    --color-opd-text: #1E4F8A;
+    --color-opd-badge: #BDE0FE;
+
+    --color-ipd-bg: #FFF0F4;
+    --color-ipd-border: #FFB3C6;
+    --color-ipd-text: #C94B6E;
+    --color-ipd-badge: #FFE5EC;
+
+    /* Typography & Contrast */
+    --color-text-primary: #1E293B;
+    --color-text-secondary: #64748B;
+    --color-text-muted: #94A3B8;
+
+    /* Status Tokens */
+    --color-catb-badge: #FFE5EC;
+    --color-catb-text: #9B3356;
+    --color-alert-bg: #FEE2E2;
+    --color-alert-border: #FCA5A5;
+    --color-alert-text: #B91C1C;
+    --color-success-bg: #D8F3DC;
+    --color-success-text: #2D6A4F;
+
+    /* Elevation & Shapes */
+    --radius-card: 24px;
+    --radius-pill: 9999px;
+    --radius-button: 16px;
+    --shadow-card: 0 8px 24px -4px rgba(255, 143, 171, 0.15);
+    --shadow-mic: 0 10px 28px -2px rgba(255, 143, 171, 0.45);
+    --shadow-float: 0 12px 32px rgba(30, 41, 59, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* Centered Mobile Container (360px - 440px) */
+  .app-container {
+    width: 100%;
+    max-width: 440px;
+    min-height: 100vh;
+    background-color: var(--color-background);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.03);
+  }
+
+  /* Header */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 248, 249, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 224, 230, 0.8);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .brand-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-primary-dark);
+    letter-spacing: -0.5px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Mode Badge Pill */
+  .mode-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid transparent;
+  }
+
+  .mode-badge:active {
+    transform: scale(0.96);
+  }
+
+  .mode-badge.opd {
+    background-color: var(--color-opd-bg);
+    color: var(--color-opd-text);
+    border-color: var(--color-opd-border);
+  }
+
+  .mode-badge.ipd {
+    background-color: var(--color-ipd-bg);
+    color: var(--color-ipd-text);
+    border-color: var(--color-ipd-border);
+  }
+
+  .alias-badge {
+    padding: 5px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    background-color: var(--color-surface-subtle);
+    color: var(--color-text-secondary);
+  }
+
+  /* Screen Content */
+  .screen-content {
+    flex: 1;
+    padding: 20px 18px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Card Component */
+  .catchme-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-card);
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(255, 224, 230, 0.7);
+    margin-bottom: 18px;
+  }
+
+  /* Typography Utilities */
+  .title-lg {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+  }
+
+  /* First-Use Mode Selection Cards */
+  .mode-select-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .mode-select-card {
+    background: var(--color-surface);
+    border: 2px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 20px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mode-select-card.selected.opd {
+    border-color: #3B82F6;
+    background: var(--color-opd-bg);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+  }
+
+  .mode-select-card.selected.ipd {
+    border-color: #EC4899;
+    background: var(--color-ipd-bg);
+    box-shadow: 0 4px 16px rgba(236, 72, 153, 0.15);
+  }
+
+  .mode-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 8px;
+  }
+
+  .mode-card-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+  }
+
+  /* Inputs */
+  .input-group {
+    margin-bottom: 18px;
+  }
+
+  .input-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid #CBD5E1;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    background: var(--color-surface);
+  }
+
+  .input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(255, 143, 171, 0.2);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-dark);
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(155, 51, 86, 0.25);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+    background: var(--color-primary-deep);
+  }
+
+  .btn-secondary {
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    border: 1px solid #CBD5E1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  /* Microphone Circle */
+  .mic-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 0 24px;
+  }
+
+  .mic-button {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF8FAB 0%, #FB6F92 100%);
+    border: none;
+    box-shadow: var(--shadow-mic);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .mic-button:active {
+    transform: scale(0.93);
+  }
+
+  .mic-icon {
+    font-size: 46px;
+    color: #FFFFFF;
+  }
+
+  .mic-prompt {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-top: 18px;
+    text-align: center;
+  }
+
+  .mic-subtext {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  /* Tagline Footer */
+  .tagline-footer {
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-primary-dark);
+    letter-spacing: 0.2px;
+  }
+
+  /* Utility display */
+  .hidden {
+    display: none !important;
+  }
+</style>

@@ -1,0 +1,47 @@
+/**
+ * CatchME — Medication Error Cat B Quick Reporter
+ * Main Entry Point (Web App)
+ */
+
+const APP_VERSION = '0.1.0';
+
+/**
+ * Serves the HTML web app for the CatchME user interface.
+ * Configured to run as USER_DEPLOYING with access ANYONE (No-Login required).
+ */
+function doGet(e) {
+  var template;
+  try {
+    template = HtmlService.createTemplateFromFile('Index');
+  } catch (err) {
+    template = HtmlService.createTemplateFromFile('src/Index');
+  }
+
+  return template.evaluate()
+    .setTitle('CatchME — Cat B Quick Reporter')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+/**
+ * Helper to include partial HTML files into the main template.
+ * Resolves both flat ("Styles") and folder-prefixed ("src/Styles") paths.
+ */
+function include(filename) {
+  try {
+    return HtmlService.createHtmlOutputFromFile(filename).getContent();
+  } catch (e) {
+    return HtmlService.createHtmlOutputFromFile('src/' + filename).getContent();
+  }
+}
+
+/**
+ * Returns initial application metadata for the client on load.
+ */
+function getInitialAppState(deviceId) {
+  return {
+    version: APP_VERSION,
+    status: 'READY',
+    serverTime: new Date().toISOString()
+  };
+}

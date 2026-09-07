@@ -1,0 +1,194 @@
+<!DOCTYPE html><html class="light" lang="th"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Clarification Question - Med Error Reporter</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "bg-surface-subtle": "#FFEBF0",
+                      "on-tertiary-fixed": "#00210b",
+                      "surface-dim": "#d0daf0",
+                      "surface-bright": "#f9f9ff",
+                      "inverse-primary": "#ffb1c2",
+                      "error-container": "#ffdad6",
+                      "primary": "#9b3f5a",
+                      "on-primary": "#ffffff",
+                      "on-secondary-fixed": "#001d32",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "surface-container-low": "#f0f3ff",
+                      "on-surface": "#121c2c",
+                      "surface-variant": "#d9e3f9",
+                      "primary-hover": "#FB6F92",
+                      "bg-primary": "#FFF8F9",
+                      "success": "#72EFDD",
+                      "tertiary-fixed": "#9cf6ae",
+                      "tertiary-container": "#6bc380",
+                      "on-tertiary-fixed-variant": "#005225",
+                      "on-primary-container": "#79243f",
+                      "warning": "#FFD166",
+                      "surface": "#f9f9ff",
+                      "secondary-light": "#BDE0FE",
+                      "surface-tint": "#9b3f5a",
+                      "inverse-on-surface": "#ebf1ff",
+                      "on-error-container": "#93000a",
+                      "inverse-surface": "#273141",
+                      "secondary-fixed-dim": "#9bcbf8",
+                      "error": "#ba1a1a",
+                      "surface-container-highest": "#d9e3f9",
+                      "surface-container-high": "#dee8ff",
+                      "surface-container": "#e7eeff",
+                      "on-primary-fixed": "#3f0018",
+                      "secondary-fixed": "#cde5ff",
+                      "tertiary": "#056d34",
+                      "tertiary-fixed-dim": "#81da94",
+                      "primary-fixed": "#ffd9e0",
+                      "on-primary-fixed-variant": "#7d2742",
+                      "on-secondary-container": "#265a81",
+                      "background": "#f9f9ff",
+                      "primary-container": "#ff8fab",
+                      "outline": "#877275",
+                      "on-tertiary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "secondary-container": "#a1d1fe",
+                      "on-secondary-fixed-variant": "#104a70",
+                      "on-background": "#121c2c",
+                      "border-subtle": "#FFE0E6",
+                      "secondary": "#30628a",
+                      "primary-fixed-dim": "#ffb1c2",
+                      "outline-variant": "#dac0c4",
+                      "on-tertiary-container": "#004f23",
+                      "on-surface-variant": "#544245"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "margin-mobile": "16px",
+                      "gutter": "24px",
+                      "xs": "8px",
+                      "xl": "32px",
+                      "sm": "12px",
+                      "lg": "24px",
+                      "md": "16px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-md": ["Plus Jakarta Sans"],
+                      "headline-sm": ["Plus Jakarta Sans"],
+                      "label-sm": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-sm": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": ["26px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-bg-primary text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16 bg-surface border-b border-border-subtle shadow-sm">
+<div class="flex items-center gap-sm">
+<button class="w-10 h-10 rounded-full bg-bg-surface-subtle flex items-center justify-center text-primary hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<span class="text-headline-sm font-headline-sm font-bold text-primary">CatchME</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="px-md py-xs rounded-full bg-primary-container text-on-primary-container text-label-md font-label-md hover:opacity-80 transition-opacity">
+                IPD Mode
+            </button>
+<div class="w-10 h-10 rounded-full bg-secondary-light flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow pt-24 pb-32 px-margin-mobile flex flex-col items-center">
+<div class="w-full max-w-md w-full flex flex-col gap-lg">
+<div class="text-center mb-md">
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile text-primary mb-xs">จำนวนผิดเกิดที่ขั้นตอนไหน?</h1>
+<p class="text-body-md font-body-md text-on-surface-variant">กรุณาเลือกขั้นตอนที่เกิดความคลาดเคลื่อน</p>
+</div>
+<!-- Options Bento Grid -->
+<div class="grid grid-cols-1 gap-md">
+<!-- Option 1 -->
+<button class="group relative bg-surface border border-border-subtle rounded-[24px] p-lg flex flex-col items-center justify-center gap-md hover:bg-bg-surface-subtle transition-all duration-300 shadow-[0_4px_14px_0_rgba(255,143,171,0.05)] hover:shadow-[0_8px_24px_0_rgba(255,143,171,0.15)] overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+<div class="w-20 h-20 rounded-full bg-primary-container/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-[40px]" data-icon="edit_document">edit_document</span>
+</div>
+<span class="text-headline-md font-headline-md text-on-surface">แพทย์สั่ง</span>
+</button>
+<!-- Option 2 -->
+<button class="group relative bg-surface border border-border-subtle rounded-[24px] p-lg flex flex-col items-center justify-center gap-md hover:bg-bg-surface-subtle transition-all duration-300 shadow-[0_4px_14px_0_rgba(255,143,171,0.05)] hover:shadow-[0_8px_24px_0_rgba(255,143,171,0.15)] overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+<div class="w-20 h-20 rounded-full bg-primary-container/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-[40px]" data-icon="keyboard">keyboard</span>
+</div>
+<span class="text-headline-md font-headline-md text-on-surface">ห้องยาคีย์</span>
+</button>
+<!-- Option 3 -->
+<button class="group relative bg-surface border border-border-subtle rounded-[24px] p-lg flex flex-col items-center justify-center gap-md hover:bg-bg-surface-subtle transition-all duration-300 shadow-[0_4px_14px_0_rgba(255,143,171,0.05)] hover:shadow-[0_8px_24px_0_rgba(255,143,171,0.15)] overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+<div class="w-20 h-20 rounded-full bg-primary-container/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+<span class="material-symbols-outlined text-[40px]" data-icon="medication">medication</span>
+</div>
+<span class="text-headline-md font-headline-md text-on-surface">คนจัดยา</span>
+</button>
+</div>
+<!-- Secondary Action -->
+<div class="mt-lg flex justify-center">
+<button class="px-xl py-sm rounded-[24px] bg-secondary-light text-on-secondary-fixed text-label-md font-label-md hover:bg-surface-variant transition-colors shadow-sm">
+                    I'm not sure
+                </button>
+</div>
+</div>
+</main>
+<!-- Navigation Suppressed for Linear/Transactional Task Intent as per instructions -->
+
+
+</body></html>

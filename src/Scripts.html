@@ -1,0 +1,219 @@
+<script>
+/**
+ * CatchME Client-side Controller (Phase 0 Foundation)
+ */
+const CatchME = (function() {
+  const STORAGE_KEYS = {
+    MODE: 'catchmeMode',
+    ALIAS: 'catchmeReporterAlias',
+    DEVICE_ID: 'catchmeDeviceId'
+  };
+
+  let state = {
+    mode: 'OPD',
+    alias: '',
+    deviceId: '',
+    selectedInitialMode: 'OPD'
+  };
+
+  /**
+   * Initializes local state and checks first-use requirement.
+   */
+  function init() {
+    ensureDeviceId();
+    loadPreferences();
+
+    const storedMode = localStorage.getItem(STORAGE_KEYS.MODE);
+    if (!storedMode) {
+      showScreen('screen-first-use');
+    } else {
+      updateHeaderUI();
+      updateDebugUI();
+      showScreen('screen-quick-report');
+    }
+
+    // Ping backend to verify Google Apps Script connectivity
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(serverState) {
+          console.log('CatchME Backend Connected:', serverState);
+          const badge = document.getElementById('foundation-status-badge');
+          if (badge) {
+            badge.innerText = 'ONLINE v' + serverState.version;
+          }
+        })
+        .withFailureHandler(function(err) {
+          console.warn('Backend connection notice:', err);
+        })
+        .getInitialAppState(state.deviceId);
+    }
+  }
+
+  /**
+   * Generates or retrieves a persistent pseudo-random UUID for this device/browser.
+   */
+  function ensureDeviceId() {
+    let id = localStorage.getItem(STORAGE_KEYS.DEVICE_ID);
+    if (!id) {
+      if (window.crypto && crypto.randomUUID) {
+        id = crypto.randomUUID();
+      } else {
+        id = 'dev-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+      }
+      localStorage.setItem(STORAGE_KEYS.DEVICE_ID, id);
+    }
+    state.deviceId = id;
+  }
+
+  /**
+   * Loads saved preferences from localStorage.
+   */
+  function loadPreferences() {
+    state.mode = localStorage.getItem(STORAGE_KEYS.MODE) || 'OPD';
+    state.alias = localStorage.getItem(STORAGE_KEYS.ALIAS) || '';
+  }
+
+  /**
+   * Shows a specific screen by ID and hides others.
+   */
+  function showScreen(screenId) {
+    const screens = ['screen-first-use', 'screen-quick-report'];
+    screens.forEach(function(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        if (id === screenId) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  /**
+   * Handles mode selection on the First-use screen.
+   */
+  function selectInitialMode(mode) {
+    state.selectedInitialMode = mode;
+    const opdCard = document.getElementById('select-opd-card');
+    const ipdCard = document.getElementById('select-ipd-card');
+
+    if (mode === 'OPD') {
+      opdCard.classList.add('selected');
+      ipdCard.classList.remove('selected');
+    } else {
+      ipdCard.classList.add('selected');
+      opdCard.classList.remove('selected');
+    }
+  }
+
+  /**
+   * Saves first-use preferences and proceeds to Quick Report screen.
+   */
+  function saveInitialSetup() {
+    const aliasInput = document.getElementById('setup-alias-input');
+    const aliasValue = aliasInput ? aliasInput.value.trim().toUpperCase() : '';
+
+    state.mode = state.selectedInitialMode;
+    state.alias = aliasValue;
+
+    localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
+    if (state.alias) {
+      localStorage.setItem(STORAGE_KEYS.ALIAS, state.alias);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.ALIAS);
+    }
+
+    updateHeaderUI();
+    updateDebugUI();
+    showScreen('screen-quick-report');
+  }
+
+  /**
+   * Instantly toggles between OPD and IPD working modes.
+   */
+  function toggleMode() {
+    state.mode = (state.mode === 'OPD') ? 'IPD' : 'OPD';
+    localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
+    updateHeaderUI();
+    updateDebugUI();
+  }
+
+  /**
+   * Allows modifying alias / resetting preferences.
+   */
+  function openSettings() {
+    const currentAlias = state.alias || '';
+    const newAlias = prompt('แก้ไขชื่อย่อ / รหัสผู้บันทึก (เช่น P03):', currentAlias);
+    if (newAlias !== null) {
+      state.alias = newAlias.trim().toUpperCase();
+      if (state.alias) {
+        localStorage.setItem(STORAGE_KEYS.ALIAS, state.alias);
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.ALIAS);
+      }
+      updateHeaderUI();
+      updateDebugUI();
+    }
+  }
+
+  /**
+   * Updates Header mode and alias pills.
+   */
+  function updateHeaderUI() {
+    const badge = document.getElementById('header-mode-badge');
+    const modeText = document.getElementById('mode-text');
+    const aliasBadge = document.getElementById('header-alias-badge');
+    const aliasText = document.getElementById('alias-text');
+
+    if (badge && modeText) {
+      modeText.innerText = state.mode;
+      if (state.mode === 'OPD') {
+        badge.className = 'mode-badge opd';
+      } else {
+        badge.className = 'mode-badge ipd';
+      }
+    }
+
+    if (aliasBadge && aliasText) {
+      aliasText.innerText = state.alias || 'ไม่ระบุ';
+    }
+  }
+
+  /**
+   * Updates debug panel information.
+   */
+  function updateDebugUI() {
+    const devEl = document.getElementById('debug-device-id');
+    const modeEl = document.getElementById('debug-mode');
+    const aliasEl = document.getElementById('debug-alias');
+
+    if (devEl) devEl.innerText = state.deviceId;
+    if (modeEl) modeEl.innerText = state.mode;
+    if (aliasEl) aliasEl.innerText = state.alias || '(ไม่มี)';
+  }
+
+  function handleMicClick() {
+    alert('🎙️ Phase 0 Foundation: เชื่อมต่อ Web App เรียบร้อย\nระบบบันทึกเสียงและ Rule-based Parser จะเปิดใช้งานใน Milestone 1 & 2');
+  }
+
+  function handleTypingFallback() {
+    alert('⌨️ Phase 0 Foundation: ระบบพิมพ์ข้อความแทน จะเปิดใช้งานพร้อมกันใน Milestone 1 & 2');
+  }
+
+  return {
+    init: init,
+    selectInitialMode: selectInitialMode,
+    saveInitialSetup: saveInitialSetup,
+    toggleMode: toggleMode,
+    openSettings: openSettings,
+    handleMicClick: handleMicClick,
+    handleTypingFallback: handleTypingFallback
+  };
+})();
+
+// Boot on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  CatchME.init();
+});
+</script>

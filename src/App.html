@@ -1,0 +1,89 @@
+<div class="app-container">
+  <!-- Sticky Header -->
+  <header class="app-header">
+    <div class="brand-group">
+      <span class="brand-title">CatchME</span>
+    </div>
+    <div class="header-actions">
+      <!-- Mode Badge Pill -->
+      <div id="header-mode-badge" class="mode-badge opd" onclick="CatchME.toggleMode()" title="แตะเพื่อสลับ OPD / IPD">
+        <span id="mode-text">OPD</span>
+        <span style="font-size: 11px;">⇄</span>
+      </div>
+      <!-- Reporter Alias Badge -->
+      <div id="header-alias-badge" class="alias-badge" onclick="CatchME.openSettings()" title="แตะเพื่อแก้ไขรหัสผู้บันทึก">
+        <span id="alias-text">-</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="screen-content">
+    
+    <!-- Screen 1: First-time Setup Screen -->
+    <section id="screen-first-use" class="hidden">
+      <div class="catchme-card">
+        <h1 class="title-lg">ตั้งค่าการใช้งาน CatchME</h1>
+        <p class="subtitle">เลือกหน่วยงานเพื่อจัดหมวดหมู่ความคลาดเคลื่อนทางยา (สามารถเปลี่ยนได้ตลอดเวลา)</p>
+
+        <div class="mode-select-grid">
+          <div id="select-opd-card" class="mode-select-card selected opd" onclick="CatchME.selectInitialMode('OPD')">
+            <div style="font-size: 32px;">🏥</div>
+            <div class="mode-card-title" style="color: #1E4F8A;">OPD</div>
+            <div class="mode-card-desc">ผู้ป่วยนอก / ห้องยา</div>
+          </div>
+          <div id="select-ipd-card" class="mode-select-card ipd" onclick="CatchME.selectInitialMode('IPD')">
+            <div style="font-size: 32px;">🛏️</div>
+            <div class="mode-card-title" style="color: #C94B6E;">IPD</div>
+            <div class="mode-card-desc">ผู้ป่วยใน / หอผู้ป่วย</div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="setup-alias-input">ชื่อย่อ / รหัสผู้บันทึก (ระบุหรือไม่ก็ได้)</label>
+          <input type="text" id="setup-alias-input" class="input-field" placeholder="เช่น P03, ARM, RX-IPD" maxlength="15">
+        </div>
+
+        <button type="button" class="btn-primary" onclick="CatchME.saveInitialSetup()">
+          <span>เริ่มใช้งาน CatchME</span>
+          <span>→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 2: Quick Report Home Shell (Milestone 0 Foundation) -->
+    <section id="screen-quick-report" class="hidden">
+      <div class="catchme-card" style="text-align: center; padding: 28px 20px;">
+        <div class="mic-section">
+          <button id="mic-trigger-btn" class="mic-button" onclick="CatchME.handleMicClick()">
+            <span class="mic-icon">🎙️</span>
+          </button>
+          <div class="mic-prompt">กดเพื่อบันทึก Medication Error</div>
+          <div class="mic-subtext">พูดสั้น ๆ ว่าเกิดอะไรขึ้น เช่น "คนจัด amlodipine 30 เม็ด แต่ต้อง 60"</div>
+        </div>
+
+        <button type="button" class="btn-secondary" onclick="CatchME.handleTypingFallback()">
+          <span>⌨️ พิมพ์ข้อความแทน</span>
+        </button>
+      </div>
+
+      <!-- Quick Foundation Status Card -->
+      <div class="catchme-card" style="background: var(--color-surface-subtle); border: 1px dashed var(--color-primary-dark);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--color-primary-dark);">สถานะระบบ (Phase 0 Foundation)</span>
+          <span id="foundation-status-badge" style="font-size: 12px; font-weight: 700; color: #2D6A4F; background: #D8F3DC; padding: 2px 8px; border-radius: 9999px;">READY</span>
+        </div>
+        <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 8px;">
+          <div>• Device ID: <span id="debug-device-id" style="font-family: monospace; font-size: 11px;">-</span></div>
+          <div>• โหมดปัจจุบัน: <strong id="debug-mode">-</strong> | ผู้บันทึก: <strong id="debug-alias">-</strong></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Tagline Footer -->
+  <footer class="tagline-footer">
+    Catch ME before it reaches the patient.
+  </footer>
+</div>

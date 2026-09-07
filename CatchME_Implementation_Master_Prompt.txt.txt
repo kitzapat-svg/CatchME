@@ -1,0 +1,2540 @@
+# CatchME
+
+## Medication Error Cat B Quick Reporter
+
+### Complete Implementation Master Prompt for Antigravity / Codex
+
+You are a senior software engineer experienced with:
+
+* Google Apps Script
+* Google Sheets
+* vanilla JavaScript
+* HTML/CSS
+* mobile-first healthcare applications
+* medication safety workflow
+* Git
+* GitHub
+* clasp
+* maintainable internal hospital systems
+
+Your task is to build a production-quality but intentionally simple internal hospital pharmacy web application called:
+
+# CatchME
+
+Meaning:
+
+**ME = Medication Error**
+
+Tagline:
+
+# Catch ME before it reaches the patient.
+
+The application is specifically designed to make Category B medication error reporting extremely fast.
+
+Prioritize in this exact order:
+
+**Reporting speed → Medication safety → Data integrity → Simplicity → Maintainability → Visual polish**
+
+Do not optimize for feature count.
+
+Do not over-engineer the project.
+
+---
+
+# 1. Before writing code
+
+Do NOT immediately generate the entire application.
+
+First:
+
+1. inspect the existing repository if one already exists,
+2. inspect all supplied requirement files,
+3. inspect the Google Stitch UX/UI output,
+4. understand the hospital medication error taxonomy,
+5. understand the parser rule tables,
+6. understand the Google Sheets schema,
+7. check the installed clasp version and commands,
+8. produce a concise Phase 0 / Phase 1 implementation plan,
+9. identify any contradictions or unclear requirements.
+
+Only then begin implementation.
+
+If supplied files conflict with this prompt, explain the conflict before changing the agreed schema or taxonomy.
+
+Do not invent a new medication error classification.
+
+---
+
+# 2. Source-of-truth files
+
+Treat the following supplied artifacts as authoritative when available:
+
+```text
+Medication_Error_CatB_Mapping_Master_V2_Speech_Tested.xlsx
+
+Medication_Error_CatB_Parser_Rules_OPD_IPD_V1.xlsx
+
+Medication_Error_CatB_Data_Schema_GoogleSheets_V1.xlsx
+
+Google Stitch UX/UI output / screenshots / design export
+```
+
+Functional/data requirements in the Excel master files take priority over visual mockups.
+
+Google Stitch is the visual and interaction hierarchy source of truth.
+
+Do not recreate taxonomy from memory if these files are available.
+
+---
+
+# 3. Product purpose
+
+CatchME is an internal hospital pharmacy tool for rapidly recording:
+
+# Medication Error Category B / Near Miss
+
+For this application:
+
+> A medication error has occurred, but the error was detected and corrected before reaching the patient.
+
+Current workflow often requires:
+
+```text
+detect error
+→ write briefly on paper
+→ later re-enter the same information into the hospital risk management system
+```
+
+This duplicate workflow contributes to under-reporting.
+
+CatchME should make reporting easier than writing the event on paper.
+
+Target reporting time:
+
+# 10–20 seconds per typical event
+
+Ideal interaction:
+
+```text
+Open CatchME
+→ tap microphone
+→ speak one short sentence
+→ review result
+→ tap Save
+```
+
+---
+
+# 4. Strict application scope
+
+CatchME V1 is primarily a:
+
+# Category B Quick Reporter
+
+It is NOT a complete hospital incident reporting system.
+
+For every valid Quick Report:
+
+```text
+severity = B
+patient_reached = No
+```
+
+These values are system-controlled.
+
+The reporter must NOT select Category A–I.
+
+Do not build full A–I workflow in V1.
+
+---
+
+# 5. Category B safety gate
+
+If the transcript indicates that the error may already have reached the patient, stop the normal Category B workflow.
+
+Examples:
+
+```text
+จ่ายไปแล้ว
+คนไข้ได้รับแล้ว
+คนไข้กินแล้ว
+พยาบาลให้ยาแล้ว
+ให้ยาไปแล้ว
+```
+
+Show a blocking warning:
+
+# เหตุการณ์นี้อาจไม่ใช่ Category B
+
+Message:
+
+```text
+CatchME ใช้สำหรับเหตุการณ์ที่ยังไม่ถึงตัวผู้ป่วย
+กรุณาตรวจสอบก่อนบันทึก
+```
+
+Do NOT silently save it as Category B.
+
+If the user confirms that the event reached the patient:
+
+```text
+stop CatchME Quick Report flow
+→ instruct user to use the hospital's normal risk-reporting process
+```
+
+However:
+
+```text
+วอร์ดเจอก่อนให้คนไข้
+พยาบาลพบก่อนถึงผู้ป่วย
+```
+
+may still qualify as Category B.
+
+---
+
+# 6. Technology stack
+
+Use only the following unless there is a compelling technical reason otherwise:
+
+```text
+Google Apps Script
+Google Sheets
+HTML
+CSS
+Vanilla JavaScript
+Browser Web Speech API
+Rule-based parser
+Git
+GitHub
+clasp
+```
+
+Do NOT require:
+
+```text
+React
+Vue
+Next.js
+Supabase
+Firebase
+Node backend
+Vercel
+Docker
+TypeScript build pipeline
+external database
+paid AI APIs
+Google Cloud Speech-to-Text
+OpenAI API
+Gemini API
+```
+
+Node/npm may be used locally only for development tooling such as clasp and parser tests.
+
+Do not introduce a frontend build pipeline.
+
+---
+
+# 7. High-level architecture
+
+Keep the architecture deliberately simple:
+
+```text
+Browser
+   ↓
+CatchME Google Apps Script Web App
+   ↓
+Google Sheets
+```
+
+Frontend responsibilities:
+
+```text
+UI state
+OPD/IPD working mode
+speech recognition
+typing fallback
+parser execution
+clarification UI
+confirmation UI
+recent reports
+```
+
+Apps Script backend responsibilities:
+
+```text
+server-side validation
+database setup
+UUID generation
+server timestamps
+Google Sheets writes
+mapping validation
+audit logging
+review operations later
+```
+
+No separate backend service.
+
+---
+
+# 8. No-login reporter experience
+
+Normal CatchME reporters must NOT be required to:
+
+```text
+sign in with Google
+enter username/password
+complete OAuth
+select a Google account
+grant Google permissions
+```
+
+before reporting a Category B event.
+
+The intended experience is:
+
+```text
+Open CatchME URL
+→ Quick Report immediately
+```
+
+There is no application login screen in MVP.
+
+---
+
+# 9. Apps Script access model
+
+The Web App should execute using the deployment owner's authorized Google account so normal reporters do not need direct edit access to the Google Sheet.
+
+Backend owns access to:
+
+```text
+Google Sheets
+master data
+configuration
+saving reports
+```
+
+Normal reporters interact only with the CatchME Web App.
+
+Before production deployment, verify the actual Web App access options available for the hospital Google account / Google Workspace environment.
+
+Do not assume anonymous/no-login Web App access exists until verified.
+
+If the environment cannot support the required no-login access safely:
+
+STOP and document the limitation before weakening security.
+
+---
+
+# 10. Reporter identity
+
+Do NOT depend on:
+
+```javascript
+Session.getActiveUser().getEmail()
+```
+
+for Quick Reporter identity.
+
+Do not make reporter email mandatory.
+
+Use a lightweight local reporter alias instead.
+
+Example:
+
+```text
+P03
+ARM
+RX-IPD-01
+```
+
+Store only non-sensitive local preferences in:
+
+```javascript
+localStorage
+```
+
+Example:
+
+```text
+catchmeMode
+catchmeReporterAlias
+catchmeDeviceId
+```
+
+Do not store patient-identifiable information in localStorage.
+
+---
+
+# 11. First-use setup
+
+On first use only, show:
+
+# ตั้งค่าการใช้งาน CatchME
+
+Required:
+
+```text
+เลือกหน่วยงาน
+
+[ OPD ]
+[ IPD ]
+```
+
+Optional:
+
+```text
+ชื่อย่อ / รหัสผู้บันทึก
+
+[ P03 ]
+```
+
+Button:
+
+```text
+เริ่มใช้งาน
+```
+
+After setup:
+
+```text
+go directly to Quick Report
+```
+
+Do not show this screen again unless Settings is opened or local preferences are cleared.
+
+---
+
+# 12. OPD / IPD Working Mode
+
+The reporter must NOT need to say:
+
+```text
+OPD
+IPD
+```
+
+for every report.
+
+Current mode:
+
+* must always be visible,
+* can be changed at any time,
+* persists on the browser/device,
+* is stored in every report,
+* must never be silently changed by the parser.
+
+Example header:
+
+```text
+CatchME      OPD      P03
+```
+
+Do not rely only on color.
+
+Always show OPD/IPD text.
+
+---
+
+# 13. Mode conflict
+
+If selected mode strongly conflicts with transcript context:
+
+Selected:
+
+```text
+OPD
+```
+
+Speech:
+
+```text
+รับ order continue ผิด
+```
+
+Do NOT automatically change mode.
+
+Show:
+
+# เหตุการณ์นี้ดูเหมือนเกี่ยวข้องกับ IPD
+
+Buttons:
+
+```text
+บันทึกเป็น OPD ต่อ
+เปลี่ยนเป็น IPD
+```
+
+The user controls mode.
+
+---
+
+# 14. Source code management
+
+The local Git repository is the source of truth.
+
+Normal source-editing workflow must NOT rely on editing directly in the Apps Script online editor.
+
+Source flow:
+
+```text
+Local repository
+      ↓
+Git
+      ↓
+GitHub
+      ↓
+clasp
+      ↓
+Google Apps Script
+      ↓
+CatchME Web App
+```
+
+All source code must live in Git.
+
+---
+
+# 15. GitHub repository
+
+Use a private GitHub repository unless explicitly told otherwise.
+
+Recommended repository name:
+
+```text
+CatchME
+```
+
+or:
+
+```text
+catchme
+```
+
+Keep branch workflow simple:
+
+```text
+main
+feature/*
+fix/*
+```
+
+Do NOT introduce GitFlow.
+
+`main` should represent a deployable production state.
+
+Use logical commits, for example:
+
+```text
+chore: initialize CatchME Apps Script project
+feat: add OPD IPD working mode
+feat: add speech input
+feat: add Cat B parser
+feat: save reports to Google Sheets
+fix: prevent duplicate submission
+docs: update deployment guide
+```
+
+---
+
+# 16. Git safety
+
+Never commit:
+
+```text
+OAuth tokens
+refresh tokens
+service-account keys
+clasp authentication credentials
+local secret files
+```
+
+Create:
+
+```text
+.gitignore
+.claspignore
+```
+
+Before important commits/deployments inspect:
+
+```bash
+git status
+```
+
+Verify no sensitive material is tracked.
+
+---
+
+# 17. Local tooling
+
+Because development may happen on multiple computers, use project-local development dependencies.
+
+Create a minimal:
+
+```text
+package.json
+package-lock.json
+```
+
+Use project-local clasp.
+
+Do not require a global clasp installation.
+
+Typical new-machine setup:
+
+```bash
+git clone <repo>
+cd CatchME
+npm ci
+```
+
+Normal coding/testing should NOT require Google login.
+
+Google authentication is only required on environments that actually deploy/push to Apps Script.
+
+---
+
+# 18. clasp requirements
+
+Use the current supported clasp CLI.
+
+Before implementing deployment scripts:
+
+```bash
+npx clasp --version
+npx clasp --help
+```
+
+Do not assume old clasp syntax.
+
+Support the current equivalent of:
+
+```text
+push source
+open script
+create immutable Apps Script version
+list deployments
+update existing production deployment
+```
+
+Use exact syntax for the installed clasp version.
+
+---
+
+# 19. Stable production deployment
+
+Production CatchME Web App should use one stable URL.
+
+Do NOT create a new production Web App deployment URL for every release.
+
+Production release conceptually:
+
+```text
+verify source
+↓
+run tests
+↓
+clasp push
+↓
+create Apps Script immutable version
+↓
+update existing production deployment
+```
+
+If the production deployment ID is missing:
+
+```text
+STOP
+```
+
+Do not silently create another deployment.
+
+---
+
+# 20. One-command deployment
+
+Primary developer environment is Windows.
+
+Create:
+
+```text
+scripts/deploy.ps1
+```
+
+The script should:
+
+1. verify required tools,
+2. verify clasp/project configuration,
+3. verify deployment authentication,
+4. verify production deployment ID,
+5. run parser regression tests,
+6. run clasp push,
+7. create an immutable Apps Script version,
+8. update the existing production deployment,
+9. stop clearly on any failure,
+10. display the deployed CatchME version on success.
+
+Do not continue after failed steps.
+
+---
+
+# 21. Deployment authentication
+
+The goal is NOT to eliminate deployment authentication.
+
+The goal is:
+
+# Reporters use CatchME without login.
+
+Production deployment still requires secure Google authorization.
+
+Never commit clasp credentials merely to simplify deployment.
+
+A workstation without deployment credentials should still be able to:
+
+```text
+clone
+edit
+test
+commit
+push GitHub
+```
+
+without Google login.
+
+---
+
+# 22. Versioning
+
+Use simple semantic versioning:
+
+```text
+MAJOR.MINOR.PATCH
+```
+
+Start at approximately:
+
+```text
+0.1.0
+```
+
+Suggested milestones:
+
+```text
+0.1.0 CatchME Core Reporting MVP
+0.2.0 Medication Safety Review
+0.3.0 Administration / Basic Analytics
+1.0.0 Stable Production
+```
+
+Maintain version centrally.
+
+Maintain:
+
+```text
+CHANGELOG.md
+```
+
+for meaningful releases.
+
+Optional stable Git tags:
+
+```text
+v0.1.0
+v0.2.0
+v1.0.0
+```
+
+---
+
+# 23. Recommended project structure
+
+Keep Phase 1 compact.
+
+```text
+CatchME/
+│
+├── src/
+│   ├── Code.gs
+│   ├── Database.gs
+│   ├── Parser.gs
+│   ├── Reports.gs
+│   ├── Index.html
+│   ├── Styles.html
+│   ├── App.html
+│   └── Scripts.html
+│
+├── tests/
+│   └── parser-tests.js
+│
+├── scripts/
+│   ├── setup-machine.ps1
+│   └── deploy.ps1
+│
+├── docs/
+│   ├── architecture.md
+│   └── data-schema.md
+│
+├── package.json
+├── package-lock.json
+├── appsscript.json
+├── .clasp.json
+├── .claspignore
+├── .gitignore
+├── README.md
+└── CHANGELOG.md
+```
+
+Do not create one file per tiny function.
+
+Do not create:
+
+```text
+40 tiny modules
+dependency injection
+repository/service/factory frameworks
+complex frontend state library
+custom routing framework
+```
+
+---
+
+# 24. Google Apps Script HTML Service
+
+Use HTML Service.
+
+Example direction:
+
+```javascript
+function doGet() {
+  return HtmlService
+    .createTemplateFromFile('Index')
+    .evaluate()
+    .setTitle('CatchME')
+    .addMetaTag(
+      'viewport',
+      'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+    )
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+```
+
+Use an include helper where useful:
+
+```javascript
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+```
+
+Do not put the entire app into one giant `Index.html`.
+
+---
+
+# 25. No PWA in V1
+
+Do not add:
+
+```text
+service worker
+offline sync
+installable PWA workflow
+push notifications
+```
+
+unless explicitly requested later.
+
+---
+
+# 26. Quick Report home
+
+This is the most important screen.
+
+Do NOT turn it into a dashboard.
+
+Main elements:
+
+```text
+CatchME logo/name
+current OPD/IPD mode
+optional reporter alias
+large microphone button
+short instruction
+typing fallback
+small recent report area if safe
+```
+
+Primary text:
+
+# กดเพื่อบันทึก Medication Error
+
+Secondary:
+
+```text
+พูดสั้น ๆ ว่าเกิดอะไรขึ้น
+```
+
+Example OPD:
+
+```text
+คนจัด amlodipine 30 เม็ด แต่ต้อง 60 เม็ด เภสัชเช็คเจอ
+```
+
+Example IPD:
+
+```text
+รับ order เป็น continue แต่หมอสั่ง one day
+```
+
+Alternative:
+
+```text
+พิมพ์แทน
+```
+
+---
+
+# 27. Speech recognition
+
+Use Browser Web Speech API when supported.
+
+Requirements:
+
+```text
+request microphone permission
+show listening state
+show transcript
+allow Stop
+allow Cancel
+preserve transcript
+```
+
+If speech recognition is unsupported or denied:
+
+```text
+fallback to text input
+```
+
+CatchME must remain fully usable.
+
+Speech input must never be mandatory.
+
+---
+
+# 28. Recording states
+
+## Idle
+
+```text
+กดเพื่อบันทึก Medication Error
+```
+
+## Listening
+
+```text
+กำลังฟัง…
+```
+
+Show:
+
+```text
+microphone active state
+subtle waveform
+live transcript where available
+elapsed seconds
+stop button
+cancel
+```
+
+## Processing
+
+```text
+กำลังจัดหมวดข้อมูล…
+```
+
+Do not claim AI processing if the parser is rule-based.
+
+---
+
+# 29. Parser architecture
+
+Expose a clear function such as:
+
+```javascript
+parseMedicationError(text, mode)
+```
+
+Keep parser testable independently of UI.
+
+Pipeline:
+
+```text
+Selected OPD/IPD Mode
+        ↓
+Normalize transcript
+        ↓
+Cat B safety gate
+        ↓
+Detect actor
+        ↓
+Detect process stage
+        ↓
+Detect error semantic
+        ↓
+Extract medication entities
+        ↓
+Extract actual / expected
+        ↓
+Detect interception stage
+        ↓
+Mapping lookup
+        ↓
+Confidence
+        ↓
+Confirm / Clarify
+```
+
+Use the supplied Parser Rule workbook as source of truth.
+
+Do not scatter rules throughout UI code.
+
+---
+
+# 30. OPD parser priorities
+
+In OPD mode prioritize:
+
+```text
+Prescribing
+Pharmacy data entry
+Label generation
+Picking / preparation
+REMED
+Wrong Visit
+Not enough medication until appointment
+OPD Card
+Prescription scanning
+Sticker identification
+```
+
+Important actor clues:
+
+```text
+หมอสั่ง
+แพทย์สั่ง
+หมอคีย์
+
+ห้องยาคีย์
+คีย์ฉลาก
+พิมพ์ฉลาก
+
+คนจัด
+จัดยา
+หยิบ
+ตะกร้า
+```
+
+---
+
+# 31. IPD parser priorities
+
+In IPD mode prioritize:
+
+```text
+Prescribing
+Order reception
+Transcription
+รคส.
+Continue
+One Day
+STAT
+Off
+Drug profile
+Picking / preparation
+Before sending to Ward
+Ward interception
+```
+
+Important clues:
+
+```text
+รับคำสั่ง
+รับ order
+พยาบาลรับคำสั่ง
+รับคำสั่งโทรศัพท์
+continue
+one day
+stat
+off
+discontinue
+drug profile
+```
+
+---
+
+# 32. Important error distinctions
+
+The parser must distinguish:
+
+### Wrong strength
+
+```text
+Amlodipine 10 mg แทน 5 mg
+```
+
+### Wrong dose
+
+```text
+Prednisolone ครั้งละ 5 เม็ด แต่ต้อง 2 เม็ด
+```
+
+### Wrong quantity
+
+```text
+จัด 30 เม็ด แต่ต้อง 60 เม็ด
+```
+
+Do not collapse these into one category.
+
+---
+
+# 33. Actual / Expected extraction
+
+Recognize patterns such as:
+
+```text
+จัด 30 แต่ต้อง 60
+
+10 mg มาแทน 5 mg
+
+คีย์วันละครั้ง แต่ใบสั่งวันละสองครั้ง
+
+จริง ๆ ต้อง...
+
+ควรเป็น...
+
+จาก...เป็น...
+```
+
+Store separately:
+
+```text
+actual_value
+expected_value
+```
+
+These remain optional.
+
+---
+
+# 34. Drug parsing
+
+Use Drug_Master where available.
+
+Fields:
+
+```text
+drug_id
+standard_name
+strength
+dosage_form
+aliases
+active
+high_alert
+notes
+```
+
+Example:
+
+```text
+standard_name = Amlodipine
+aliases = amlodipine|amlo|แอมโล
+```
+
+Do not require Drug_Master to be complete before MVP works.
+
+Unknown drug names may remain transcript-derived text.
+
+---
+
+# 35. Parser confidence
+
+Use:
+
+```text
+High
+Medium
+Low
+```
+
+Do not show numeric confidence to normal reporters.
+
+Suggested signals:
+
+```text
+explicit actor/stage      strong positive
+explicit error keyword    strong positive
+specific local subtype    positive
+detected-stage clue       positive
+actual + expected         positive
+conflicting evidence      negative
+multiple possible codes   clarification required
+```
+
+Suggested threshold:
+
+```text
+High >= 0.75
+Medium 0.50–0.74
+Low < 0.50
+```
+
+Equivalent consistent point scoring is acceptable.
+
+---
+
+# 36. High-confidence behavior
+
+Go directly to confirmation.
+
+Example:
+
+```text
+คนจัด amlodipine มา 30 เม็ด แต่ต้อง 60 เภสัชเช็คเจอ
+```
+
+Expected:
+
+```text
+Pre-dispensing
+PS04
+Wrong quantity
+B29
+DS04
+Category B
+```
+
+---
+
+# 37. Medium-confidence behavior
+
+Ask exactly one clarification question.
+
+Example:
+
+```text
+amlodipine 30 เม็ด แต่ต้อง 60
+```
+
+Ask:
+
+# จำนวนผิดเกิดที่ขั้นตอนไหน?
+
+Choices:
+
+```text
+แพทย์สั่ง
+ห้องยาคีย์
+คนจัดยา
+```
+
+Then go directly to confirmation.
+
+---
+
+# 38. Low-confidence behavior
+
+Do not start a chatbot conversation.
+
+Show a compact manual selection:
+
+# เลือกประเภทความคลาดเคลื่อน
+
+Examples:
+
+```text
+ผิดตัวยา
+ผิดความแรง
+ผิดจำนวน
+ผิดวิธีใช้
+ยาตกหล่น
+อื่น ๆ
+```
+
+Do not expose the entire master taxonomy.
+
+Maximum clarification questions:
+
+```text
+1
+```
+
+---
+
+# 39. Important clarification cases
+
+Support at least:
+
+### Quantity stage
+
+```text
+แพทย์สั่ง
+ห้องยาคีย์
+คนจัดยา
+```
+
+### Strength vs Dose
+
+```text
+ความแรงของยา
+ขนาดยาที่ให้ต่อครั้ง
+```
+
+### IPD wrong patient
+
+```text
+ยาทั้งชุดเป็นของผู้ป่วยคนอื่น
+มียาของผู้ป่วยคนอื่นปนบางรายการ
+```
+
+### STAT
+
+```text
+ห้องยาไม่ได้รับคำสั่ง STAT
+Ward ไม่ได้ติดป้าย STAT / ขอก่อน
+```
+
+### IPD order reception
+
+```text
+รับคำสั่งในระบบ
+รับคำสั่งโทรศัพท์ / รคส.
+```
+
+---
+
+# 40. Confirmation screen
+
+Do not show a long form.
+
+Example:
+
+# Medication Error
+
+```text
+Amlodipine 5 mg
+
+Pre-dispensing
+จัด / เตรียมยา
+
+ผิดจำนวน
+
+จัดจริง: 30 เม็ด
+ควรเป็น: 60 เม็ด
+
+ตรวจพบ:
+เภสัชกรตรวจสอบยาขั้นสุดท้าย
+
+Risk code: B29
+
+Category B
+ยังไม่ถึงผู้ป่วย
+```
+
+Buttons:
+
+```text
+บันทึก
+แก้ไข
+```
+
+Expandable:
+
+```text
+ดูข้อความที่พูด
+```
+
+Raw transcript must remain available.
+
+---
+
+# 41. Manual editing
+
+Allow only relevant corrections:
+
+```text
+Process
+Error Type
+Detected Stage
+Drug
+Strength
+Actual
+Expected
+HN optional
+AN optional
+Ward / Clinic optional
+```
+
+Do NOT allow normal reporters to edit:
+
+```text
+Severity
+Patient reached
+Parser version
+System IDs
+```
+
+Legacy code should be recomputed from mapping.
+
+---
+
+# 42. Save success
+
+After server-confirmed save:
+
+# บันทึกแล้ว
+
+Show compact summary.
+
+Actions:
+
+```text
+บันทึกเหตุการณ์ถัดไป
+ดูรายการล่าสุด
+```
+
+Do not use celebratory animations.
+
+---
+
+# 43. Google Sheets database
+
+Use supplied Data Schema V1 as source of truth, but adapt identity fields to the no-login CatchME model.
+
+Core Phase 1 sheets:
+
+```text
+ME_Log
+App_Settings
+Audit_Log
+required mapping/parser master sheets
+```
+
+Optional/later:
+
+```text
+ME_Review
+Drug_Master
+Users
+```
+
+Do not make Users authentication mandatory for Quick Reporter.
+
+---
+
+# 44. Updated ME_Log identity model
+
+Do not require:
+
+```text
+reporter_email
+confirmed_by email
+```
+
+For CatchME V1 use:
+
+```text
+reporter_alias
+device_session_id
+```
+
+If older schema columns such as `reporter_email` still exist for compatibility, leave them blank.
+
+Do not pretend aliases represent authenticated identity.
+
+---
+
+# 45. Recommended ME_Log fields
+
+One row = one Cat B event.
+
+Store:
+
+```text
+record_id
+created_at
+mode
+
+reporter_alias
+device_session_id
+
+raw_transcript
+normalized_transcript
+
+parser_version
+parser_confidence
+needed_clarification
+clarification_id
+
+process
+process_stage_code
+standard_error_code
+error_type_th
+
+legacy_code
+legacy_event
+
+detected_stage_code
+
+drug_name
+strength
+actual_value
+expected_value
+
+hn
+an
+ward_clinic
+
+severity
+patient_reached
+
+status
+confirmed_at
+
+review_required
+reviewed_at
+reviewed_by
+```
+
+Do not require optional fields.
+
+---
+
+# 46. Device ID
+
+On first use generate a random device/session identifier.
+
+Use something like:
+
+```javascript
+crypto.randomUUID()
+```
+
+or a safe equivalent.
+
+Store locally as:
+
+```text
+catchmeDeviceId
+```
+
+This is for:
+
+```text
+deduplication
+recent reports scope
+technical troubleshooting
+```
+
+It is NOT secure user identity.
+
+---
+
+# 47. Recent Reports privacy
+
+Because CatchME Quick Reporter has no login, do NOT expose all hospital reports.
+
+For MVP:
+
+# Only show reports associated with the current device_session_id.
+
+Alternative:
+
+Do not show report history if this cannot be implemented safely.
+
+Never let a no-login user browse the full hospital ME database.
+
+---
+
+# 48. No-login privacy
+
+Quick Report should NOT require:
+
+```text
+patient name
+national ID
+phone number
+address
+```
+
+HN / AN remain optional.
+
+Do not put patient identifiers in:
+
+```text
+URL parameters
+console logs
+localStorage
+```
+
+---
+
+# 49. setupDatabase()
+
+Implement:
+
+```javascript
+setupDatabase()
+```
+
+It must be idempotent.
+
+It should:
+
+```text
+create missing sheets
+create missing headers
+create required default settings
+preserve existing data
+```
+
+It must NOT:
+
+```text
+wipe data
+delete rows
+destructively replace schemas
+```
+
+Do not build a migration framework in V1.
+
+---
+
+# 50. Server-side save API
+
+Expose a narrow function such as:
+
+```javascript
+saveQuickReport(payload)
+```
+
+Do NOT expose a generic arbitrary spreadsheet write endpoint.
+
+Before saving verify:
+
+```text
+mode is OPD or IPD
+severity = B
+patient_reached = No
+process is valid
+legacy code exists in master
+payload schema is valid
+transcript length is reasonable
+```
+
+Do not trust client legacy code blindly.
+
+---
+
+# 51. UUID and timestamps
+
+Generate server-side:
+
+```text
+record_id
+created_at
+confirmed_at
+```
+
+Use:
+
+```javascript
+Utilities.getUuid()
+```
+
+Use server timestamps.
+
+---
+
+# 52. Record status
+
+Use:
+
+```text
+DRAFT
+CONFIRMED
+REVIEWED
+VOID
+```
+
+Never physically delete reports through the application.
+
+Incorrect report:
+
+```text
+status = VOID
+```
+
+Audit the action.
+
+---
+
+# 53. Audit Log
+
+Use minimal audit logging.
+
+Fields:
+
+```text
+audit_id
+timestamp
+record_id
+reporter_alias
+device_session_id
+action
+field_name
+old_value
+new_value
+source
+```
+
+Important actions:
+
+```text
+CREATE
+EDIT
+VOID
+REVIEW
+```
+
+Do not log every UI click.
+
+---
+
+# 54. Duplicate prevention
+
+Prevent accidental duplicate Save taps.
+
+Use:
+
+```text
+client submit lock
+server-side idempotency token or equivalent
+LockService around critical Sheet writes
+```
+
+Do not use row count as an ID generator.
+
+---
+
+# 55. Network/server errors
+
+If save fails:
+
+# ยังบันทึกไม่สำเร็จ
+
+Action:
+
+```text
+ลองอีกครั้ง
+```
+
+Keep transcript and structured result on screen.
+
+Do not discard the report.
+
+Every important `google.script.run` call must have:
+
+```text
+success handler
+failure handler
+loading state
+```
+
+---
+
+# 56. Performance
+
+Apps Script may have latency.
+
+Optimize sensibly:
+
+```text
+batch config reads
+cache stable master data
+minimize google.script.run calls
+use CacheService where useful
+avoid reading entire sheets unnecessarily
+```
+
+Do not prematurely create complex caching infrastructure.
+
+---
+
+# 57. Web App abuse protection
+
+Because CatchME may be accessible without login, implement simple defensive protections:
+
+```text
+strict payload schema
+transcript length limit
+reject unexpected fields
+output escaping
+duplicate prevention
+LockService
+```
+
+Do NOT implement CAPTCHA or complex rate limiting in V1 unless actual abuse occurs.
+
+---
+
+# 58. Reviewer/Admin
+
+Do NOT expose no-login Reviewer/Admin functionality in Phase 1.
+
+Quick Reporter surface should remain narrow:
+
+```text
+submit Cat B report
+receive confirmation
+view same-device recent reports only
+```
+
+Future architecture may be:
+
+```text
+CatchME Quick Reporter
+No login
+
+CatchME Review/Admin
+Protected access
+```
+
+Do not implement protected Reviewer/Admin authentication yet unless explicitly requested.
+
+---
+
+# 59. Google Stitch UX/UI
+
+Use the supplied Stitch design as visual source of truth.
+
+Preserve:
+
+```text
+visual hierarchy
+mode switch placement
+microphone prominence
+mobile spacing
+confirmation card pattern
+clarification pattern
+Cat B hard stop
+```
+
+Functional requirements override visuals if there is conflict.
+
+---
+
+# 60. Mobile-first
+
+Primary width:
+
+```text
+360–430 px
+```
+
+Requirements:
+
+```text
+large microphone target
+minimum ~44px touch targets
+no horizontal scrolling
+readable Thai typography
+high contrast
+minimal typing
+one-handed use where practical
+```
+
+Desktop may use a centered max-width panel.
+
+---
+
+# 61. Visual direction
+
+Use:
+
+```text
+clean professional healthcare UI
+light neutral background
+teal/blue primary accent
+subtle violet/indigo for IPD
+amber for clarification
+red for hard-stop/error only
+rounded cards
+subtle borders
+clear Thai sans-serif
+simple icons
+```
+
+Avoid:
+
+```text
+cartoon visuals
+heavy gradients
+glassmorphism
+excessive animation
+crowded dashboards
+celebratory UI
+```
+
+---
+
+# 62. Parser regression tests
+
+Use the supplied 30 speech test cases.
+
+Parser must be runnable independently from microphone UI.
+
+Known ambiguous examples should intentionally return:
+
+```text
+requiresClarification = true
+```
+
+Do not optimize for always producing a code.
+
+Safe uncertainty is better than confident misclassification.
+
+---
+
+# 63. Critical acceptance tests
+
+## OPD picking quantity
+
+Speech:
+
+```text
+คนจัด amlodipine มา 30 เม็ด แต่ต้อง 60 เภสัชเช็คเจอ
+```
+
+Expected:
+
+```text
+Pre-dispensing
+PS04
+Wrong quantity
+B29
+DS04
+Category B
+```
+
+---
+
+## OPD prescribing strength
+
+```text
+หมอสั่ง amlodipine 10 มิล แต่เดิม 5 มิล เภสัชทวนเจอ
+```
+
+Expected:
+
+```text
+Prescribing
+PS01
+Wrong strength
+A05
+DS01
+Category B
+```
+
+---
+
+## OPD pharmacy instruction
+
+```text
+คีย์ฉลาก metformin วันละครั้ง แต่ใบสั่งวันละสองครั้ง
+```
+
+Expected:
+
+```text
+Pre-dispensing
+PS02
+Wrong instruction
+B06
+```
+
+---
+
+## IPD order type
+
+```text
+รับ order เป็น continue แต่หมอสั่ง one day
+```
+
+Expected:
+
+```text
+Pre-dispensing
+PS03
+Wrong order type
+B21
+```
+
+---
+
+## IPD STAT ambiguity
+
+```text
+stat ตก
+```
+
+Expected:
+
+```text
+requiresClarification = true
+```
+
+Do not guess between B22 and E11.
+
+---
+
+## IPD wrong patient
+
+Correctly distinguish:
+
+```text
+B25 = entire prepared set belongs to another patient
+
+B34 = another patient's medication is mixed into this patient's set
+```
+
+---
+
+## Cat B hard stop
+
+```text
+จ่ายยาไปแล้ว คนไข้กินไปหนึ่งเม็ด
+```
+
+Must NOT save as Category B.
+
+---
+
+# 64. Phase 0 — Foundation
+
+Implement only:
+
+```text
+Git repository
+GitHub-ready repository
+project-local clasp
+package.json/package-lock.json
+Apps Script project connection
+appsscript.json
+file structure
+README
+CHANGELOG
+setup-machine.ps1
+deploy.ps1
+setupDatabase()
+base responsive CatchME shell
+first-use setup
+OPD/IPD persistent mode
+device ID
+reporter alias preference
+```
+
+Verify infrastructure before proceeding.
+
+---
+
+# 65. Phase 1 — Core CatchME MVP
+
+Implement only:
+
+```text
+Quick Report screen
+speech recognition
+text fallback
+rule parser
+confidence classification
+maximum one clarification
+Cat B safety gate
+confirmation screen
+manual minimal correction
+save ME_Log
+CREATE audit record
+success state
+same-device recent reports
+```
+
+Nothing else is required for Phase 1.
+
+---
+
+# 66. Explicitly out of Phase 1
+
+Do NOT build yet:
+
+```text
+Analytics dashboard
+Charts
+Admin dashboard
+User management UI
+Parser Rules Admin UI
+Drug Master Admin UI
+full database browsing
+full report search
+complex export
+notification system
+PWA
+offline sync
+AI APIs
+GitHub Actions deployment
+advanced Reviewer dashboard
+complex RCA workflow
+```
+
+Do not create placeholder complexity for these features.
+
+---
+
+# 67. Phase 2 — only after MVP is stable
+
+Potential next features:
+
+```text
+Report detail
+Edit
+VOID
+Medication Safety Review
+LASA
+HAD
+Contributing factors
+Immediate action
+Review notes
+```
+
+Protected access can be designed here if required.
+
+RCA remains optional.
+
+---
+
+# 68. Phase 3 — later
+
+Only if useful:
+
+```text
+Admin
+Drug Master UI
+Parser rule management
+Users
+basic analytics
+basic export
+```
+
+---
+
+# 69. Development workflow
+
+Normal multi-machine workflow:
+
+```text
+git pull
+↓
+npm ci
+↓
+create feature/fix branch
+↓
+edit
+↓
+npm test
+↓
+git commit
+↓
+git push
+↓
+merge to main
+↓
+deploy from authenticated deployment environment
+```
+
+Normal source editing does not require Google login.
+
+---
+
+# 70. Apps Script editor divergence rule
+
+The Apps Script online editor is not the source of truth.
+
+If an emergency remote edit is made:
+
+```text
+clasp pull from trusted environment
+↓
+inspect diff
+↓
+commit intentionally
+↓
+push GitHub
+```
+
+Do not allow silent divergence.
+
+---
+
+# 71. setup-machine.ps1
+
+Create:
+
+```text
+scripts/setup-machine.ps1
+```
+
+It should:
+
+```text
+check Git
+check Node/npm
+run npm ci
+verify project files
+run parser tests
+report clasp deployment credential availability
+```
+
+It must NOT require Google login to prepare a development machine.
+
+Example result:
+
+```text
+CatchME development environment ready.
+
+Git                  OK
+Node                 OK
+Dependencies         OK
+Parser tests         OK
+Deployment auth      NOT CONFIGURED
+
+You can develop and push to GitHub normally.
+```
+
+---
+
+# 72. README
+
+Create a concise `README.md` explaining:
+
+```text
+What CatchME does
+Architecture
+Project structure
+New machine setup
+Git workflow
+clasp setup
+setupDatabase()
+Parser tests
+Development workflow
+Production deployment
+Rollback
+Configuration
+Privacy considerations
+```
+
+Keep it understandable to a maintainer with basic Git and Apps Script knowledge.
+
+---
+
+# 73. Coding quality
+
+Use:
+
+```text
+small focused functions
+clear names
+constants for enums
+central configuration
+JSDoc where useful
+defensive validation
+minimal duplication
+explicit error handling
+```
+
+Avoid:
+
+```text
+giant functions
+deep nested conditionals
+duplicated OPD/IPD parser code
+magic strings everywhere
+large mutable global state
+enterprise abstractions with no benefit
+```
+
+---
+
+# 74. No unnecessary abstractions
+
+Do not introduce things such as:
+
+```text
+BaseRepository
+AbstractServiceFactory
+DependencyContainer
+EventBus
+API Gateway
+complex state manager
+```
+
+unless solving an actual current problem.
+
+Keep CatchME boring and understandable.
+
+---
+
+# 75. Definition of Done — Phase 0
+
+Phase 0 is complete when:
+
+```text
+Git initialized
+GitHub repository ready
+npm ci works
+project-local clasp works
+Apps Script project connected
+setupDatabase() succeeds
+CatchME Web App deploys
+no-login access feasibility verified
+first-use setup works
+OPD/IPD mode persists
+reporter alias persists
+device ID persists
+deploy.ps1 works from trusted deployment environment
+README documents the workflow
+```
+
+If no-login Apps Script access cannot be safely configured:
+
+STOP and report the environment limitation before Phase 1.
+
+---
+
+# 76. Definition of Done — Phase 1
+
+CatchME MVP is complete when a pharmacy staff member can:
+
+1. open CatchME without application login,
+2. immediately see the remembered OPD/IPD mode,
+3. switch mode at any time,
+4. tap microphone,
+5. speak a natural medication-error sentence,
+6. see the transcript,
+7. receive structured classification,
+8. answer no more than one clarification if needed,
+9. review the result,
+10. tap Save,
+11. receive server-confirmed success,
+12. see the event in same-device Recent Reports,
+13. refresh and still have persisted data,
+14. use typing when microphone recognition is unavailable.
+
+Typical high-confidence flow:
+
+```text
+Open CatchME
+→ tap microphone
+→ speak
+→ tap Save
+```
+
+No login interruption.
+
+---
+
+# 77. Data integrity Definition of Done
+
+After successful save:
+
+```text
+exactly one ME_Log row exists
+record_id is unique
+server created_at exists
+mode is correct
+reporter_alias stored if supplied
+device_session_id stored
+raw transcript preserved
+parser version stored
+legacy code validated
+severity = B
+patient_reached = No
+confirmed_at stored
+CREATE Audit_Log record exists
+```
+
+Repeated Save taps must not create duplicates.
+
+---
+
+# 78. Privacy Definition of Done
+
+A no-login CatchME user must NOT be able to:
+
+```text
+browse all hospital reports
+access Reviewer data
+access Admin data
+read the underlying Google Sheet directly through the Web App
+```
+
+Quick Reporter exposure is limited to:
+
+```text
+submit report
+receive save result
+view current-device recent reports only
+```
+
+---
+
+# 79. Deployment Definition of Done
+
+Production deployment is ready when:
+
+```text
+all source is tracked in Git
+GitHub contains source history
+clasp can push source
+immutable Apps Script versions can be created
+existing production deployment can be updated
+production URL stays stable
+rollback procedure is documented
+no credentials are committed
+normal CatchME reporters require no app login
+```
+
+---
+
+# 80. Initial response required from you
+
+Before large code changes, respond with:
+
+## A. Understanding
+
+Summarize the CatchME workflow in your own words.
+
+## B. Scope check
+
+Clearly state what is IN and OUT of Phase 0 / Phase 1.
+
+## C. Proposed minimal file structure
+
+Show only files actually needed.
+
+## D. No-login feasibility check
+
+Explain:
+
+```text
+which Apps Script Web App deployment settings are required
+whether the current environment can support them
+what privacy limitations result
+```
+
+Do not proceed if this requirement cannot be met safely.
+
+## E. Git + GitHub + clasp plan
+
+Explain:
+
+```text
+multi-machine workflow
+project-local clasp
+GitHub source of truth
+development workflow
+deploy.ps1
+production stable URL
+rollback
+```
+
+## F. Apps Script risks
+
+Identify:
+
+```text
+Web Speech API browser support
+no-login access implications
+Google Sheets concurrent writes
+Apps Script latency
+Apps Script quotas
+payload validation
+```
+
+## G. Implementation plan
+
+Give small sequential steps.
+
+## H. First milestone
+
+The first milestone is only:
+
+```text
+CatchME repository
+↓
+GitHub-ready
+↓
+npm/project-local clasp
+↓
+Apps Script connected
+↓
+basic Web App deployable
+↓
+verify no-login access
+↓
+setupDatabase()
+↓
+first-use setup
+↓
+OPD/IPD shell
+```
+
+Do not build Analytics/Admin/Review yet.
+
+---
+
+# 81. Final CatchME engineering principle
+
+CatchME succeeds only if staff actually report errors.
+
+Therefore:
+
+Do not make reporters think about taxonomy.
+
+Do not require login for Quick Report.
+
+Do not make reporters perform RCA.
+
+Do not require many dropdowns.
+
+Do not require OPD/IPD to be spoken.
+
+Do not require Severity selection.
+
+Do not require patient name.
+
+Do not require paid AI.
+
+Do not expose sensitive report history to no-login users.
+
+Do not build infrastructure more complicated than the application.
+
+The desired experience is:
+
+# พบ Error → เปิด CatchME → กดไมค์ → พูด → ตรวจ → บันทึก
+
+Tagline:
+
+# Catch ME before it reaches the patient.
+
+Begin by inspecting the supplied files and repository, verifying the current Apps Script/clasp environment and no-login Web App feasibility, then present the Phase 0 / Phase 1 implementation plan before making large code changes.

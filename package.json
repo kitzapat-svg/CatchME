@@ -1,0 +1,24 @@
+﻿{
+  "name": "catchme",
+  "version": "0.1.0",
+  "description": "CatchME — Medication Error Cat B Quick Reporter",
+  "private": true,
+  "scripts": {
+    "test": "node tests/parser-tests.js",
+    "push": "clasp push",
+    "status": "clasp status",
+    "deploy": "powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1"
+  },
+  "devDependencies": {
+    "@google/clasp": "^3.3.0"
+  },
+  "keywords": [
+    "medication-error",
+    "hospital-pharmacy",
+    "near-miss",
+    "category-b",
+    "google-apps-script"
+  ],
+  "author": "Hospital Pharmacy Team",
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="th"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Cat B Safety Gate</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "bg-surface-subtle": "#FFEBF0",
+                    "on-tertiary-fixed": "#00210b",
+                    "surface-dim": "#d0daf0",
+                    "surface-bright": "#f9f9ff",
+                    "inverse-primary": "#ffb1c2",
+                    "error-container": "#ffdad6",
+                    "primary": "#9b3f5a",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#001d32",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-low": "#f0f3ff",
+                    "on-surface": "#121c2c",
+                    "surface-variant": "#d9e3f9",
+                    "primary-hover": "#FB6F92",
+                    "bg-primary": "#FFF8F9",
+                    "success": "#72EFDD",
+                    "tertiary-fixed": "#9cf6ae",
+                    "tertiary-container": "#6bc380",
+                    "on-tertiary-fixed-variant": "#005225",
+                    "on-primary-container": "#79243f",
+                    "warning": "#FFD166",
+                    "surface": "#f9f9ff",
+                    "secondary-light": "#BDE0FE",
+                    "surface-tint": "#9b3f5a",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-error-container": "#93000a",
+                    "inverse-surface": "#273141",
+                    "secondary-fixed-dim": "#9bcbf8",
+                    "error": "#ba1a1a",
+                    "surface-container-highest": "#d9e3f9",
+                    "surface-container-high": "#dee8ff",
+                    "surface-container": "#e7eeff",
+                    "on-primary-fixed": "#3f0018",
+                    "secondary-fixed": "#cde5ff",
+                    "tertiary": "#056d34",
+                    "tertiary-fixed-dim": "#81da94",
+                    "primary-fixed": "#ffd9e0",
+                    "on-primary-fixed-variant": "#7d2742",
+                    "on-secondary-container": "#265a81",
+                    "background": "#f9f9ff",
+                    "primary-container": "#ff8fab",
+                    "outline": "#877275",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "secondary-container": "#a1d1fe",
+                    "on-secondary-fixed-variant": "#104a70",
+                    "on-background": "#121c2c",
+                    "border-subtle": "#FFE0E6",
+                    "secondary": "#30628a",
+                    "primary-fixed-dim": "#ffb1c2",
+                    "outline-variant": "#dac0c4",
+                    "on-tertiary-container": "#004f23",
+                    "on-surface-variant": "#544245"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "xs": "8px",
+                    "xl": "32px",
+                    "sm": "12px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ],
+                    "body-lg": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ],
+                    "headline-md": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ],
+                    "label-md": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ],
+                    "headline-sm": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ],
+                    "label-sm": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ],
+                    "body-md": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ],
+                    "headline-lg": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ],
+                    "body-sm": [
+                            "Plus Jakarta Sans", "sans-serif"
+                    ]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": [
+                            "26px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-sm": [
+                            "20px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "14px",
+                                    "letterSpacing": "0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        /* Ensuring custom font is applied globally */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-bg-primary text-on-surface antialiased min-h-screen flex flex-col pt-16 pb-20">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16 bg-surface shadow-sm border-b border-border-subtle">
+<div class="flex items-center gap-xs">
+<!-- Simplified Avatar as leading element for mobile focus -->
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined text-[20px]" data-icon="person" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+</div>
+</div>
+<div class="text-headline-sm font-headline-sm font-bold text-primary">CatchME</div>
+<div>
+<button class="text-label-md font-label-md text-primary bg-bg-surface-subtle px-sm py-base rounded-full hover:bg-surface-container-highest transition-colors">
+                IPD Mode
+            </button>
+</div>
+</header>
+<!-- Main Content Canvas - Focused on Hard Stop -->
+<main class="flex-grow flex items-center justify-center p-margin-mobile">
+<!-- Glassmorphism Card for Safety Gate -->
+<div class="w-full max-w-sm bg-surface rounded-[24px] border border-border-subtle shadow-[0_4px_14px_0_rgba(255,143,171,0.12)] p-lg flex flex-col items-center text-center relative overflow-hidden">
+<!-- Subtle background accent -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-error-container rounded-bl-full opacity-20 -z-0"></div>
+<!-- Warning Icon -->
+<div class="relative z-10 w-24 h-24 rounded-full bg-error-container/50 border-4 border-error-container flex items-center justify-center mb-md shadow-sm">
+<span class="material-symbols-outlined text-[48px] text-error" data-icon="warning" data-weight="fill" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<!-- Title -->
+<h1 class="font-headline-md text-headline-md text-on-surface mb-sm relative z-10">
+                เหตุการณ์นี้อาจไม่ใช่ Category B
+            </h1>
+<!-- Warning Text -->
+<p class="font-body-md text-body-md text-on-surface-variant mb-xl relative z-10">
+                ระบบนี้ใช้สำหรับเหตุการณ์ที่ยังไม่ถึงตัวผู้ป่วยเท่านั้น
+            </p>
+<!-- Actions -->
+<div class="w-full flex flex-col gap-sm relative z-10">
+<button class="w-full bg-primary text-on-primary font-label-md text-label-md py-[14px] rounded-[24px] shadow-sm hover:bg-primary-hover hover:shadow-[0_4px_14px_0_rgba(255,143,171,0.2)] transition-all flex justify-center items-center gap-xs">
+                    ไปบันทึกในระบบความเสี่ยง
+                    <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="w-full bg-bg-surface-subtle text-primary font-label-md text-label-md py-[14px] rounded-[24px] hover:bg-surface-container-highest transition-colors">
+                    ตรวจสอบอีกครั้ง
+                </button>
+</div>
+</div>
+</main>
+<!-- Navigation suppressed as this is a transactional/hard-stop page -->
+
+
+</body></html>

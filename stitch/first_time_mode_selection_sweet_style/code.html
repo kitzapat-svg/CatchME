@@ -1,0 +1,200 @@
+<!DOCTYPE html><html lang="th"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>เลือกหน่วยงานที่กำลังใช้งาน</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "bg-surface-subtle": "#FFEBF0",
+                        "on-tertiary-fixed": "#00210b",
+                        "surface-dim": "#d0daf0",
+                        "surface-bright": "#f9f9ff",
+                        "inverse-primary": "#ffb1c2",
+                        "error-container": "#ffdad6",
+                        "primary": "#9b3f5a",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#001d32",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-surface": "#121c2c",
+                        "surface-variant": "#d9e3f9",
+                        "primary-hover": "#FB6F92",
+                        "bg-primary": "#FFF8F9",
+                        "success": "#72EFDD",
+                        "tertiary-fixed": "#9cf6ae",
+                        "tertiary-container": "#6bc380",
+                        "on-tertiary-fixed-variant": "#005225",
+                        "on-primary-container": "#79243f",
+                        "warning": "#FFD166",
+                        "surface": "#f9f9ff",
+                        "secondary-light": "#BDE0FE",
+                        "surface-tint": "#9b3f5a",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#273141",
+                        "secondary-fixed-dim": "#9bcbf8",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#d9e3f9",
+                        "surface-container-high": "#dee8ff",
+                        "surface-container": "#e7eeff",
+                        "on-primary-fixed": "#3f0018",
+                        "secondary-fixed": "#cde5ff",
+                        "tertiary": "#056d34",
+                        "tertiary-fixed-dim": "#81da94",
+                        "primary-fixed": "#ffd9e0",
+                        "on-primary-fixed-variant": "#7d2742",
+                        "on-secondary-container": "#265a81",
+                        "background": "#f9f9ff",
+                        "primary-container": "#ff8fab",
+                        "outline": "#877275",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#a1d1fe",
+                        "on-secondary-fixed-variant": "#104a70",
+                        "on-background": "#121c2c",
+                        "border-subtle": "#FFE0E6",
+                        "secondary": "#30628a",
+                        "primary-fixed-dim": "#ffb1c2",
+                        "outline-variant": "#dac0c4",
+                        "on-tertiary-container": "#004f23",
+                        "on-surface-variant": "#544245"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "xs": "8px",
+                        "xl": "32px",
+                        "sm": "12px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .pink-shadow {
+            box-shadow: 0 4px 14px 0 rgba(255, 143, 171, 0.12);
+        }
+        .pink-shadow-hover:hover {
+            box-shadow: 0 8px 24px 0 rgba(255, 143, 171, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-bg-primary text-on-background min-h-screen flex flex-col items-center justify-center relative overflow-hidden font-body-md">
+<!-- Background Decorators -->
+<div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-primary-container rounded-full blur-[80px] opacity-20"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-secondary-light rounded-full blur-[100px] opacity-30"></div>
+<main class="w-full max-w-md px-margin-mobile flex flex-col z-10 relative">
+<!-- Header -->
+<header class="text-center mb-xl"><div class="font-headline-sm text-primary mb-xs">CatchME</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-xs">เลือกหน่วยงานที่กำลังใช้งาน</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">กรุณาเลือกแผนกเพื่อเริ่มต้นการทำงานของคุณ</p>
+</header>
+<!-- Mode Selection Cards -->
+<div class="flex flex-col gap-lg w-full">
+<!-- OPD Card -->
+<button class="glass-card rounded-[24px] border border-border-subtle p-lg flex flex-col items-center justify-center gap-md pink-shadow pink-shadow-hover transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-left w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="absolute inset-0 bg-gradient-to-br from-bg-surface-subtle to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="w-16 h-16 rounded-full bg-secondary-light flex items-center justify-center text-on-secondary-fixed mb-xs relative z-10">
+<span class="material-symbols-outlined text-[32px]">group</span>
+</div>
+<div class="text-center relative z-10">
+<h2 class="font-headline-md text-headline-md text-on-background mb-base">OPD</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">ห้องจ่ายยาผู้ป่วยนอก</p>
+</div>
+<div class="w-full flex justify-end relative z-10 mt-sm">
+<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-[-10px] group-hover:translate-x-0">arrow_forward</span>
+</div>
+</button>
+<!-- IPD Card -->
+<button class="glass-card rounded-[24px] border border-border-subtle p-lg flex flex-col items-center justify-center gap-md pink-shadow pink-shadow-hover transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden text-left w-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-fixed to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="w-16 h-16 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container mb-xs relative z-10">
+<span class="material-symbols-outlined text-[32px]">local_hospital</span>
+</div>
+<div class="text-center relative z-10">
+<h2 class="font-headline-md text-headline-md text-on-background mb-base">IPD</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">ห้องจ่ายยาผู้ป่วยใน</p>
+</div>
+<div class="w-full flex justify-end relative z-10 mt-sm">
+<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-[-10px] group-hover:translate-x-0">arrow_forward</span>
+</div>
+</button>
+</div>
+<!-- Footer Text -->
+<footer class="mt-xl text-center">
+<div class="inline-flex items-center gap-xs px-md py-sm bg-surface-container-low rounded-full border border-border-subtle">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">info</span>
+<p class="font-label-md text-label-md text-on-surface-variant">สามารถเปลี่ยนภายหลังได้ตลอดเวลา</p>
+</div>
+</footer>
+</main>
+<script>
+        // Simple interaction to visually indicate selection before navigation (if applicable)
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active state from all
+                document.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('ring-2', 'ring-primary', 'bg-bg-surface-subtle');
+                });
+                // Add active state to clicked
+                this.classList.add('ring-2', 'ring-primary', 'bg-bg-surface-subtle');
+                
+                // Simulate loading/navigation
+                setTimeout(() => {
+                    console.log('Navigating to', this.querySelector('h2').innerText);
+                }, 300);
+            });
+        });
+    </script>
+
+
+</body></html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="th"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>บันทึกสำเร็จ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "bg-surface-subtle": "#FFEBF0",
+                    "on-tertiary-fixed": "#00210b",
+                    "surface-dim": "#d0daf0",
+                    "surface-bright": "#f9f9ff",
+                    "inverse-primary": "#ffb1c2",
+                    "error-container": "#ffdad6",
+                    "primary": "#9b3f5a",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#001d32",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-low": "#f0f3ff",
+                    "on-surface": "#121c2c",
+                    "surface-variant": "#d9e3f9",
+                    "primary-hover": "#FB6F92",
+                    "bg-primary": "#FFF8F9",
+                    "success": "#72EFDD",
+                    "tertiary-fixed": "#9cf6ae",
+                    "tertiary-container": "#6bc380",
+                    "on-tertiary-fixed-variant": "#005225",
+                    "on-primary-container": "#79243f",
+                    "warning": "#FFD166",
+                    "surface": "#f9f9ff",
+                    "secondary-light": "#BDE0FE",
+                    "surface-tint": "#9b3f5a",
+                    "inverse-on-surface": "#ebf1ff",
+                    "on-error-container": "#93000a",
+                    "inverse-surface": "#273141",
+                    "secondary-fixed-dim": "#9bcbf8",
+                    "error": "#ba1a1a",
+                    "surface-container-highest": "#d9e3f9",
+                    "surface-container-high": "#dee8ff",
+                    "surface-container": "#e7eeff",
+                    "on-primary-fixed": "#3f0018",
+                    "secondary-fixed": "#cde5ff",
+                    "tertiary": "#056d34",
+                    "tertiary-fixed-dim": "#81da94",
+                    "primary-fixed": "#ffd9e0",
+                    "on-primary-fixed-variant": "#7d2742",
+                    "on-secondary-container": "#265a81",
+                    "background": "#f9f9ff",
+                    "primary-container": "#ff8fab",
+                    "outline": "#877275",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "secondary-container": "#a1d1fe",
+                    "on-secondary-fixed-variant": "#104a70",
+                    "on-background": "#121c2c",
+                    "border-subtle": "#FFE0E6",
+                    "secondary": "#30628a",
+                    "primary-fixed-dim": "#ffb1c2",
+                    "outline-variant": "#dac0c4",
+                    "on-tertiary-container": "#004f23",
+                    "on-surface-variant": "#544245"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "xs": "8px",
+                    "xl": "32px",
+                    "sm": "12px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-sm": ["Plus Jakarta Sans"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"],
+                    "body-sm": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["26px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        .check-anim {
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        @keyframes popIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="bg-bg-primary text-on-background min-h-screen flex flex-col font-sans antialiased"><header class="w-full px-margin-mobile py-sm bg-surface border-b border-border-subtle flex items-center z-20">
+  <h1 class="text-headline-sm font-semibold text-primary">CatchME</h1>
+</header>
+<!-- Top Navigation suppression rule applied: Transactional/Success screen, no global nav -->
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center px-margin-mobile py-xl relative overflow-hidden">
+<!-- Decorative background elements -->
+<div class="absolute top-[-10%] left-[-20%] w-[300px] h-[300px] bg-secondary-light/30 rounded-full blur-3xl z-0 pointer-events-none"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[250px] h-[250px] bg-primary-fixed/40 rounded-full blur-3xl z-0 pointer-events-none"></div>
+<!-- Success Container -->
+<div class="w-full max-w-sm bg-surface rounded-[24px] border border-border-subtle p-lg shadow-[0_4px_14px_0_rgba(255,143,171,0.12)] flex flex-col items-center text-center z-10">
+<!-- Icon -->
+<div class="w-24 h-24 bg-tertiary-fixed rounded-full flex items-center justify-center mb-lg check-anim shadow-sm border-4 border-surface">
+<span class="material-symbols-outlined text-[48px] text-tertiary" style="font-variation-settings: 'FILL' 1;">
+                    check_circle
+                </span>
+</div>
+<!-- Title -->
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile text-on-surface mb-xs">บันทึกสำเร็จ</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mb-lg">ระบบได้บันทึกข้อมูลเรียบร้อยแล้ว</p>
+<!-- Summary Card -->
+<div class="w-full bg-bg-surface-subtle rounded-xl p-md mb-xl flex flex-col items-start text-left border border-border-subtle">
+<span class="text-label-sm font-label-sm text-outline mb-base uppercase tracking-wider">รายละเอียด</span>
+<p class="text-body-md font-body-md text-on-surface">
+<span class="font-semibold text-primary">Pre-dispensing</span> <span class="text-outline mx-1">•</span> ผิดจำนวน Amlodipine B29
+                </p>
+</div>
+<!-- Actions -->
+<div class="w-full flex flex-col gap-md">
+<button class="w-full bg-primary hover:bg-primary-hover text-on-primary rounded-[24px] py-sm px-lg text-label-md font-label-md transition-colors shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    บันทึกเหตุการณ์ถัดไป
+                </button>
+<button class="w-full bg-secondary-light hover:bg-secondary-container text-on-secondary-fixed rounded-[24px] py-sm px-lg text-label-md font-label-md transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">list</span>
+                    ดูรายการล่าสุด
+                </button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation suppression rule applied: Transactional/Success screen -->
+
+
+</body></html>

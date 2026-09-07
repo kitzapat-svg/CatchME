@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>OPD Quick Report Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "bg-surface-subtle": "#FFEBF0",
+                        "on-tertiary-fixed": "#00210b",
+                        "surface-dim": "#d0daf0",
+                        "surface-bright": "#f9f9ff",
+                        "inverse-primary": "#ffb1c2",
+                        "error-container": "#ffdad6",
+                        "primary": "#9b3f5a",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#001d32",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f0f3ff",
+                        "on-surface": "#121c2c",
+                        "surface-variant": "#d9e3f9",
+                        "primary-hover": "#FB6F92",
+                        "bg-primary": "#FFF8F9",
+                        "success": "#72EFDD",
+                        "tertiary-fixed": "#9cf6ae",
+                        "tertiary-container": "#6bc380",
+                        "on-tertiary-fixed-variant": "#005225",
+                        "on-primary-container": "#79243f",
+                        "warning": "#FFD166",
+                        "surface": "#f9f9ff",
+                        "secondary-light": "#BDE0FE",
+                        "surface-tint": "#9b3f5a",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#273141",
+                        "secondary-fixed-dim": "#9bcbf8",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#d9e3f9",
+                        "surface-container-high": "#dee8ff",
+                        "surface-container": "#e7eeff",
+                        "on-primary-fixed": "#3f0018",
+                        "secondary-fixed": "#cde5ff",
+                        "tertiary": "#056d34",
+                        "tertiary-fixed-dim": "#81da94",
+                        "primary-fixed": "#ffd9e0",
+                        "on-primary-fixed-variant": "#7d2742",
+                        "on-secondary-container": "#265a81",
+                        "background": "#f9f9ff",
+                        "primary-container": "#ff8fab",
+                        "outline": "#877275",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary-container": "#a1d1fe",
+                        "on-secondary-fixed-variant": "#104a70",
+                        "on-background": "#121c2c",
+                        "border-subtle": "#FFE0E6",
+                        "secondary": "#30628a",
+                        "primary-fixed-dim": "#ffb1c2",
+                        "outline-variant": "#dac0c4",
+                        "on-tertiary-container": "#004f23",
+                        "on-surface-variant": "#544245"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "2xl": "1.5rem"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "xs": "8px",
+                        "xl": "32px",
+                        "sm": "12px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.bg-primary');
+            color: theme('colors.on-background');
+            -webkit-tap-highlight-color: transparent;
+        }
+        .recording-pulse {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; box-shadow: 0 0 0 0 rgba(255, 143, 171, 0.7); }
+            100% { transform: scale(1.2); opacity: 0; box-shadow: 0 0 0 20px rgba(255, 143, 171, 0); }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid theme('colors.border-subtle');
+        }
+        .pink-shadow {
+            box-shadow: 0 4px 14px 0 rgba(255, 143, 171, 0.12);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-body-md pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16 bg-surface border-b border-border-subtle shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-bg-surface-subtle border border-border-subtle">
+<img alt="Staff Member Profile" class="w-full h-full object-cover" data-alt="A small, soft pastel-toned abstract avatar illustration for a medical staff profile. Features gentle curved shapes in teal and light pink, creating a calm, professional, and friendly healthcare persona. Simple and clean design on a white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdcXN9DScz8aYMXmFuHgllpCyLMDl9Hp4udKNQxgoRzjpQiyWXi06tOMTrXT6HQo7K7MkmRFXHzg4D42D5zUbeiPyPGkQib_ZktlIyGq4xNliGa7hDpIVU-Gw-EuW4DvxTQA0L2IYvCsih7B9Dhc20_TfsQ2Y98m6fAq1fhgHcBuO-tYTOcRFAn6rvL_sp9qh43mIntLPmzK-qEpX-tQ5vFgpEvaWpGBRuaxUpXtNgXmR1ep7EYIB0">
+</div>
+<h1 class="text-headline-sm font-headline-sm font-bold text-primary">CatchME</h1>
+</div>
+<button class="px-3 py-1.5 rounded-full bg-bg-surface-subtle text-primary font-label-md text-label-md hover:bg-primary hover:text-on-primary transition-colors border border-border-subtle">
+            IPD Mode
+        </button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow pt-24 px-margin-mobile md:px-margin-desktop flex flex-col items-center">
+<!-- Welcome Section -->
+<div class="w-full max-w-md text-center mb-8">
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile text-on-background mb-2">OPD Quick Report</h2>
+<p class="text-body-md font-body-md text-on-surface-variant">บันทึกความคลาดเคลื่อนทางยาอย่างรวดเร็ว</p>
+</div>
+<!-- Central Microphone Button -->
+<div class="relative flex flex-col items-center justify-center mb-12 mt-8">
+  <!-- Pulsing Rings Behind Button -->
+  <div class="absolute w-48 h-48 bg-primary-container rounded-full opacity-20 recording-pulse"></div>
+  <div class="absolute w-40 h-40 bg-primary-container rounded-full opacity-30 recording-pulse" style="animation-delay: 0.5s;"></div>
+  
+  <!-- Central Microphone Button -->
+  <button class="relative z-10 w-32 h-32 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-[0_8px_24px_0_rgba(155,63,90,0.3)] hover:bg-primary-hover active:scale-95 transition-all duration-200">
+    <span class="material-symbols-outlined text-[48px]" style="font-variation-settings: 'FILL' 1;">mic</span>
+  </button>
+
+  <!-- Accompanying Text -->
+  <div class="mt-8 flex flex-col items-center gap-2">
+    <span class="text-headline-sm font-headline-sm text-primary">กดเพื่อบันทึก Medication Error</span>
+    <span class="text-label-md font-label-md text-on-surface-variant bg-bg-surface-subtle px-4 py-1.5 rounded-full">พูดสั้น ๆ ว่าเกิดอะไรขึ้น</span>
+  </div>
+</div>
+<!-- Recent Reports Section (Bento style grid) -->
+<div class="w-full max-w-lg mt-4">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-headline-sm font-headline-sm text-on-background">Recent Reports</h3>
+<button class="text-label-md font-label-md text-primary hover:underline">ดูทั้งหมด</button>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<!-- Report Card 1 -->
+<div class="glass-card rounded-2xl p-4 pink-shadow hover:bg-bg-surface-subtle transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="bg-[#FFE5EC] text-primary border border-[#FF8FAB] px-2 py-0.5 rounded-full text-label-sm font-label-sm">Pre-dispensing</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 14:32
+                            </span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">chevron_right</span>
+</div>
+<p class="text-body-md font-body-md text-on-background font-medium mb-1">ผิดจำนวน Amlodipine</p>
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant">Ward: B29</span>
+<span class="w-1 h-1 rounded-full bg-border-subtle"></span>
+<span class="text-label-sm font-label-sm text-success flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check_circle</span> Draft Saved</span>
+</div>
+</div>
+<!-- Report Card 2 (Example secondary card) -->
+<div class="glass-card rounded-2xl p-4 pink-shadow hover:bg-bg-surface-subtle transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="bg-surface-container text-secondary border border-secondary-fixed-dim px-2 py-0.5 rounded-full text-label-sm font-label-sm">Administration</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 11:15
+                            </span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">chevron_right</span>
+</div>
+<p class="text-body-md font-body-md text-on-background font-medium mb-1">ผิดเวลา Paracetamol IV</p>
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant">Ward: A12</span>
+<span class="w-1 h-1 rounded-full bg-border-subtle"></span>
+<span class="text-label-sm font-label-sm text-warning flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">pending</span> Processing</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 bg-surface rounded-t-xl border-t border-border-subtle shadow-[0_-4px_14px_0_rgba(255,143,171,0.12)] md:hidden">
+<!-- Active Tab: Home (matches intent) -->
+<button aria-label="Home" class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full w-14 h-14 shadow-md scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">home</span>
+</button>
+<!-- Inactive Tab: Mic -->
+<button aria-label="Microphone" class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:bg-bg-surface-subtle rounded-full">
+<span class="material-symbols-outlined">mic_none</span>
+</button>
+<!-- Inactive Tab: History -->
+<button aria-label="History" class="flex items-center justify-center text-on-surface-variant w-12 h-12 hover:bg-bg-surface-subtle rounded-full">
+<span class="material-symbols-outlined">history</span>
+</button>
+</nav>
+<!-- Desktop Navigation (Hidden on mobile) -->
+<nav class="hidden md:flex fixed top-0 right-margin-desktop h-16 items-center gap-8 z-[51]">
+<button class="flex items-center gap-2 text-primary font-bold hover:bg-bg-surface-subtle px-4 py-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">home</span>
+<span class="text-label-md font-label-md">Home</span>
+</button>
+<button class="flex items-center gap-2 text-on-surface-variant hover:bg-bg-surface-subtle px-4 py-2 rounded-lg transition-colors">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-md font-label-md">History</span>
+</button>
+</nav>
+
+
+</body></html>

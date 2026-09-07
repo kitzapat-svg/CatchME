@@ -1,0 +1,230 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title class="">Recording State - CatchME</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "bg-surface-subtle": "#FFEBF0",
+                            "on-tertiary-fixed": "#00210b",
+                            "surface-dim": "#d0daf0",
+                            "surface-bright": "#f9f9ff",
+                            "inverse-primary": "#ffb1c2",
+                            "error-container": "#ffdad6",
+                            "primary": "#9b3f5a",
+                            "on-primary": "#ffffff",
+                            "on-secondary-fixed": "#001d32",
+                            "surface-container-lowest": "#ffffff",
+                            "on-secondary": "#ffffff",
+                            "surface-container-low": "#f0f3ff",
+                            "on-surface": "#121c2c",
+                            "surface-variant": "#d9e3f9",
+                            "primary-hover": "#FB6F92",
+                            "bg-primary": "#FFF8F9",
+                            "success": "#72EFDD",
+                            "tertiary-fixed": "#9cf6ae",
+                            "tertiary-container": "#6bc380",
+                            "on-tertiary-fixed-variant": "#005225",
+                            "on-primary-container": "#79243f",
+                            "warning": "#FFD166",
+                            "surface": "#f9f9ff",
+                            "secondary-light": "#BDE0FE",
+                            "surface-tint": "#9b3f5a",
+                            "inverse-on-surface": "#ebf1ff",
+                            "on-error-container": "#93000a",
+                            "inverse-surface": "#273141",
+                            "secondary-fixed-dim": "#9bcbf8",
+                            "error": "#ba1a1a",
+                            "surface-container-highest": "#d9e3f9",
+                            "surface-container-high": "#dee8ff",
+                            "surface-container": "#e7eeff",
+                            "on-primary-fixed": "#3f0018",
+                            "secondary-fixed": "#cde5ff",
+                            "tertiary": "#056d34",
+                            "tertiary-fixed-dim": "#81da94",
+                            "primary-fixed": "#ffd9e0",
+                            "on-primary-fixed-variant": "#7d2742",
+                            "on-secondary-container": "#265a81",
+                            "background": "#f9f9ff",
+                            "primary-container": "#ff8fab",
+                            "outline": "#877275",
+                            "on-tertiary": "#ffffff",
+                            "on-error": "#ffffff",
+                            "secondary-container": "#a1d1fe",
+                            "on-secondary-fixed-variant": "#104a70",
+                            "on-background": "#121c2c",
+                            "border-subtle": "#FFE0E6",
+                            "secondary": "#30628a",
+                            "primary-fixed-dim": "#ffb1c2",
+                            "outline-variant": "#dac0c4",
+                            "on-tertiary-container": "#004f23",
+                            "on-surface-variant": "#544245"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px"
+                    },
+                    "spacing": {
+                            "base": "4px",
+                            "margin-mobile": "16px",
+                            "gutter": "24px",
+                            "xs": "8px",
+                            "xl": "32px",
+                            "sm": "12px",
+                            "lg": "24px",
+                            "md": "16px",
+                            "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                            "headline-lg-mobile": ["Plus Jakarta Sans"],
+                            "body-lg": ["Plus Jakarta Sans"],
+                            "headline-md": ["Plus Jakarta Sans"],
+                            "label-md": ["Plus Jakarta Sans"],
+                            "headline-sm": ["Plus Jakarta Sans"],
+                            "label-sm": ["Plus Jakarta Sans"],
+                            "body-md": ["Plus Jakarta Sans"],
+                            "headline-lg": ["Plus Jakarta Sans"],
+                            "body-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                            "headline-lg-mobile": ["26px", {"lineHeight": "32px", "fontWeight": "700"}],
+                            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                            "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                            "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                            "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                            "label-sm": ["12px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                            "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                            "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    },
+                    "animation": {
+                        'pulse-soft': 'pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'wave': 'wave 1s ease-in-out infinite alternate',
+                    },
+                    "keyframes": {
+                        'pulse-soft': {
+                            '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+                            '50%': { opacity: '.8', transform: 'scale(1.05)', boxShadow: '0 0 20px rgba(255, 143, 171, 0.4)' },
+                        },
+                        'wave': {
+                            '0%': { transform: 'scaleY(0.5)' },
+                            '100%': { transform: 'scaleY(1.5)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #FFF8F9;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #FFE0E6;
+        }
+        .waveform-bar {
+            width: 4px;
+            background-color: #ff8fab;
+            border-radius: 9999px;
+            animation: wave 1s ease-in-out infinite alternate;
+        }
+        .waveform-bar:nth-child(1) { animation-delay: 0.0s; height: 16px; }
+        .waveform-bar:nth-child(2) { animation-delay: 0.1s; height: 32px; }
+        .waveform-bar:nth-child(3) { animation-delay: 0.2s; height: 24px; }
+        .waveform-bar:nth-child(4) { animation-delay: 0.3s; height: 48px; }
+        .waveform-bar:nth-child(5) { animation-delay: 0.4s; height: 36px; }
+        .waveform-bar:nth-child(6) { animation-delay: 0.5s; height: 56px; }
+        .waveform-bar:nth-child(7) { animation-delay: 0.4s; height: 40px; }
+        .waveform-bar:nth-child(8) { animation-delay: 0.3s; height: 28px; }
+        .waveform-bar:nth-child(9) { animation-delay: 0.2s; height: 20px; }
+        .waveform-bar:nth-child(10) { animation-delay: 0.1s; height: 12px; }
+    </style>
+</head>
+<body class="bg-bg-primary text-on-surface font-body-md min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<!-- Decorative background elements -->
+<div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-primary-container rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-soft" style="animation-duration: 6s;"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-secondary-light rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse-soft" style="animation-duration: 8s; animation-delay: 1s;"></div>
+<main class="w-full max-w-md px-margin-mobile flex flex-col items-center justify-center z-10 space-y-lg flex-1 py-xl"><div class="w-full flex justify-center mb-4"><h1 class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">CatchME</h1></div>
+<!-- Timer -->
+<div class="text-center space-y-2">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">00:08</h2>
+<p class="font-label-md text-label-md text-on-surface-variant flex items-center justify-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+                Recording active
+            </p>
+</div>
+<!-- Microphone Visualizer -->
+<div class="relative flex items-center justify-center w-48 h-48 my-8">
+<!-- Pulsing outer rings -->
+<div class="absolute inset-0 bg-primary-container opacity-20 rounded-full animate-pulse-soft" style="animation-duration: 2s;"></div>
+<div class="absolute inset-4 bg-primary-container opacity-40 rounded-full animate-pulse-soft" style="animation-duration: 2s; animation-delay: 0.2s;"></div>
+<!-- Core Mic Button -->
+<div class="relative z-10 w-24 h-24 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-[0_4px_24px_rgba(155,63,90,0.4)]">
+<span class="material-symbols-outlined text-4xl" data-icon="mic" data-weight="fill" style="font-variation-settings: 'FILL' 1;">mic</span>
+</div>
+</div>
+<!-- Waveform Animation -->
+<div class="flex items-end justify-center gap-1.5 h-16 w-full">
+<div class="waveform-bar" style="height: 54px;"></div>
+<div class="waveform-bar" style="height: 56px;"></div>
+<div class="waveform-bar" style="height: 33px;"></div>
+<div class="waveform-bar" style="height: 26px;"></div>
+<div class="waveform-bar" style="height: 58px;"></div>
+<div class="waveform-bar" style="height: 52px;"></div>
+<div class="waveform-bar" style="height: 12px;"></div>
+<div class="waveform-bar" style="height: 42px;"></div>
+<div class="waveform-bar" style="height: 23px;"></div>
+<div class="waveform-bar" style="height: 27px;"></div>
+</div>
+<!-- Live Transcript Preview -->
+<div class="glass-card w-full rounded-xl p-md shadow-sm mt-4">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="text_snippet">text_snippet</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Live Transcript</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface italic text-center text-opacity-80">
+                "คนจัด amlodipine มา 30 เม็ด..."
+                <span class="inline-block w-1 h-4 bg-primary ml-1 animate-pulse align-middle"></span>
+</p>
+</div>
+<!-- Actions -->
+<div class="w-full flex flex-col gap-4 mt-8">
+<button class="w-full h-14 bg-primary hover:bg-primary-hover text-on-primary font-label-md text-label-md rounded-[24px] shadow-[0_4px_14px_0_rgba(255,143,171,0.24)] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="stop_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">stop_circle</span>
+                หยุดบันทึก (Stop Recording)
+            </button>
+<button class="w-full h-12 bg-transparent text-on-surface-variant hover:text-primary font-label-md text-label-md transition-colors">
+                ยกเลิก (Cancel)
+            </button>
+</div>
+</main>
+<!-- Top Navigation (Suppressed per semantic shell mandate for active transaction) -->
+<!-- Bottom Navigation (Suppressed per semantic shell mandate for active transaction) -->
+<script>
+        // Simple script to slightly randomize waveform for organic feel
+        document.addEventListener("DOMContentLoaded", () => {
+            const bars = document.querySelectorAll('.waveform-bar');
+            setInterval(() => {
+                bars.forEach(bar => {
+                    // Randomize height between 10px and 60px
+                    const randomHeight = Math.floor(Math.random() * 50) + 10;
+                    bar.style.height = `${randomHeight}px`;
+                });
+            }, 500); // Update every half second
+        });
+    </script>
+
+
+</body></html>
