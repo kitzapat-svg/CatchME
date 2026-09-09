@@ -38,10 +38,14 @@ const DB_CONFIG = {
  */
 function getDatabaseSpreadsheet(customSpreadsheetId) {
   var props = PropertiesService.getScriptProperties();
-  var sheetId = customSpreadsheetId || props.getProperty('SPREADSHEET_ID');
+  var sheetId = customSpreadsheetId || props.getProperty('SPREADSHEET_ID') || '1HOnuMkVE8ujOvGoZYHpdRnrJ6pOvJLOBH5HW9cd_yuI';
 
   if (sheetId) {
-    return SpreadsheetApp.openById(sheetId);
+    try {
+      return SpreadsheetApp.openById(sheetId);
+    } catch (e) {
+      console.warn('Failed to open spreadsheet by configured ID:', e);
+    }
   }
 
   // Fallback if container-bound

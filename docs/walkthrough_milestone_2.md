@@ -77,3 +77,4 @@ Milestone 2 ได้พัฒนาและติดตั้งระบบ *
   * ทดสอบการบันทึกลง Google Sheets จริงผ่าน Web App Deployment URL
   * ตรวจสอบการทำงานของ `setupDatabase()` ในกรณีเชื่อมโยงกับ Google Sheet จริง
   * ปรับแต่งประสบการณ์ใช้งานบนอุปกรณ์มือถือ (iOS Safari, Android Chrome) และการตั้งค่าหน้าจอหลัก (Add to Home Screen)
+

@@ -176,3 +176,4 @@ function getRecentReports(deviceSessionId, limit) {
     return [];
   }
 }
+

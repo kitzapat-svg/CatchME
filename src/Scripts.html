@@ -79,14 +79,11 @@ const CatchME = (function() {
   }
 
   /**
-   * Initializes the Web Speech API recognition instance.
+   * Factory to create a fresh SpeechRecognition instance for clean lifecycle.
    */
-  function initSpeechRecognition() {
+  function createSpeechRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      console.warn('Web Speech API is not supported in this browser.');
-      return;
-    }
+    if (!SpeechRecognition) return null;
 
     try {
       const recognition = new SpeechRecognition();
@@ -131,7 +128,11 @@ const CatchME = (function() {
         console.warn('Speech recognition error:', event.error);
         state.isRecording = false;
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          alert('ไม่สามารถเข้าถึงไมโครโฟนได้ กรุณาอนุญาตสิทธิ์ หรือใช้ปุ่ม "พิมพ์ข้อความแทน"');
+          alert('ไมโครโฟนยังไม่ได้รับอนุญาต:\n1. แตะไอคอนการตั้งค่า (หรือรูปแม่กุญแจ) ข้างแถบ URL ด้านบน\n2. ไปที่ "สิทธิ์" (Permissions) > เปิด "ไมโครโฟน" (Microphone)\nหรือแตะปุ่ม "พิมพ์ข้อความแทน" ได้ทันทีครับ');
+          showScreen('screen-quick-report');
+        } else if (event.error === 'no-speech') {
+          showScreen('screen-quick-report');
+        } else {
           showScreen('screen-quick-report');
         }
       };
@@ -148,34 +149,60 @@ const CatchME = (function() {
         }
       };
 
-      state.recognition = recognition;
+      return recognition;
     } catch (e) {
-      console.warn('SpeechRecognition initialization failed:', e);
+      console.warn('Failed to construct SpeechRecognition:', e);
+      return null;
+    }
+  }
+
+  function initSpeechRecognition() {
+    // Initial check for feature availability
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn('Web Speech API is not supported in this browser.');
     }
   }
 
   /**
-   * Starts speech capture or fallbacks to text modal.
+   * Starts speech capture with native microphone permission trigger for mobile.
    */
-  function startSpeechCapture() {
-    if (!state.recognition) {
+  async function startSpeechCapture() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
       alert('เบราว์เซอร์นี้ไม่รองรับการบันทึกเสียง กรุณาใช้การพิมพ์ข้อความแทน');
       openTextFallback();
       return;
     }
 
-    try {
-      state.recognition.start();
-    } catch (err) {
-      console.warn('Recognition start exception:', err);
+    // Step 1: Explicitly trigger Android Chrome native microphone permission dialog if needed
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
-        state.recognition.stop();
-        setTimeout(function() {
-          state.recognition.start();
-        }, 150);
-      } catch (e) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Permission acquired, release mic track so SpeechRecognition can take over
+        stream.getTracks().forEach(function(track) { track.stop(); });
+      } catch (err) {
+        console.warn('getUserMedia permission rejected or failed:', err);
+        alert('ไมโครโฟนยังไม่ได้รับอนุญาตในเบราว์เซอร์:\nแตะไอคอนรูปแม่กุญแจ/การตั้งค่าข้างแถบ URL ด้านบน แล้วเลือก "อนุญาตไมโครโฟน" หรือแตะปุ่ม "พิมพ์ข้อความแทน"');
+        openTextFallback();
+        return;
+      }
+    }
+
+    // Step 2: Always instantiate a clean SpeechRecognition object to prevent InvalidStateError
+    try {
+      if (state.recognition) {
+        try { state.recognition.abort(); } catch (e) {}
+      }
+      state.recognition = createSpeechRecognition();
+      if (state.recognition) {
+        state.recognition.start();
+      } else {
         openTextFallback();
       }
+    } catch (err) {
+      console.warn('Recognition start exception:', err);
+      openTextFallback();
     }
   }
 
