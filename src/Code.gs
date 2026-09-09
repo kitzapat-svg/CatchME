@@ -66,3 +66,21 @@ function apiSaveQuickReport(reportData) {
 function apiGetRecentReports(deviceSessionId, limit) {
   return getRecentReports(deviceSessionId, limit);
 }
+
+/**
+ * Handles incoming HTTP POST requests from external frontends (e.g. GitHub Pages).
+ */
+function doPost(e) {
+  try {
+    var rawData = e && e.postData ? e.postData.contents : '{}';
+    var reportData = JSON.parse(rawData);
+    var result = saveQuickReport(reportData);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: err.message || String(err)
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}

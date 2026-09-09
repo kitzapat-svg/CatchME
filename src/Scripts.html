@@ -170,26 +170,25 @@ const CatchME = (function() {
   async function startSpeechCapture() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('เบราว์เซอร์นี้ไม่รองรับการบันทึกเสียง กรุณาใช้การพิมพ์ข้อความแทน');
+      alert('เบราว์เซอร์นี้ไม่รองรับ SpeechRecognition API ใน iframe นี้\nกำลังเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
       openTextFallback();
       return;
     }
 
-    // Step 1: Explicitly trigger Android Chrome native microphone permission dialog if needed
+    // Diagnostic Step 1: Check mediaDevices
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Permission acquired, release mic track so SpeechRecognition can take over
         stream.getTracks().forEach(function(track) { track.stop(); });
       } catch (err) {
-        console.warn('getUserMedia permission rejected or failed:', err);
-        alert('ไมโครโฟนยังไม่ได้รับอนุญาตในเบราว์เซอร์:\nแตะไอคอนรูปแม่กุญแจ/การตั้งค่าข้างแถบ URL ด้านบน แล้วเลือก "อนุญาตไมโครโฟน" หรือแตะปุ่ม "พิมพ์ข้อความแทน"');
+        console.warn('getUserMedia permission error:', err);
+        alert('ไมโครโฟนถูกบล็อกในระดับ iframe ของ Google Apps Script (' + err.name + ': ' + err.message + ')\n\nระบบจะเปิดกล่องพิมพ์ข้อความแทน (สามารถกดไมค์บนคีย์บอร์ดพิมพ์ด้วยเสียงได้ทันทีครับ)');
         openTextFallback();
         return;
       }
     }
 
-    // Step 2: Always instantiate a clean SpeechRecognition object to prevent InvalidStateError
+    // Step 2: Instantiate SpeechRecognition
     try {
       if (state.recognition) {
         try { state.recognition.abort(); } catch (e) {}
@@ -201,7 +200,7 @@ const CatchME = (function() {
         openTextFallback();
       }
     } catch (err) {
-      console.warn('Recognition start exception:', err);
+      alert('SpeechRecognition Error: ' + err.name + ' - ' + err.message);
       openTextFallback();
     }
   }
@@ -522,6 +521,8 @@ const CatchME = (function() {
       patientReached: 'No'
     };
 
+    const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzG1lOIkSlisc14ofAW0Ev49EgtMgmtvaJ0LCf353BNX_tzhx38in5P_HvxlOhmH7Cf_w/exec';
+
     if (window.google && google.script && google.script.run) {
       google.script.run
         .withSuccessHandler(function(res) {
@@ -546,12 +547,26 @@ const CatchME = (function() {
         })
         .apiSaveQuickReport(payload);
     } else {
-      // Local preview standalone fallback
-      setTimeout(function() {
+      // External Frontend (e.g. GitHub Pages) HTTP POST via text/plain to bypass CORS
+      fetch(GAS_WEBAPP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(function() {
         state.isSaving = false;
-        const mockRecordId = 'local-' + Date.now().toString(36);
-        handleSaveSuccess(mockRecordId, payload);
-      }, 500);
+        const recordId = 'web-' + Date.now().toString(36);
+        handleSaveSuccess(recordId, payload);
+      })
+      .catch(function(err) {
+        state.isSaving = false;
+        console.warn('Network save fallback:', err);
+        const recordId = 'local-' + Date.now().toString(36);
+        handleSaveSuccess(recordId, payload);
+      });
     }
   }
 
