@@ -1030,7 +1030,56 @@
     { patterns: [/แคปซูล/g, /capsule/gi, /\bcap\b/gi], replacement: 'แคปซูล' },
     { patterns: [/ไวอัล/g, /vial/gi], replacement: 'vial' },
     { patterns: [/แอมป์/g, /ampule/gi, /ampoule/gi, /\bamp\b/gi], replacement: 'amp' },
-    { patterns: [/มิลลิอิควิวาเลนท์/g, /มิลลิอิควิวาเลนต์/g, /\bmEq\b/gi], replacement: 'mEq' }
+    { patterns: [/มิลลิอิควิวาเลนท์/g, /มิลลิอิควิวาเลนต์/g, /\bmEq\b/gi], replacement: 'mEq' },
+    { patterns: [/ส่วน/g], replacement: 'ส่วน' },
+    { patterns: [/แผง/g], replacement: 'แผง' }
+  ];
+
+  // Comprehensive Drug Dictionary (Canonical generic name, lowercase key, and speech regex patterns)
+  var DRUG_DICTIONARY = [
+    { name: 'Metoprolol', key: 'metoprolol', patterns: [/metoprolol/gi, /เมโทโพรลอล/gi, /เมโตโปรลอล/gi, /เมโทโปรลอล/gi, /เมโตโพรลอล/gi] },
+    { name: 'Amlodipine', key: 'amlodipine', patterns: [/amlodipine/gi, /แอมโลดิปีน/gi, /แอมโลดิพีน/gi, /แอมโล(?![a-zA-Z])/gi] },
+    { name: 'Prednisolone', key: 'prednisolone', patterns: [/prednisolone/gi, /เพรดนิโซโลน/gi, /พรีดนิโซโลน/gi, /เพรดนิ(?![a-zA-Z])/gi] },
+    { name: 'Metformin', key: 'metformin', patterns: [/metformin/gi, /เมทฟอร์มิน/gi, /เมตฟอร์มิน/gi, /เม็ทฟอร์มิน/gi] },
+    { name: 'Simvastatin', key: 'simvastatin', patterns: [/simvastatin/gi, /ซิมวาสแตติน/gi, /ซิมวาสเตติน/gi, /ซิมวาส(?![a-zA-Z])/gi] },
+    { name: 'Losartan', key: 'losartan', patterns: [/losartan/gi, /ลอซาร์แทน/gi, /โลซาร์แทน/gi, /ลอซาแทน/gi, /ลอสาร์แทน/gi] },
+    { name: 'Warfarin', key: 'warfarin', patterns: [/warfarin/gi, /วาร์ฟาริน/gi, /วอฟาริน/gi, /วาฟาริน/gi] },
+    { name: 'Tramadol', key: 'tramadol', patterns: [/tramadol/gi, /ทรามาดอล/gi, /ทรามอล/gi] },
+    { name: 'Paracetamol', key: 'paracetamol', patterns: [/paracetamol/gi, /พาราเซตามอล/gi, /พาราเซต/gi, /พารา(?![a-zA-Z])/gi] },
+    { name: 'Amoxicillin', key: 'amoxicillin', patterns: [/amoxicillin/gi, /อะม็อกซีซิลลิน/gi, /อะม็อกซี/gi, /อาม็อกซี/gi, /อะมอกซี/gi] },
+    { name: 'Penicillin', key: 'penicillin', patterns: [/penicillin/gi, /เพนนิซิลลิน/gi, /เพนิซิลลิน/gi] },
+    { name: 'Cotrimoxazole', key: 'cotrimoxazole', patterns: [/cotrimoxazole/gi, /โคไตรม็อกซาโซล/gi, /โคไตร/gi] },
+    { name: 'Gliclazide', key: 'gliclazide', patterns: [/gliclazide/gi, /ไกลคลาไซด์/gi, /กลิคลาไซด์/gi, /กลิคาไซด์/gi] },
+    { name: 'Glipizide', key: 'glipizide', patterns: [/glipizide/gi, /กลิพิไซด์/gi, /ไกลพิไซด์/gi] },
+    { name: 'Nifedipine', key: 'nifedipine', patterns: [/nifedipine/gi, /นิเฟดิปีน/gi] },
+    { name: 'Ceftriaxone', key: 'ceftriaxone', patterns: [/ceftriaxone/gi, /เซฟไตรอะโซน/gi, /เซฟไตร/gi] },
+    { name: 'Cephalosporin', key: 'cephalosporin', patterns: [/cephalosporin/gi, /เซฟาโลสปอริน/gi] },
+    { name: 'Meropenem', key: 'meropenem', patterns: [/meropenem/gi, /เมโรพีเนม/gi, /เมโรเพเนม/gi] },
+    { name: 'Enoxaparin', key: 'enoxaparin', patterns: [/enoxaparin/gi, /อีนอกซาพาริน/gi] },
+    { name: 'Potassium chloride', key: 'potassium chloride', patterns: [/potassium\s*chloride/gi, /โพแทสเซียม\s*คลอไรด์/gi, /โปแตสเซียม\s*คลอไรด์/gi, /เคซีแอล/gi, /\bkcl\b/gi] },
+    { name: 'Cefazolin', key: 'cefazolin', patterns: [/cefazolin/gi, /เซฟาโซลิน/gi] },
+    { name: 'Ceftazidime', key: 'ceftazidime', patterns: [/ceftazidime/gi, /เซฟทาซิดิม/gi, /เซฟตาซิดิม/gi] },
+    { name: 'Aspirin', key: 'aspirin', patterns: [/aspirin/gi, /แอสไพริน/gi] },
+    { name: 'Clopidogrel', key: 'clopidogrel', patterns: [/clopidogrel/gi, /โคลพิโดเกรล/gi] },
+    { name: 'Atorvastatin', key: 'atorvastatin', patterns: [/atorvastatin/gi, /อะทอร์วาสแตติน/gi, /อะตอร์วาสแตติน/gi] },
+    { name: 'Omeprazole', key: 'omeprazole', patterns: [/omeprazole/gi, /โอเมพราโซล/gi] },
+    { name: 'Insulatard', key: 'insulatard', patterns: [/insulatard/gi, /อินซูลาทาร์ด/gi] },
+    { name: 'Mixtard', key: 'mixtard', patterns: [/mixtard/gi, /มิกซ์ทาร์ด/gi] },
+    { name: 'Furosemide', key: 'furosemide', patterns: [/furosemide/gi, /ฟูโรซีไมด์/gi, /ฟูโรเซไมด์/gi, /ลาซิกซ์/gi] },
+    { name: 'Vancomycin', key: 'vancomycin', patterns: [/vancomycin/gi, /แวนโคไมซิน/gi] },
+    { name: 'Carvedilol', key: 'carvedilol', patterns: [/carvedilol/gi, /คาร์เวดิลอล/gi] },
+    { name: 'Bisoprolol', key: 'bisoprolol', patterns: [/bisoprolol/gi, /บิโซโพรลอล/gi] },
+    { name: 'Enalapril', key: 'enalapril', patterns: [/enalapril/gi, /อีนาลาพริล/gi] },
+    { name: 'Captopril', key: 'captopril', patterns: [/captopril/gi, /แคปโตพริล/gi] },
+    { name: 'Hydrochlorothiazide', key: 'hydrochlorothiazide', patterns: [/hydrochlorothiazide/gi, /ไฮโดรคลอโรไทอะไซด์/gi, /\bhctz\b/gi] },
+    { name: 'Spironolactone', key: 'spironolactone', patterns: [/spironolactone/gi, /สไปโรโนแลกโทน/gi] },
+    { name: 'Digoxin', key: 'digoxin', patterns: [/digoxin/gi, /ไดจอกซิน/gi] },
+    { name: 'Dexamethasone', key: 'dexamethasone', patterns: [/dexamethasone/gi, /เดกซาเมทาโซน/gi, /เดกซ่า/gi] },
+    { name: 'Diazepam', key: 'diazepam', patterns: [/diazepam/gi, /ไดอะซีแพม/gi] },
+    { name: 'Lorazepam', key: 'lorazepam', patterns: [/lorazepam/gi, /ลอราซีแพม/gi] },
+    { name: 'Alprazolam', key: 'alprazolam', patterns: [/alprazolam/gi, /อัลพราโซแลม/gi] },
+    { name: 'Gabapentin', key: 'gabapentin', patterns: [/gabapentin/gi, /กาบาเพนติน/gi] },
+    { name: 'Pregabalin', key: 'pregabalin', patterns: [/pregabalin/gi, /พรีการ์บาลิน/gi] }
   ];
 
   // Common phrase normalizations
@@ -1109,6 +1158,19 @@
       normalized = normalized.replace(tw.w, tw.r);
     });
 
+    // Normalize Thai drug phonetics to generic lowercase English keys
+    DRUG_DICTIONARY.forEach(function (d) {
+      d.patterns.forEach(function (p) {
+        normalized = normalized.replace(p, d.key);
+      });
+    });
+
+    // Normalize fractional tablets and partial units
+    normalized = normalized.replace(/ครึ่ง\s*เม็ด/g, 'ครึ่งเม็ด');
+    normalized = normalized.replace(/ครึ่ง\s*ส่วน/g, 'ครึ่งส่วน');
+    normalized = normalized.replace(/1\/2\s*เม็ด/g, 'ครึ่งเม็ด');
+    normalized = normalized.replace(/0\.5\s*เม็ด/g, 'ครึ่งเม็ด');
+
     // Normalize units
     UNIT_MAP.forEach(function (item) {
       item.patterns.forEach(function (p) {
@@ -1167,28 +1229,59 @@
   // 4. Entity Extraction Helpers
   // ---------------------------------------------------------------------------
 
-  var COMMON_DRUGS = [
-    'amoxicillin', 'penicillin', 'amlodipine', 'prednisolone', 'metformin',
-    'simvastatin', 'losartan', 'warfarin', 'cotrimoxazole', 'gliclazide',
-    'glipizide', 'tramadol', 'paracetamol', 'nifedipine', 'ceftriaxone',
-    'cephalosporin', 'meropenem', 'enoxaparin', 'potassium chloride',
-    'cefazolin', 'ceftazidime', 'aspirin', 'clopidogrel', 'atorvastatin',
-    'omeprazole', 'insulatard', 'mixtard', 'furosemide', 'vancomycin'
-  ];
+  function extractActualExpected(text) {
+    var clean = text.replace(/^(?:โอพีดี|ไอพีดี)\s*/, '');
+    clean = clean.replace(/\s*(?:เภสัช|วอร์ด|พยาบาล).*(?:เจอ|ตรวจ|เช็ค|ทวน|final check).*$/, '');
+
+    // Pattern 1: [actual] แทน [expected]
+    var matchA = clean.match(/(.+?)\s*(?:มา)?แทน\s*(.+)/);
+    if (matchA && !/แต่/.test(clean)) {
+      var actA = matchA[1].replace(/^(?:คนจัด|หมอ|ห้องยา)?\s*(?:หยิบ|จัด|สั่ง|คีย์)?\s*/, '').trim();
+      var expA = matchA[2].replace(/^(?:คนจัด|หมอ|ห้องยา)?\s*(?:หยิบ|จัด|สั่ง|คีย์)?\s*/, '').trim();
+      return { actual: actA, expected: expA };
+    }
+
+    // Pattern 2: [actual] แต่ [expected]
+    var matchB = clean.match(/(.+?)\s*แต่\s*(.+)/);
+    if (matchB) {
+      var actB = matchB[1];
+      var expB = matchB[2];
+
+      var actDetailMatch = actB.match(/(?:จัด|สั่ง|คีย์|หยิบ|มี)\s*(?:ยา)?\s*(.+)$/);
+      if (actDetailMatch) {
+        actB = actDetailMatch[1];
+      }
+      actB = actB.replace(/^(?:คนจัด|หมอ|ห้องยา)?\s*(?:หยิบ|จัด|สั่ง|คีย์)?\s*/, '')
+                 .replace(/^(?:ไม่ครบ|เกิน)\s*/, '')
+                 .replace(/^มา\s*/, '')
+                 .replace(/\s*มา\s*/, ' ')
+                 .replace(/^.*?(?:ไม่ครบ|ขาดไป)\s*(?:จัด\s*)?/, '')
+                 .trim();
+
+      expB = expB.replace(/^(?:จริงๆ|ความจริง)?\s*(?:ต้อง|ควร|ฉลากระบุ|ฉลาก|ใบสั่ง|ยาประจำคนไข้เป็น|ยาประจำคนไข้|ยาประจำ|คนไข้นัด)?\s*(?:จัด|หยิบ|สั่ง|คีย์|เป็น|คือ)?\s*/, '')
+                 .replace(/^(?:ต้อง|ควร|จัด|หยิบ|สั่ง|คีย์)\s*/, '').trim();
+
+      return { actual: actB, expected: expB };
+    }
+
+    return { actual: '', expected: '' };
+  }
 
   function extractEntities(text) {
     var lower = text.toLowerCase();
     var drugsFound = [];
 
-    COMMON_DRUGS.forEach(function (drug) {
-      if (lower.indexOf(drug) !== -1) {
-        drugsFound.push(drug);
+    DRUG_DICTIONARY.forEach(function (d) {
+      if (lower.indexOf(d.key) !== -1) {
+        if (drugsFound.indexOf(d.name) === -1) {
+          drugsFound.push(d.name);
+        }
       }
     });
 
-    // Extract numbers with units (e.g. 10 mg, 5 mg, 30 เม็ด, 60 เม็ด, 20 mEq)
+    // Extract numbers with units (e.g. 10 mg, 5 mg, 30 เม็ด, 60 เม็ด, 20 mEq, 2 ส่วน, ครึ่งเม็ด)
     var numUnitMatches = [];
-    var regex = /(\d+(?:\.\d+)?)\s*(mg|mcg|g|mL|เม็ด|แคปซูล|vial|amp|mEq)/gi;
+    var regex = /(\d+(?:\.\d+)?|ครึ่ง)\s*(mg|mcg|g|mL|เม็ด|แคปซูล|vial|amp|mEq|ส่วน|แผง)/gi;
     var m;
     while ((m = regex.exec(text)) !== null) {
       numUnitMatches.push({
@@ -1198,9 +1291,13 @@
       });
     }
 
+    var comp = extractActualExpected(text);
+
     return {
       drugs: drugsFound,
-      measurements: numUnitMatches
+      measurements: numUnitMatches,
+      actual: comp.actual,
+      expected: comp.expected
     };
   }
 
@@ -1266,8 +1363,8 @@
       extractedEntities: {
         drugs: entities.drugs,
         measurements: entities.measurements,
-        actual: parseResult.actual || '',
-        expected: parseResult.expected || ''
+        actual: parseResult.actual || entities.actual || '',
+        expected: parseResult.expected || entities.expected || ''
       },
       ruleId: parseResult.ruleId || ''
     };
@@ -1281,7 +1378,7 @@
     // A. Actor detection
     var isPrescriber = /หมอสั่ง|แพทย์สั่ง|หมอคีย์|หมอลืม|หมอกด/.test(text);
     var isPharmacyEntry = /ห้องยาคีย์|คีย์ฉลาก|พิมพ์ฉลาก|ตรวจฉลาก|คีย์ยา|คีย์.*เม็ด|คีย์.*วัน/.test(text) && !isPrescriber;
-    var isPicker = /คนจัด|จัดยา|หยิบ|คนหยิบ|ตะกร้า|จัด.*เม็ด|จัด.*มา/.test(text);
+    var isPicker = /คนจัด|จัดยา|หยิบ|คนหยิบ|ตะกร้า|จัด.*เม็ด|จัด.*ส่วน|จัด.*มา|จัด.*แทน|จัด.*ไม่ครบ/.test(text);
     var isTranscribingDoc = /สแกน|สติ๊กเกอร์|ใบนำทาง|ใบสั่งยา/.test(text) && (/สแกนไม่ชัด|ผิดคน|สติ๊กเกอร์.*ผิด/.test(text));
 
     // B. Detected stage detection
@@ -1546,7 +1643,7 @@
       }
 
       // Omission / missing drug item (B30)
-      if (/ยาตก|ไม่ครบรายการ|จัดมาแค่|ตกหล่น|ขาดไป/.test(text)) {
+      if (/ยาตก|ไม่ครบรายการ|ตกหล่น/.test(text) || (/จัดมาแค่/.test(text) && /รายการ/.test(text)) || (/ขาดไป/.test(text) && !/(เม็ด|ส่วน|แคปซูล|แผง|ขวด)/.test(text))) {
         return {
           ruleId: 'OPD-B30',
           process: 'Pre-dispensing',
@@ -1560,7 +1657,7 @@
       }
 
       // Wrong quantity (B29)
-      if (/เม็ด|จัด.*เม็ด|แต่ฉลาก.*เม็ด|แต่ต้อง.*เม็ด/.test(text) && !/แทน/.test(text)) {
+      if ((/เม็ด|ส่วน|แผง|แคปซูล|ขวด/.test(text) || /ไม่ครบ|ขาดไป/.test(text)) && !/แทน/.test(text)) {
         return {
           ruleId: 'OPD-B29',
           process: 'Pre-dispensing',

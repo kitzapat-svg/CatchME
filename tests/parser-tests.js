@@ -377,6 +377,45 @@ const SPEECH_TEST_CASES = [
     expectedConfidence: 'High',
     expectedNeedsConfirm: false,
     expectedCatB: true
+  },
+  {
+    id: 'T31',
+    setting: 'OPD',
+    phrase: 'จัด Metoprolol ไม่ครบ จัด ครึ่ง เม็ด มา 2 ส่วน แต่จริงๆ ต้องจัด ครึ่งเม็ด 3 ส่วน',
+    expectedLegacyCode: 'B29',
+    expectedProcess: 'Pre-dispensing',
+    expectedErrorType: 'ผิดจำนวน/ปริมาณ',
+    expectedDetectedStage: 'DS04',
+    expectedConfidence: 'High',
+    expectedNeedsConfirm: false,
+    expectedCatB: true,
+    expectedDrug: 'Metoprolol'
+  },
+  {
+    id: 'T32',
+    setting: 'OPD',
+    phrase: 'จัด เมโทโพรลอล ไม่ครบ จัด ครึ่ง เม็ด มา สอง ส่วน แต่จริงๆ ต้องจัด ครึ่งเม็ด สาม ส่วน',
+    expectedLegacyCode: 'B29',
+    expectedProcess: 'Pre-dispensing',
+    expectedErrorType: 'ผิดจำนวน/ปริมาณ',
+    expectedDetectedStage: 'DS04',
+    expectedConfidence: 'High',
+    expectedNeedsConfirm: false,
+    expectedCatB: true,
+    expectedDrug: 'Metoprolol'
+  },
+  {
+    id: 'T33',
+    setting: 'OPD',
+    phrase: 'หมอสั่ง แอมโล 10 มิล แต่ยาประจำคนไข้เป็น 5 มิล เภสัชทวนเจอ',
+    expectedLegacyCode: 'A05',
+    expectedProcess: 'Prescribing',
+    expectedErrorType: 'ผิดความแรง',
+    expectedDetectedStage: 'DS01',
+    expectedConfidence: 'High',
+    expectedNeedsConfirm: false,
+    expectedCatB: true,
+    expectedDrug: 'Amlodipine'
   }
 ];
 
@@ -415,7 +454,7 @@ const HARD_STOP_CASES = [
 let totalPassed = 0;
 let totalFailed = 0;
 
-console.log('--- RUNNING 30 SPEECH TEST CASES ---\n');
+console.log('--- RUNNING SPEECH TEST CASES ---\n');
 
 SPEECH_TEST_CASES.forEach((tc) => {
   const result = parseMedicationError(tc.phrase, tc.setting);
@@ -426,12 +465,14 @@ SPEECH_TEST_CASES.forEach((tc) => {
   const passStage = result.detectedStage === tc.expectedDetectedStage;
   const passConf = result.confidence === tc.expectedConfidence;
   const passCatB = result.catBEligible === tc.expectedCatB;
+  const passDrug = !tc.expectedDrug || (result.extractedEntities && result.extractedEntities.drugs && result.extractedEntities.drugs.includes(tc.expectedDrug));
 
-  const isAllPass = passCode && passProcess && passError && passStage && passConf && passCatB;
+  const isAllPass = passCode && passProcess && passError && passStage && passConf && passCatB && passDrug;
 
   if (isAllPass) {
     totalPassed++;
-    console.log(`\x1b[32m[PASS]\x1b[0m ${tc.id} (${tc.setting}) -> ${result.legacyCode} | ${result.process} | ${result.errorType} | ${result.detectedStage} (${result.confidence})`);
+    const drugInfo = (result.extractedEntities && result.extractedEntities.drugs.length > 0) ? ` [${result.extractedEntities.drugs.join(', ')}]` : '';
+    console.log(`\x1b[32m[PASS]\x1b[0m ${tc.id} (${tc.setting}) -> ${result.legacyCode} | ${result.process} | ${result.errorType} | ${result.detectedStage} (${result.confidence})${drugInfo}`);
   } else {
     totalFailed++;
     console.log(`\x1b[31m[FAIL]\x1b[0m ${tc.id} (${tc.setting}) "${tc.phrase}"`);
@@ -441,6 +482,7 @@ SPEECH_TEST_CASES.forEach((tc) => {
     if (!passStage) console.log(`   - Stage:       expected "${tc.expectedDetectedStage}", got "${result.detectedStage}"`);
     if (!passConf) console.log(`   - Confidence:  expected "${tc.expectedConfidence}", got "${result.confidence}"`);
     if (!passCatB) console.log(`   - Cat B Gate:  expected ${tc.expectedCatB}, got ${result.catBEligible}`);
+    if (!passDrug) console.log(`   - Drug:        expected "${tc.expectedDrug}", got "${JSON.stringify(result.extractedEntities.drugs)}"`);
   }
 });
 
