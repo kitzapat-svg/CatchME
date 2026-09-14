@@ -128,8 +128,11 @@ const CatchME = (function() {
         console.warn('Speech recognition error:', event.error);
         state.isRecording = false;
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          alert('ไมโครโฟนยังไม่ได้รับอนุญาต:\n1. แตะไอคอนการตั้งค่า (หรือรูปแม่กุญแจ) ข้างแถบ URL ด้านบน\n2. ไปที่ "สิทธิ์" (Permissions) > เปิด "ไมโครโฟน" (Microphone)\nหรือแตะปุ่ม "พิมพ์ข้อความแทน" ได้ทันทีครับ');
-          showScreen('screen-quick-report');
+          alert('ไมโครโฟนยังไม่ได้รับอนุญาต:\n1. คลิกไอคอนแม่กุญแจ 🔒 (หรือการตั้งค่าสิทธิ์) ข้างแถบ URL ด้านบน\n2. ไปที่ "สิทธิ์" (Permissions) > เลือก "อนุญาตไมโครโฟน" (Allow Microphone)\nหรือคลิกปุ่ม "พิมพ์ข้อความแทน" ได้ทันทีครับ');
+          openTextFallback();
+        } else if (event.error === 'audio-capture') {
+          alert('ไม่พบอุปกรณ์ไมโครโฟนในเครื่องนี้ (No Microphone Found):\nกรุณาเสียบหูฟัง Smalltalk, ไมค์ USB หรือตรวจสอบการตั้งค่า Microphone ใน Windows\n\nระบบจะเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
+          openTextFallback();
         } else if (event.error === 'no-speech') {
           showScreen('screen-quick-report');
         } else {
@@ -165,30 +168,38 @@ const CatchME = (function() {
   }
 
   /**
-   * Starts speech capture with native microphone permission trigger for mobile.
+   * Starts speech capture with native microphone permission trigger.
    */
   async function startSpeechCapture() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('เบราว์เซอร์นี้ไม่รองรับ SpeechRecognition API ใน iframe นี้\nกำลังเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
+      alert('เบราว์เซอร์นี้ไม่รองรับ SpeechRecognition API\nกำลังเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
       openTextFallback();
       return;
     }
 
-    // Diagnostic Step 1: Check mediaDevices
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    const isInIframe = window.self !== window.top;
+
+    // Diagnostic check for GAS Iframe environment only
+    if (isInIframe && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(function(track) { track.stop(); });
       } catch (err) {
-        console.warn('getUserMedia permission error:', err);
-        alert('ไมโครโฟนถูกบล็อกในระดับ iframe ของ Google Apps Script (' + err.name + ': ' + err.message + ')\n\nระบบจะเปิดกล่องพิมพ์ข้อความแทน (สามารถกดไมค์บนคีย์บอร์ดพิมพ์ด้วยเสียงได้ทันทีครับ)');
+        console.warn('Iframe getUserMedia permission error:', err);
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          alert('ไมโครโฟนถูกบล็อกในระดับ iframe ของ Google Apps Script\n\nแนะนำเปิดใช้งานผ่านลิงก์ GitHub Pages:\nhttps://kitzapat-svg.github.io/CatchME/\nเพื่อใช้งานไมโครโฟนได้เต็มรูปแบบครับ');
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          alert('ไม่พบอุปกรณ์ไมโครโฟนในเครื่องนี้:\nกรุณาเสียบหูฟัง Smalltalk, ไมค์ USB หรือตรวจสอบ Microphone ใน Windows Sound Settings ครับ');
+        } else {
+          alert('ไม่สามารถเข้าถึงไมโครโฟนได้ (' + err.name + ': ' + err.message + ')');
+        }
         openTextFallback();
         return;
       }
     }
 
-    // Step 2: Instantiate SpeechRecognition
+    // Direct SpeechRecognition instantiation (Standard for GitHub Pages & standalone browsers)
     try {
       if (state.recognition) {
         try { state.recognition.abort(); } catch (e) {}
@@ -200,7 +211,12 @@ const CatchME = (function() {
         openTextFallback();
       }
     } catch (err) {
-      alert('SpeechRecognition Error: ' + err.name + ' - ' + err.message);
+      console.warn('SpeechRecognition start error:', err);
+      if (err.name === 'NotFoundError' || (err.message && err.message.toLowerCase().indexOf('device') !== -1)) {
+        alert('ไม่พบอุปกรณ์ไมโครโฟนในเครื่องนี้:\nกรุณาเสียบหูฟัง Smalltalk หรือไมค์ USB ก่อนกดบันทึกเสียงครับ');
+      } else {
+        alert('SpeechRecognition Error: ' + err.name + ' - ' + err.message);
+      }
       openTextFallback();
     }
   }
