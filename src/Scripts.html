@@ -10,6 +10,23 @@ const CatchME = (function() {
     RECENT_REPORTS: 'catchmeRecentReports'
   };
 
+  const GROQ_CONFIG = {
+    getApiKey: function() {
+      return localStorage.getItem('catchme_groq_api_key') || '';
+    },
+    setApiKey: function(key) {
+      if (key && key.trim()) {
+        localStorage.setItem('catchme_groq_api_key', key.trim());
+      } else if (key === '') {
+        localStorage.removeItem('catchme_groq_api_key');
+      }
+    },
+    endpoint: 'https://api.groq.com/openai/v1/audio/transcriptions',
+    model: 'whisper-large-v3',
+    language: 'th',
+    prompt: 'รายงานความคลาดเคลื่อนทางยา Medication Error โรงพยาบาล: Metoprolol, Amlodipine, Prednisolone, Simvastatin, Metformin, Losartan, Warfarin, Tramadol, Paracetamol, Gliclazide, Glipizide, Nifedipine, Ceftriaxone, Meropenem, Cefazolin, Ceftazidime, Aspirin, Clopidogrel, Atorvastatin, Omeprazole, Insulatard, Mixtard, Furosemide, Vancomycin, Potassium chloride, Carvedilol, Bisoprolol, Enalapril, Captopril, HCTZ, Digoxin, จัดไม่ครบ, ขาดไป, ครึ่งเม็ด, สองส่วน, สามส่วน, แผง, เม็ด, มิลลิกรัม, mg, OPD, IPD, ผิดจำนวน, ผิดขนาด, ผิดความแรง, ยาตกหล่น, เภสัชเช็คเจอ'
+  };
+
   let state = {
     mode: 'OPD',
     alias: '',
@@ -17,6 +34,9 @@ const CatchME = (function() {
     currentParsed: null,
     isRecording: false,
     isSaving: false,
+    mediaRecorder: null,
+    audioStream: null,
+    audioChunks: [],
     recognition: null,
     capturedTranscript: ''
   };
@@ -168,67 +188,160 @@ const CatchME = (function() {
   }
 
   /**
-   * Starts speech capture with native microphone permission trigger.
+   * Sends recorded audio blob to Groq Whisper Large v3 for ultra-fast and accurate medical transcription.
+   */
+  async function sendAudioToGroq(audioBlob, mimeType) {
+    const ext = (mimeType && mimeType.indexOf('mp4') !== -1) ? 'mp4' : 'webm';
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'audio.' + ext);
+    formData.append('model', GROQ_CONFIG.model);
+    formData.append('language', GROQ_CONFIG.language);
+    formData.append('prompt', GROQ_CONFIG.prompt);
+
+    const apiKey = GROQ_CONFIG.getApiKey();
+    const response = await fetch(GROQ_CONFIG.endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(function() { return {}; });
+      const errMsg = (errJson.error && errJson.error.message) || ('HTTP ' + response.status);
+      throw new Error(errMsg);
+    }
+
+    const data = await response.json();
+    return data.text || '';
+  }
+
+  /**
+   * Starts high-fidelity audio recording for Groq Whisper AI.
    */
   async function startSpeechCapture() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert('เบราว์เซอร์นี้ไม่รองรับ SpeechRecognition API\nกำลังเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
+    let apiKey = GROQ_CONFIG.getApiKey();
+    if (!apiKey) {
+      const inputKey = prompt('🔑 เพื่อเปิดใช้งาน AI ถอดเสียงชื่อยาความแม่นยำสูง (Groq Whisper)\nกรุณาวาง Groq API Key ของคุณที่นี่ (ตั้งค่าครั้งเดียว):', '');
+      if (!inputKey || !inputKey.trim()) {
+        openTextFallback();
+        return;
+      }
+      GROQ_CONFIG.setApiKey(inputKey.trim());
+      apiKey = inputKey.trim();
+    }
+
+    const isInIframe = window.self !== window.top;
+    if (isInIframe) {
+      alert('ไมโครโฟนถูกจำกัดใน iframe ของ Google Apps Script\n\nกรุณาเปิดผ่านลิงก์ GitHub Pages เพื่อใช้งาน Whisper AI ได้เต็มรูปแบบครับ:\nhttps://kitzapat-svg.github.io/CatchME/');
       openTextFallback();
       return;
     }
 
-    const isInIframe = window.self !== window.top;
-
-    // Diagnostic check for GAS Iframe environment only
-    if (isInIframe && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(function(track) { track.stop(); });
-      } catch (err) {
-        console.warn('Iframe getUserMedia permission error:', err);
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          alert('ไมโครโฟนถูกบล็อกในระดับ iframe ของ Google Apps Script\n\nแนะนำเปิดใช้งานผ่านลิงก์ GitHub Pages:\nhttps://kitzapat-svg.github.io/CatchME/\nเพื่อใช้งานไมโครโฟนได้เต็มรูปแบบครับ');
-        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-          alert('ไม่พบอุปกรณ์ไมโครโฟนในเครื่องนี้:\nกรุณาเสียบหูฟัง Smalltalk, ไมค์ USB หรือตรวจสอบ Microphone ใน Windows Sound Settings ครับ');
-        } else {
-          alert('ไม่สามารถเข้าถึงไมโครโฟนได้ (' + err.name + ': ' + err.message + ')');
-        }
-        openTextFallback();
-        return;
-      }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('เบราว์เซอร์นี้ไม่รองรับการเข้าถึงไมโครโฟน (MediaDevices)\nกำลังเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
+      openTextFallback();
+      return;
     }
 
-    // Direct SpeechRecognition instantiation (Standard for GitHub Pages & standalone browsers)
     try {
-      if (state.recognition) {
-        try { state.recognition.abort(); } catch (e) {}
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      state.audioStream = stream;
+
+      let mimeType = '';
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+        else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
+        else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
       }
-      state.recognition = createSpeechRecognition();
-      if (state.recognition) {
-        state.recognition.start();
-      } else {
-        openTextFallback();
-      }
+
+      state.mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      state.audioChunks = [];
+      state.isRecording = true;
+
+      state.mediaRecorder.ondataavailable = function(e) {
+        if (e.data && e.data.size > 0) {
+          state.audioChunks.push(e.data);
+        }
+      };
+
+      state.mediaRecorder.onstart = function() {
+        showScreen('screen-recording');
+        const preview = document.getElementById('live-transcript-preview');
+        if (preview) {
+          preview.innerHTML = '<span style="color: var(--color-primary-dark); font-weight: 600;">กำลังบันทึกเสียง... เมื่อพูดจบแตะปุ่ม "เสร็จสิ้น"</span>';
+        }
+      };
+
+      state.mediaRecorder.onstop = async function() {
+        state.isRecording = false;
+        if (state.audioStream) {
+          state.audioStream.getTracks().forEach(function(track) { track.stop(); });
+          state.audioStream = null;
+        }
+
+        if (!state.audioChunks || state.audioChunks.length === 0) {
+          showScreen('screen-quick-report');
+          return;
+        }
+
+        const blobType = (state.mediaRecorder && state.mediaRecorder.mimeType) || 'audio/webm';
+        const audioBlob = new Blob(state.audioChunks, { type: blobType });
+
+        showScreen('screen-processing');
+        const procTitle = document.getElementById('processing-title');
+        const procSub = document.getElementById('processing-subtext');
+        if (procTitle) procTitle.innerText = '🤖 Groq Whisper AI กำลังประมวลผล...';
+        if (procSub) procSub.innerText = 'ถอดความภาษาไทยและชื่อยาอย่างแม่นยำ พร้อมวิเคราะห์รหัสความเสี่ยง';
+
+        try {
+          const transcript = await sendAudioToGroq(audioBlob, blobType);
+          if (transcript && transcript.trim()) {
+            state.capturedTranscript = transcript.trim();
+            processTranscript(transcript.trim());
+          } else {
+            alert('ไม่พบเสียงพูดในไฟล์เสียง กรุณาลองใหม่อีกครั้งครับ');
+            showScreen('screen-quick-report');
+          }
+        } catch (err) {
+          console.error('Groq Whisper error:', err);
+          alert('Whisper AI Error: ' + err.message + '\n\nระบบจะเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
+          openTextFallback();
+        }
+      };
+
+      state.mediaRecorder.start(200);
+
     } catch (err) {
-      console.warn('SpeechRecognition start error:', err);
-      if (err.name === 'NotFoundError' || (err.message && err.message.toLowerCase().indexOf('device') !== -1)) {
-        alert('ไม่พบอุปกรณ์ไมโครโฟนในเครื่องนี้:\nกรุณาเสียบหูฟัง Smalltalk หรือไมค์ USB ก่อนกดบันทึกเสียงครับ');
+      console.warn('Microphone capture error:', err);
+      state.isRecording = false;
+      if (state.audioStream) {
+        state.audioStream.getTracks().forEach(function(track) { track.stop(); });
+        state.audioStream = null;
+      }
+
+      if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        alert('ไม่พบอุปกรณ์ไมโครโฟนในเครื่องนี้:\nกรุณาเสียบหูฟัง Smalltalk, ไมค์ USB หรือตรวจสอบการตั้งค่า Microphone ใน Windows');
+      } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        alert('ไมโครโฟนยังไม่ได้รับอนุญาต:\n1. คลิกไอคอนแม่กุญแจ 🔒 ที่แถบ URL ด้านบน\n2. ไปที่ "สิทธิ์" (Permissions) > เลือก "อนุญาตไมโครโฟน" (Allow Microphone)');
       } else {
-        alert('SpeechRecognition Error: ' + err.name + ' - ' + err.message);
+        alert('ไม่สามารถเปิดไมโครโฟนได้ (' + err.name + ': ' + err.message + ')');
       }
       openTextFallback();
     }
   }
 
   /**
-   * Stops recording manually.
+   * Stops recording manually and triggers Groq Whisper transcription.
    */
   function stopSpeechCapture() {
-    if (state.recognition && state.isRecording) {
+    if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
       try {
-        state.recognition.stop();
-      } catch (e) {}
+        state.mediaRecorder.stop();
+      } catch (e) {
+        console.warn('Error stopping MediaRecorder:', e);
+      }
     }
   }
 
@@ -237,11 +350,20 @@ const CatchME = (function() {
    */
   function cancelSpeechCapture() {
     state.capturedTranscript = '';
-    if (state.recognition && state.isRecording) {
+    state.isRecording = false;
+    if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
       try {
-        state.recognition.abort();
+        state.mediaRecorder.onstop = null;
+        state.mediaRecorder.stop();
       } catch (e) {}
     }
+    if (state.audioStream) {
+      try {
+        state.audioStream.getTracks().forEach(function(t) { t.stop(); });
+      } catch (e) {}
+      state.audioStream = null;
+    }
+    state.audioChunks = [];
     showScreen('screen-quick-report');
   }
 
@@ -833,12 +955,22 @@ const CatchME = (function() {
     }
   }
 
+  function openApiKeySetting() {
+    const currentKey = GROQ_CONFIG.getApiKey();
+    const updated = prompt('🔑 ตั้งค่า Groq API Key สำหรับถอดเสียง Whisper:\n(รับ Key ฟรีได้ที่ https://console.groq.com/)\nปล่อยว่างแล้วกด OK หากต้องการล้างค่า', currentKey);
+    if (updated !== null) {
+      GROQ_CONFIG.setApiKey(updated);
+      alert(updated.trim() ? 'บันทึก Groq API Key เรียบร้อยแล้วครับ!' : 'ล้าง API Key เรียบร้อยแล้ว');
+    }
+  }
+
   return {
     init: init,
     toggleMode: toggleMode,
     selectInitialMode: selectInitialMode,
     saveInitialSetup: saveInitialSetup,
     openSettings: openSettings,
+    openApiKeySetting: openApiKeySetting,
     startSpeechCapture: startSpeechCapture,
     stopSpeechCapture: stopSpeechCapture,
     cancelSpeechCapture: cancelSpeechCapture,

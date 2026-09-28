@@ -63,6 +63,13 @@
           </button>
           <div class="mic-prompt">กดเพื่อบันทึก Medication Error</div>
           <div class="mic-subtext">พูดสั้น ๆ ประโยคเดียว เช่น "คนจัด amlodipine 30 เม็ด แต่ต้อง 60"</div>
+          <div style="margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 6px;">
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(255, 235, 240, 0.9); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; color: #9D174D; border: 1px solid rgba(255, 143, 171, 0.4);">
+              <span>⚡</span>
+              <span>Groq Whisper AI</span>
+            </span>
+            <button type="button" onclick="CatchME.openApiKeySetting()" style="background: none; border: none; font-size: 11px; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline; padding: 2px 4px;">ตั้งค่า Key</button>
+          </div>
         </div>
 
         <button type="button" class="btn-secondary" onclick="CatchME.openTextFallback()">
@@ -87,7 +94,8 @@
     <!-- Screen 3: Recording State -->
     <section id="screen-recording" class="hidden">
       <div class="catchme-card" style="text-align: center; padding: 32px 20px;">
-        <div style="font-size: 14px; font-weight: 700; color: #C9184A; letter-spacing: 0.5px;">กำลังฟังเสียง... (พูดได้เลย)</div>
+        <div style="font-size: 15px; font-weight: 800; color: #C9184A; letter-spacing: 0.5px;">กำลังบันทึกเสียงด้วย Whisper AI...</div>
+        <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">พูดรายละเอียดเหตุการณ์ได้เลย เมื่อพูดจบแตะ "เสร็จสิ้น"</div>
         
         <div class="wave-bars">
           <div class="wave-bar"></div>
@@ -98,18 +106,18 @@
         </div>
 
         <div class="mic-section" style="padding: 10px 0 20px;">
-          <button class="mic-button recording" onclick="CatchME.stopSpeechCapture()" title="แตะเพื่อหยุดฟัง">
+          <button class="mic-button recording" onclick="CatchME.stopSpeechCapture()" title="แตะเพื่อหยุดและส่งประมวลผล">
             <span class="mic-icon">⏹️</span>
           </button>
         </div>
 
         <div id="live-transcript-preview" class="transcript-preview-box">
-          <span style="color: var(--color-text-muted);">กำลังแปลงเสียงเป็นข้อความ...</span>
+          <span style="color: var(--color-text-muted);">ระบบกำลังดักจับคลื่นเสียงความละเอียดสูง...</span>
         </div>
 
         <div style="margin-top: 20px;">
           <button type="button" class="btn-primary" onclick="CatchME.stopSpeechCapture()">
-            <span>เสร็จสิ้น / ประมวลผล</span>
+            <span>เสร็จสิ้น / ส่ง AI ประมวลผล</span>
             <span>✓</span>
           </button>
           <button type="button" class="btn-secondary" onclick="CatchME.cancelSpeechCapture()" style="border: none; color: var(--color-text-secondary); margin-top: 8px;">
@@ -122,9 +130,9 @@
     <!-- Screen 4: Processing State -->
     <section id="screen-processing" class="hidden">
       <div class="catchme-card" style="text-align: center; padding: 50px 20px;">
-        <div style="font-size: 42px; animation: spin 1.5s linear infinite; display: inline-block;">⚙️</div>
-        <div style="font-size: 18px; font-weight: 700; color: var(--color-primary-dark); margin-top: 20px;">กำลังวิเคราะห์ความคลาดเคลื่อน...</div>
-        <div style="font-size: 13px; color: var(--color-text-secondary); margin-top: 6px;">ระบบกำลังจำแนกหมวดหมู่และรหัสความเสี่ยง</div>
+        <div style="font-size: 44px; animation: spin 1.5s linear infinite; display: inline-block;">🤖</div>
+        <div id="processing-title" style="font-size: 18px; font-weight: 700; color: var(--color-primary-dark); margin-top: 20px;">Groq Whisper AI กำลังประมวลผล...</div>
+        <div id="processing-subtext" style="font-size: 13px; color: var(--color-text-secondary); margin-top: 6px;">ถอดความภาษาไทยและชื่อยาอย่างแม่นยำ พร้อมวิเคราะห์หมวดหมู่ความคลาดเคลื่อน</div>
       </div>
     </section>
 
