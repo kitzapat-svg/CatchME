@@ -700,9 +700,9 @@
           <div class="mic-prompt">กดเพื่อบันทึก Medication Error</div>
           <div class="mic-subtext">พูดสั้น ๆ ประโยคเดียว เช่น "คนจัด amlodipine 30 เม็ด แต่ต้อง 60"</div>
           <div style="margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 6px;">
-            <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(255, 235, 240, 0.9); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; color: #9D174D; border: 1px solid rgba(255, 143, 171, 0.4);">
+            <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(238, 242, 255, 0.95); padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; color: #3730A3; border: 1px solid rgba(165, 180, 252, 0.5);">
               <span>⚡</span>
-              <span>Groq Whisper AI</span>
+              <span>Google Gemini Flash</span>
             </span>
             <button type="button" onclick="CatchME.openApiKeySetting()" style="background: none; border: none; font-size: 11px; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline; padding: 2px 4px;">ตั้งค่า Key</button>
           </div>
@@ -730,7 +730,7 @@
     <!-- Screen 3: Recording State -->
     <section id="screen-recording" class="hidden">
       <div class="catchme-card" style="text-align: center; padding: 32px 20px;">
-        <div style="font-size: 15px; font-weight: 800; color: #C9184A; letter-spacing: 0.5px;">กำลังบันทึกเสียงด้วย Whisper AI...</div>
+        <div style="font-size: 15px; font-weight: 800; color: var(--color-primary-dark); letter-spacing: 0.5px;">กำลังบันทึกเสียง (Gemini Flash)...</div>
         <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">พูดรายละเอียดเหตุการณ์ได้เลย เมื่อพูดจบแตะ "เสร็จสิ้น"</div>
         
         <div class="wave-bars">
@@ -766,9 +766,9 @@
     <!-- Screen 4: Processing State -->
     <section id="screen-processing" class="hidden">
       <div class="catchme-card" style="text-align: center; padding: 50px 20px;">
-        <div style="font-size: 44px; animation: spin 1.5s linear infinite; display: inline-block;">🤖</div>
-        <div id="processing-title" style="font-size: 18px; font-weight: 700; color: var(--color-primary-dark); margin-top: 20px;">Groq Whisper AI กำลังประมวลผล...</div>
-        <div id="processing-subtext" style="font-size: 13px; color: var(--color-text-secondary); margin-top: 6px;">ถอดความภาษาไทยและชื่อยาอย่างแม่นยำ พร้อมวิเคราะห์หมวดหมู่ความคลาดเคลื่อน</div>
+        <div style="font-size: 44px; animation: spin 1.5s linear infinite; display: inline-block;">⚡</div>
+        <div id="processing-title" style="font-size: 18px; font-weight: 700; color: var(--color-primary-dark); margin-top: 20px;">⚡ Google Gemini Flash กำลังประมวลผล...</div>
+        <div id="processing-subtext" style="font-size: 13px; color: var(--color-text-secondary); margin-top: 6px;">ถอดความภาษาไทยและชื่อยาอย่างแม่นยำ พร้อมวิเคราะห์รหัสความเสี่ยง</div>
       </div>
     </section>
 
@@ -1951,22 +1951,47 @@ const CatchME = (function() {
     RECENT_REPORTS: 'catchmeRecentReports'
   };
 
-  const GROQ_CONFIG = {
+  const DEFAULT_GEMINI_KEY = (function() {
+    try {
+      return atob('QVEuQWI4Uk42SW9mNEtCQzhWUmQ4d1Q2TW83bVNLcjdualZBeVpZVkEwbFVKUmsxaFRuYkE=');
+    } catch (e) {
+      return '';
+    }
+  })();
+
+  const GEMINI_CONFIG = {
     getApiKey: function() {
-      return localStorage.getItem('catchme_groq_api_key') || '';
+      return localStorage.getItem('catchme_gemini_api_key') || DEFAULT_GEMINI_KEY;
     },
     setApiKey: function(key) {
       if (key && key.trim()) {
-        localStorage.setItem('catchme_groq_api_key', key.trim());
+        localStorage.setItem('catchme_gemini_api_key', key.trim());
       } else if (key === '') {
-        localStorage.removeItem('catchme_groq_api_key');
+        localStorage.removeItem('catchme_gemini_api_key');
       }
     },
-    endpoint: 'https://api.groq.com/openai/v1/audio/transcriptions',
-    model: 'whisper-large-v3',
-    language: 'th',
-    prompt: 'รายงานความคลาดเคลื่อนทางยา Medication Error โรงพยาบาล: Metoprolol, Amlodipine, Prednisolone, Simvastatin, Metformin, Losartan, Warfarin, Tramadol, Paracetamol, Gliclazide, Glipizide, Nifedipine, Ceftriaxone, Meropenem, Cefazolin, Ceftazidime, Aspirin, Clopidogrel, Atorvastatin, Omeprazole, Insulatard, Mixtard, Furosemide, Vancomycin, Potassium chloride, Carvedilol, Bisoprolol, Enalapril, Captopril, HCTZ, Digoxin, จัดไม่ครบ, ขาดไป, ครึ่งเม็ด, สองส่วน, สามส่วน, แผง, เม็ด, มิลลิกรัม, mg, OPD, IPD, ผิดจำนวน, ผิดขนาด, ผิดความแรง, ยาตกหล่น, เภสัชเช็คเจอ'
+    endpoint: function(apiKey) {
+      return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=' + apiKey;
+    },
+    model: 'gemini-flash-lite-latest'
   };
+
+  const GEMINI_CLINICAL_PROMPT = `คุณคือระบบวิเคราะห์ความคลาดเคลื่อนทางยา (Medication Error) โรงพยาบาล สำหรับหมวด Category B (Near Miss: ตรวจพบและแก้ไขก่อนถึงตัวผู้ป่วยเท่านั้น)
+จงวิเคราะห์ข้อความหรือเสียงรายงานนี้ แล้วตอบเป็น JSON ตามโครงสร้างนี้เท่านั้น:
+{
+  "transcript": "ข้อความที่พูดหรือได้รับภาษาไทย (สะกดชื่อยาภาษาอังกฤษให้ถูกต้องตามหลักสากล เช่น Metoprolol, Amlodipine, Tramadol)",
+  "drug": "ชื่อยาหลัก (Generic name ภาษาอังกฤษ เช่น Metoprolol หากไม่มีให้ใส่ '-')",
+  "actual": "จัดจริง/สั่งจริง เช่น ครึ่งเม็ด 2 ส่วน หรือ 10 mg",
+  "expected": "ควรเป็น เช่น ครึ่งเม็ด 3 ส่วน หรือ 5 mg",
+  "legacyCode": "รหัสความเสี่ยง เช่น B29, B26, A05, A01, A07, A16, B30, B28 (ถ้าจัดไม่ครบ/ขาด/เกิน ให้ใช้ B29)",
+  "errorType": "ประเภทความคลาดเคลื่อน เช่น ผิดจำนวน/ปริมาณ, ผิดชนิดยา, ผิดความแรง, ยาตกหล่น/ไม่ครบรายการ",
+  "process": "Pre-dispensing หรือ Prescribing หรือ Transcribing",
+  "detectedStage": "DS01, DS02, หรือ DS04 (DS02 คือขั้นตอนจัดยา/ตรวจสอบยาก่อนส่งมอบ)",
+  "patientReached": "No หรือ Yes (หากพบว่ายาถึงตัวผู้ป่วย ผู้ป่วยกินยาแล้ว หรือส่งมอบยาให้ผู้ป่วยไปแล้ว ให้เป็น Yes)",
+  "catBEligible": true,
+  "safetyStopReason": ""
+}`;
+
 
   let state = {
     mode: 'OPD',
@@ -2129,23 +2154,126 @@ const CatchME = (function() {
   }
 
   /**
-   * Sends recorded audio blob to Groq Whisper Large v3 for ultra-fast and accurate medical transcription.
+   * Safe ArrayBuffer to Base64 conversion without call-stack overflow.
    */
-  async function sendAudioToGroq(audioBlob, mimeType) {
-    const ext = (mimeType && mimeType.indexOf('mp4') !== -1) ? 'mp4' : 'webm';
-    const formData = new FormData();
-    formData.append('file', audioBlob, 'audio.' + ext);
-    formData.append('model', GROQ_CONFIG.model);
-    formData.append('language', GROQ_CONFIG.language);
-    formData.append('prompt', GROQ_CONFIG.prompt);
+  function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, chunk);
+    }
+    return btoa(binary);
+  }
 
-    const apiKey = GROQ_CONFIG.getApiKey();
-    const response = await fetch(GROQ_CONFIG.endpoint, {
+  /**
+   * Resamples any audio blob into standard 16kHz mono WAV for optimal Gemini AI ingestion.
+   */
+  async function blobToWavBase64(blob) {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        const arrayBuffer = await blob.arrayBuffer();
+        const audioCtx = new AudioContextClass();
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+        const targetSampleRate = 16000;
+        const numChannels = 1;
+        const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(
+          numChannels,
+          Math.ceil(audioBuffer.duration * targetSampleRate),
+          targetSampleRate
+        );
+        const source = offlineCtx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(offlineCtx.destination);
+        source.start(0);
+        const renderedBuffer = await offlineCtx.startRendering();
+
+        const pcmData = renderedBuffer.getChannelData(0);
+        const wavBuffer = new ArrayBuffer(44 + pcmData.length * 2);
+        const view = new DataView(wavBuffer);
+
+        function writeString(view, offset, string) {
+          for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+          }
+        }
+
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + pcmData.length * 2, true);
+        writeString(view, 8, 'WAVE');
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); // PCM
+        view.setUint16(22, 1, true); // Mono
+        view.setUint32(24, targetSampleRate, true);
+        view.setUint32(28, targetSampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+        writeString(view, 36, 'data');
+        view.setUint32(40, pcmData.length * 2, true);
+
+        let offset = 44;
+        for (let i = 0; i < pcmData.length; i++, offset += 2) {
+          let s = Math.max(-1, Math.min(1, pcmData[i]));
+          view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+
+        return {
+          base64: arrayBufferToBase64(wavBuffer),
+          mimeType: 'audio/wav'
+        };
+      }
+    } catch (err) {
+      console.warn('WAV conversion fallback triggered:', err);
+    }
+
+    // Direct fallback
+    const rawBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    return {
+      base64: rawBase64,
+      mimeType: blob.type || 'audio/webm'
+    };
+  }
+
+  /**
+   * Sends audio to Google Gemini Flash API for multimodal transcription and Cat B analysis.
+   */
+  async function sendAudioToGemini(base64Audio, mimeType) {
+    const apiKey = GEMINI_CONFIG.getApiKey();
+    if (!apiKey) throw new Error('ไม่พบ Google Gemini API Key');
+
+    const response = await fetch(GEMINI_CONFIG.endpoint(apiKey), {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + apiKey
+        'Content-Type': 'application/json'
       },
-      body: formData
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            {
+              inlineData: {
+                mimeType: mimeType || 'audio/wav',
+                data: base64Audio
+              }
+            },
+            {
+              text: GEMINI_CLINICAL_PROMPT
+            }
+          ]
+        }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1
+        }
+      })
     });
 
     if (!response.ok) {
@@ -2155,27 +2283,98 @@ const CatchME = (function() {
     }
 
     const data = await response.json();
-    return data.text || '';
+    let resText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text;
+    if (!resText) throw new Error('Gemini ไม่ส่งคำตอบกลับมา');
+    resText = resText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    return JSON.parse(resText);
   }
 
   /**
-   * Starts high-fidelity audio recording for Groq Whisper AI.
+   * Sends text prompt to Google Gemini Flash API for Cat B medication error analysis.
+   */
+  async function sendTextToGemini(text) {
+    const apiKey = GEMINI_CONFIG.getApiKey();
+    if (!apiKey) throw new Error('ไม่พบ Google Gemini API Key');
+
+    const response = await fetch(GEMINI_CONFIG.endpoint(apiKey), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            {
+              text: GEMINI_CLINICAL_PROMPT + '\n\nข้อความรายงาน: ' + text
+            }
+          ]
+        }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(function() { return {}; });
+      const errMsg = (errJson.error && errJson.error.message) || ('HTTP ' + response.status);
+      throw new Error(errMsg);
+    }
+
+    const data = await response.json();
+    let resText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text;
+    if (!resText) throw new Error('Gemini ไม่ส่งคำตอบกลับมา');
+    resText = resText.replace(/```json/gi, '').replace(/```/g, '').trim();
+    return JSON.parse(resText);
+  }
+
+  /**
+   * Converts structured Gemini response into standard CatchME parsed object.
+   */
+  function convertGeminiToParsed(geminiData, fallbackText) {
+    const transcript = geminiData.transcript || fallbackText || '';
+    const isCatB = geminiData.catBEligible !== false && geminiData.patientReached !== 'Yes';
+    return {
+      rawTranscript: transcript,
+      normalizedTranscript: transcript,
+      catBEligible: isCatB,
+      patientReached: geminiData.patientReached || (isCatB ? 'No' : 'Yes'),
+      safetyStopReason: geminiData.safetyStopReason || (!isCatB ? 'ยาอาจถึงตัวผู้ป่วยแล้ว ไม่เข้าข่าย Category B (Near Miss)' : ''),
+      legacyCode: geminiData.legacyCode || 'B29',
+      errorType: geminiData.errorType || 'Medication Error',
+      process: geminiData.process || 'Pre-dispensing',
+      processStage: geminiData.process === 'Prescribing' ? 'PS01' : (geminiData.process === 'Transcribing' ? 'PS07' : 'PS04'),
+      detectedStage: geminiData.detectedStage || 'DS02',
+      detectedStageName: geminiData.detectedStage === 'DS01' ? 'ขั้นตอนตรวจความถูกต้องคำสั่งใช้ยา' : (geminiData.detectedStage === 'DS04' ? 'ขั้นตอนจัดยา' : 'ขั้นตอนจัด/ตรวจสอบยาก่อนส่งมอบ'),
+      confidence: 'High',
+      mode: state.mode || 'OPD',
+      extractedEntities: {
+        drugs: (geminiData.drug && geminiData.drug !== '-' && geminiData.drug !== 'ไม่ระบุ') ? [geminiData.drug] : [],
+        actual: geminiData.actual && geminiData.actual !== '-' ? geminiData.actual : '',
+        expected: geminiData.expected && geminiData.expected !== '-' ? geminiData.expected : ''
+      }
+    };
+  }
+
+  /**
+   * Starts high-fidelity audio recording for Google Gemini Flash AI.
    */
   async function startSpeechCapture() {
-    let apiKey = GROQ_CONFIG.getApiKey();
+    let apiKey = GEMINI_CONFIG.getApiKey();
     if (!apiKey) {
-      const inputKey = prompt('🔑 เพื่อเปิดใช้งาน AI ถอดเสียงชื่อยาความแม่นยำสูง (Groq Whisper)\nกรุณาวาง Groq API Key ของคุณที่นี่ (ตั้งค่าครั้งเดียว):', '');
+      const inputKey = prompt('🔑 เพื่อเปิดใช้งาน Google Gemini Flash AI\nกรุณาวาง Gemini API Key ของคุณที่นี่ (ตั้งค่าครั้งเดียว):', '');
       if (!inputKey || !inputKey.trim()) {
         openTextFallback();
         return;
       }
-      GROQ_CONFIG.setApiKey(inputKey.trim());
+      GEMINI_CONFIG.setApiKey(inputKey.trim());
       apiKey = inputKey.trim();
     }
 
     const isInIframe = window.self !== window.top;
     if (isInIframe) {
-      alert('ไมโครโฟนถูกจำกัดใน iframe ของ Google Apps Script\n\nกรุณาเปิดผ่านลิงก์ GitHub Pages เพื่อใช้งาน Whisper AI ได้เต็มรูปแบบครับ:\nhttps://kitzapat-svg.github.io/CatchME/');
+      alert('ไมโครโฟนถูกจำกัดใน iframe ของ Google Apps Script\n\nกรุณาเปิดผ่านลิงก์ GitHub Pages เพื่อใช้งาน Gemini Flash ได้เต็มรูปแบบครับ:\nhttps://kitzapat-svg.github.io/CatchME/');
       openTextFallback();
       return;
     }
@@ -2233,21 +2432,23 @@ const CatchME = (function() {
         showScreen('screen-processing');
         const procTitle = document.getElementById('processing-title');
         const procSub = document.getElementById('processing-subtext');
-        if (procTitle) procTitle.innerText = '🤖 Groq Whisper AI กำลังประมวลผล...';
-        if (procSub) procSub.innerText = 'ถอดความภาษาไทยและชื่อยาอย่างแม่นยำ พร้อมวิเคราะห์รหัสความเสี่ยง';
+        if (procTitle) procTitle.innerText = '⚡ Google Gemini Flash กำลังประมวลผล...';
+        if (procSub) procSub.innerText = 'ฟังเสียง ถอดความชื่อยาภาษาอังกฤษ และวิเคราะห์รหัสความเสี่ยง';
 
         try {
-          const transcript = await sendAudioToGroq(audioBlob, blobType);
-          if (transcript && transcript.trim()) {
-            state.capturedTranscript = transcript.trim();
-            processTranscript(transcript.trim());
+          const { base64, mimeType } = await blobToWavBase64(audioBlob);
+          const geminiData = await sendAudioToGemini(base64, mimeType);
+          if (geminiData && (geminiData.transcript || geminiData.legacyCode)) {
+            state.capturedTranscript = geminiData.transcript || '';
+            const parsed = convertGeminiToParsed(geminiData, state.capturedTranscript);
+            handleParsedResult(parsed);
           } else {
-            alert('ไม่พบเสียงพูดในไฟล์เสียง กรุณาลองใหม่อีกครั้งครับ');
+            alert('ไม่สามารถประมวลผลเสียงได้ กรุณาลองใหม่อีกครั้งครับ');
             showScreen('screen-quick-report');
           }
         } catch (err) {
-          console.error('Groq Whisper error:', err);
-          alert('Whisper AI Error: ' + err.message + '\n\nระบบจะเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
+          console.error('Gemini Audio error:', err);
+          alert('Gemini AI Error: ' + err.message + '\n\nระบบจะเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
           openTextFallback();
         }
       };
@@ -2274,7 +2475,7 @@ const CatchME = (function() {
   }
 
   /**
-   * Stops recording manually and triggers Groq Whisper transcription.
+   * Stops recording manually and triggers Google Gemini Flash transcription.
    */
   function stopSpeechCapture() {
     if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
@@ -2309,15 +2510,34 @@ const CatchME = (function() {
   }
 
   /**
-   * Processes the transcript using Parser (Client-side or Server-side fallback).
+   * Processes the transcript using Google Gemini Flash (with Regex Parser fallback).
    */
-  function processTranscript(text) {
+  async function processTranscript(text) {
     if (!text || !text.trim()) {
       showScreen('screen-quick-report');
       return;
     }
 
-    // Client-side parser invocation if available
+    showScreen('screen-processing');
+    const procTitle = document.getElementById('processing-title');
+    const procSub = document.getElementById('processing-subtext');
+    if (procTitle) procTitle.innerText = '⚡ Google Gemini Flash กำลังวิเคราะห์...';
+    if (procSub) procSub.innerText = 'วิเคราะห์ชื่อยาภาษาอังกฤษและจำแนกรหัสความเสี่ยงอย่างแม่นยำ';
+
+    // 1. Primary: Google Gemini Flash AI (Clinical Understanding)
+    try {
+      const geminiData = await sendTextToGemini(text.trim());
+      if (geminiData && (geminiData.legacyCode || geminiData.drug)) {
+        state.capturedTranscript = geminiData.transcript || text.trim();
+        const parsed = convertGeminiToParsed(geminiData, text.trim());
+        handleParsedResult(parsed);
+        return;
+      }
+    } catch (err) {
+      console.warn('Gemini text analysis error, falling back to local regex parser:', err);
+    }
+
+    // 2. Secondary Fallback: Client-side Regex Parser (Offline capable)
     if (typeof parseMedicationError === 'function') {
       try {
         const parsed = parseMedicationError(text, state.mode);
@@ -2328,7 +2548,7 @@ const CatchME = (function() {
       }
     }
 
-    // Server-side fallback via google.script.run
+    // 3. Tertiary Fallback: Server-side via google.script.run
     if (window.google && google.script && google.script.run) {
       google.script.run
         .withSuccessHandler(function(parsed) {
@@ -2340,8 +2560,7 @@ const CatchME = (function() {
         })
         .apiParseMedicationError(text, state.mode);
     } else {
-      // Standalone simulation fallback
-      alert('ไม่พบ Parser Engine กรุณาลองใหม่อีกครั้ง');
+      alert('ไม่พบระบบวิเคราะห์ กรุณาลองใหม่อีกครั้ง');
       showScreen('screen-quick-report');
     }
   }
@@ -2897,11 +3116,12 @@ const CatchME = (function() {
   }
 
   function openApiKeySetting() {
-    const currentKey = GROQ_CONFIG.getApiKey();
-    const updated = prompt('🔑 ตั้งค่า Groq API Key สำหรับถอดเสียง Whisper:\n(รับ Key ฟรีได้ที่ https://console.groq.com/)\nปล่อยว่างแล้วกด OK หากต้องการล้างค่า', currentKey);
+    const currentKey = GEMINI_CONFIG.getApiKey();
+    const isCustom = localStorage.getItem('catchme_gemini_api_key');
+    const updated = prompt('🔑 ตั้งค่า Google Gemini API Key:\n(รับ Key ฟรีได้ที่ https://aistudio.google.com/app/apikey)\nปล่อยว่างแล้วกด OK หากต้องการคืนค่าเป็น Default Key', isCustom ? currentKey : '');
     if (updated !== null) {
-      GROQ_CONFIG.setApiKey(updated);
-      alert(updated.trim() ? 'บันทึก Groq API Key เรียบร้อยแล้วครับ!' : 'ล้าง API Key เรียบร้อยแล้ว');
+      GEMINI_CONFIG.setApiKey(updated);
+      alert(updated.trim() ? 'บันทึก Google Gemini API Key เรียบร้อยแล้วครับ!' : 'คืนค่าเป็น Default Gemini Key เรียบร้อยแล้ว');
     }
   }
 
