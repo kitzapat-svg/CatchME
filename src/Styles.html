@@ -620,4 +620,232 @@
   .hidden {
     display: none !important;
   }
+
+  /* Quick Presets Section */
+  .quick-presets-container {
+    margin-top: 14px;
+  }
+
+  .preset-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .preset-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .preset-card-btn {
+    background: #FFFFFF;
+    border: 1.5px solid #F1F5F9;
+    border-radius: 14px;
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  }
+
+  .preset-card-btn:hover {
+    border-color: var(--color-primary);
+    background: #FFFDFC;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 143, 171, 0.15);
+  }
+
+  .preset-card-btn:active {
+    transform: scale(0.97);
+  }
+
+  .preset-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .preset-icon {
+    font-size: 18px;
+  }
+
+  .preset-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: var(--color-primary-container);
+    color: var(--color-primary-dark);
+  }
+
+  .preset-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+  }
+
+  .preset-desc {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    line-height: 1.2;
+  }
+
+  /* Drug & Quantity Chip Pills */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .chip-pill {
+    padding: 4px 10px;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .chip-pill:hover {
+    background: #E2E8F0;
+  }
+
+  .chip-pill:active {
+    transform: scale(0.95);
+  }
+
+  .chip-pill.active {
+    background: var(--color-primary-dark);
+    color: #FFFFFF;
+    border-color: var(--color-primary-dark);
+  }
+
+  /* Code Dictionary Tabs & List */
+  .dict-tab-bar {
+    display: flex;
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 12px;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .dict-tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .dict-tab-btn.active {
+    background: #FFFFFF;
+    color: var(--color-primary-dark);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .dict-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .dict-item {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .dict-item.highlight {
+    background: #FFF5F7;
+    border-color: var(--color-primary);
+  }
+
+  .dict-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .dict-code {
+    display: inline-block;
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #E2E8F0;
+    color: #1E293B;
+  }
+
+  .dict-code.stage {
+    background: #E0F2FE;
+    color: #0369A1;
+  }
+
+  .dict-code.risk-b {
+    background: #FFE4E6;
+    color: #9F1239;
+  }
+
+  .dict-code.risk-a {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  .dict-code.risk-e {
+    background: #EDE9FE;
+    color: #5B21B6;
+  }
+
+  .dict-item-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .dict-item-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.3;
+  }
+
+  .dict-item-en {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
 </style>

@@ -3,12 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CatchME — Cat B Quick Reporter (Local Preview)</title>
+  <meta name="theme-color" content="#FF8FAB">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CatchME">
+  <title>CatchME — Medication Error Cat B Quick Reporter</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-  <style>
+<style>
   :root {
     /* Brand Tokens (Sweet Cotton Candy & Berry) */
     --color-primary: #FF8FAB;
@@ -630,11 +634,239 @@
   .hidden {
     display: none !important;
   }
+
+  /* Quick Presets Section */
+  .quick-presets-container {
+    margin-top: 14px;
+  }
+
+  .preset-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .preset-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .preset-card-btn {
+    background: #FFFFFF;
+    border: 1.5px solid #F1F5F9;
+    border-radius: 14px;
+    padding: 10px 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  }
+
+  .preset-card-btn:hover {
+    border-color: var(--color-primary);
+    background: #FFFDFC;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 143, 171, 0.15);
+  }
+
+  .preset-card-btn:active {
+    transform: scale(0.97);
+  }
+
+  .preset-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .preset-icon {
+    font-size: 18px;
+  }
+
+  .preset-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: var(--color-primary-container);
+    color: var(--color-primary-dark);
+  }
+
+  .preset-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+  }
+
+  .preset-desc {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    line-height: 1.2;
+  }
+
+  /* Drug & Quantity Chip Pills */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .chip-pill {
+    padding: 4px 10px;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+
+  .chip-pill:hover {
+    background: #E2E8F0;
+  }
+
+  .chip-pill:active {
+    transform: scale(0.95);
+  }
+
+  .chip-pill.active {
+    background: var(--color-primary-dark);
+    color: #FFFFFF;
+    border-color: var(--color-primary-dark);
+  }
+
+  /* Code Dictionary Tabs & List */
+  .dict-tab-bar {
+    display: flex;
+    background: #F1F5F9;
+    padding: 4px;
+    border-radius: 12px;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .dict-tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .dict-tab-btn.active {
+    background: #FFFFFF;
+    color: var(--color-primary-dark);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .dict-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .dict-item {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .dict-item.highlight {
+    background: #FFF5F7;
+    border-color: var(--color-primary);
+  }
+
+  .dict-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .dict-code {
+    display: inline-block;
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #E2E8F0;
+    color: #1E293B;
+  }
+
+  .dict-code.stage {
+    background: #E0F2FE;
+    color: #0369A1;
+  }
+
+  .dict-code.risk-b {
+    background: #FFE4E6;
+    color: #9F1239;
+  }
+
+  .dict-code.risk-a {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  .dict-code.risk-e {
+    background: #EDE9FE;
+    color: #5B21B6;
+  }
+
+  .dict-item-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .dict-item-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.3;
+  }
+
+  .dict-item-en {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
 </style>
 
 </head>
 <body>
-  <div class="app-container">
+<div class="app-container">
   <!-- Sticky Header -->
   <header class="app-header">
     <div class="brand-group">
@@ -644,6 +876,11 @@
       <span class="brand-title">CatchME</span>
     </div>
     <div class="header-actions">
+      <!-- Code Dictionary Help Button -->
+      <button type="button" onclick="CatchME.openCodeDictionary()" style="background: none; border: 1px solid rgba(255, 143, 171, 0.4); border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="ดูคู่มือความหมายรหัส DS และ Risk Code">
+        <span>📖</span>
+        <span>รหัสคืออะไร?</span>
+      </button>
       <!-- Mode Badge Pill -->
       <div id="header-mode-badge" class="mode-badge opd" onclick="CatchME.toggleMode()" title="แตะเพื่อสลับ OPD / IPD">
         <span id="mode-text">OPD</span>
@@ -711,6 +948,22 @@
         <button type="button" class="btn-secondary" onclick="CatchME.openTextFallback()">
           <span>⌨️ พิมพ์ข้อความแทน</span>
         </button>
+
+        <!-- Quick Presets for Common Medication Errors -->
+        <div class="quick-presets-container">
+          <div class="preset-section-header">
+            <span class="preset-section-title">
+              <span>⚡</span>
+              <span id="preset-mode-title">รายการพบบ่อย (OPD)</span>
+            </span>
+            <button type="button" onclick="CatchME.openCodeDictionary('risk')" style="background: none; border: none; font-size: 11px; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline;">
+              ดูรหัสทั้งหมด
+            </button>
+          </div>
+          <div id="quick-presets-list" class="preset-grid">
+            <!-- Dynamically rendered based on OPD/IPD -->
+          </div>
+        </div>
       </div>
 
       <!-- Recent Reports On This Device -->
@@ -782,8 +1035,12 @@
             <span>Category B (Near Miss)</span>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 11px; font-weight: 600; color: var(--color-text-secondary);">Risk Code</div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+              <span>RISK CODE</span>
+              <button type="button" onclick="CatchME.explainCurrentRiskCode()" style="background: none; border: none; font-size: 13px; color: var(--color-primary-dark); cursor: pointer; padding: 0 2px;" title="ดูความหมายรหัสนี้">ⓘ</button>
+            </div>
             <div id="confirm-risk-code" class="risk-code-display">-</div>
+            <div id="confirm-risk-code-desc" style="font-size: 11px; font-weight: 600; color: var(--color-primary-dark); max-width: 140px; text-align: right; line-height: 1.2; margin-top: 2px;">-</div>
           </div>
         </div>
 
@@ -820,8 +1077,12 @@
           </div>
 
           <div>
-            <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">จุดที่ตรวจพบ</span>
-            <div id="confirm-detected-stage" style="font-size: 13px; color: #30628A; margin-top: 2px;">-</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">จุดที่ตรวจพบ (DETECTED STAGE)</span>
+              <button type="button" onclick="CatchME.explainCurrentStage()" style="background: none; border: none; font-size: 11px; color: #1E4F8A; cursor: pointer; text-decoration: underline;" title="ดูความหมายรหัส DS ทั้งหมด">รหัส DS คืออะไร ⓘ</button>
+            </div>
+            <div id="confirm-detected-stage" style="font-size: 14px; font-weight: 700; color: #1E4F8A; margin-top: 2px;">-</div>
+            <div id="confirm-detected-stage-desc" style="font-size: 11px; color: var(--color-text-secondary); margin-top: 1px;">-</div>
           </div>
 
           <!-- Expandable Raw Transcript -->
@@ -918,6 +1179,19 @@
       <div class="input-group">
         <label class="input-label" for="edit-risk-code">รหัสความเสี่ยง (Risk Code)</label>
         <input type="text" id="edit-risk-code" class="input-field" placeholder="เช่น B29, A05">
+        <div style="margin-top: 6px;">
+          <span style="font-size: 11px; color: var(--color-text-secondary);">แตะเพื่อเลือกรหัสพบบ่อย:</span>
+          <div class="chip-group" style="margin-top: 4px;">
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B29')">B29 (จัดผิดจำนวน)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B28')">B28 (จัดผิดความแรง)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B26')">B26 (จัดผิดชนิด)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B30')">B30 (ยาตกหล่น)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B06')">B06 (คีย์ฉลากผิด)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('A05')">A05 (สั่งผิดความแรง)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('A01')">A01 (ประวัติแพ้)</span>
+            <span class="chip-pill" onclick="CatchME.openCodeDictionary('risk')">📖 ดูทั้งหมด...</span>
+          </div>
+        </div>
       </div>
 
       <div class="input-group">
@@ -956,6 +1230,19 @@
       
       <textarea id="fallback-text-input" class="input-field" rows="4" style="resize: none;" placeholder="เช่น คนจัด amlodipine มา 30 เม็ด แต่ต้อง 60 เภสัชเช็คเจอ"></textarea>
 
+      <div style="margin-top: 8px;">
+        <span style="font-size: 11px; color: var(--color-text-secondary);">แตะคำลัดช่วยพิมพ์:</span>
+        <div class="chip-group" style="margin-top: 4px;">
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('คนจัด ')">+คนจัด</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('ห้องยาคีย์ ')">+ห้องยาคีย์</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('หมอสั่ง ')">+หมอสั่ง</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('amlodipine ')">+amlodipine</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('30 เม็ด แต่ต้อง 60 เม็ด ')">+30 แต่ต้อง 60</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('10 mg แทน 5 mg ')">+10 แทน 5mg</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('เภสัชเช็คเจอก่อนจ่าย')">+เภสัชเช็คเจอ</span>
+        </div>
+      </div>
+
       <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
         <button type="button" class="btn-primary" onclick="CatchME.submitTextFallback()">
           <span>วิเคราะห์ข้อความ</span>
@@ -968,15 +1255,135 @@
     </div>
   </div>
 
+  <!-- Modal 4: Code Dictionary Guide Modal (ความหมายรหัส DS และ Risk Code) -->
+  <div id="modal-code-dictionary" class="modal-overlay hidden">
+    <div class="catchme-card" style="max-width: 420px; width: 100%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: var(--color-primary-dark); display: flex; align-items: center; gap: 6px;">
+          <span>📖</span>
+          <span>คู่มือรหัสความเสี่ยง & จุดตรวจพบ</span>
+        </h2>
+        <button type="button" onclick="CatchME.closeModal('modal-code-dictionary')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="dict-tab-bar">
+        <button id="dict-tab-stage" type="button" class="dict-tab-btn active" onclick="CatchME.switchDictTab('stage')">
+          จุดตรวจพบ (DS Codes)
+        </button>
+        <button id="dict-tab-risk" type="button" class="dict-tab-btn" onclick="CatchME.switchDictTab('risk')">
+          รหัสความเสี่ยง (Risk Codes)
+        </button>
+      </div>
+
+      <!-- Tab 1: DS Codes List -->
+      <div id="dict-content-stage" class="dict-list">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Tab 2: Risk Codes List -->
+      <div id="dict-content-risk" class="dict-list hidden">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div style="margin-top: 14px; text-align: center;">
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-code-dictionary')" style="width: 100%;">
+          <span>ปิดหน้าต่าง</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Quick Preset Fill Form Modal -->
+  <div id="modal-quick-preset-form" class="modal-overlay hidden">
+    <div class="catchme-card" style="max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+        <div>
+          <span id="quick-preset-badge" class="preset-badge">B29</span>
+          <h2 id="quick-preset-modal-title" style="font-size: 17px; font-weight: 800; color: var(--color-primary-dark); margin-top: 4px;">
+            จัดยาผิดจำนวน (ขาด/เกิน)
+          </h2>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-quick-preset-form')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer;">✕</button>
+      </div>
+      <p id="quick-preset-modal-desc" style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 14px;">
+        กรอกข้อมูลหรือเลือกตัวช่วยด้านล่าง แล้วกดถัดไป
+      </p>
+
+      <!-- Drug Name Selection -->
+      <div class="input-group">
+        <label class="input-label" for="preset-drug-input">ชื่อยาที่เกี่ยวข้อง (Medication)</label>
+        <input type="text" id="preset-drug-input" class="input-field" placeholder="เช่น Amlodipine 5mg">
+        <div style="margin-top: 6px;">
+          <span style="font-size: 11px; color: var(--color-text-secondary);">ยาพบบ่อย (แตะเพื่อเลือก):</span>
+          <div class="chip-group" style="margin-top: 4px;">
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Amlodipine')">Amlodipine</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Metformin')">Metformin</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Paracetamol')">Paracetamol</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Simvastatin')">Simvastatin</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Losartan')">Losartan</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Tramadol')">Tramadol</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Prednisolone')">Prednisolone</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Omeprazole')">Omeprazole</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actual vs Expected -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+        <div class="input-group">
+          <label class="input-label" for="preset-actual-input">จัดจริง / สั่งจริง</label>
+          <input type="text" id="preset-actual-input" class="input-field" placeholder="เช่น 30 เม็ด">
+          <div class="chip-group" style="margin-top: 4px;">
+            <span class="chip-pill" onclick="CatchME.setPresetActual('30 เม็ด')">30 เม็ด</span>
+            <span class="chip-pill" onclick="CatchME.setPresetActual('10 mg')">10 mg</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="preset-expected-input">ควรเป็น</label>
+          <input type="text" id="preset-expected-input" class="input-field" placeholder="เช่น 60 เม็ด">
+          <div class="chip-group" style="margin-top: 4px;">
+            <span class="chip-pill" onclick="CatchME.setPresetExpected('60 เม็ด')">60 เม็ด</span>
+            <span class="chip-pill" onclick="CatchME.setPresetExpected('5 mg')">5 mg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detected Stage Selector -->
+      <div class="input-group" style="margin-top: 10px;">
+        <label class="input-label" for="preset-stage-select">จุดที่ตรวจพบ (Detected Stage)</label>
+        <select id="preset-stage-select" class="input-field" style="background-color: #FFFFFF;">
+          <option value="DS04">DS04 — เภสัชกรตรวจสอบยาขั้นสุดท้ายก่อนจ่าย</option>
+          <option value="DS02">DS02 — ตรวจการคีย์/ฉลาก (Data entry / label check)</option>
+          <option value="DS01">DS01 — เภสัชกรทบทวนคำสั่งยา</option>
+          <option value="DS03">DS03 — ระหว่างหยิบ/จัด/เตรียมยา</option>
+          <option value="DS05">DS05 — ก่อนส่งยาให้หอผู้ป่วย</option>
+          <option value="DS06">DS06 — หอผู้ป่วยตรวจพบก่อนถึงผู้ป่วย</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+        <button type="button" class="btn-primary" onclick="CatchME.submitQuickPresetForm()">
+          <span>ถัดไป: ตรวจสอบและบันทึก</span>
+          <span>→</span>
+        </button>
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-quick-preset-form')">
+          <span>ยกเลิก</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Tagline Footer -->
   <footer class="tagline-footer">
     Catch ME before it reaches the patient.
   </footer>
 </div>
 
+
   <script>
-    // Embedded Parser for Standalone Local Browser Testing
-    /**
+    // Embedded Rule-based Parser Engine
+/**
  * CatchME — Medication Error Cat B Quick Reporter
  * Parser.gs — Deterministic Rule-Based Speech & Text Parser
  * 
@@ -1939,7 +2346,7 @@
 });
 
   </script>
-  <script>
+<script>
 /**
  * CatchME Client-side Controller (Milestone 2 - Web Speech API & End-to-End Quick Report)
  */
@@ -1992,12 +2399,79 @@ const CatchME = (function() {
   "safetyStopReason": ""
 }`;
 
+  const DETECTED_STAGES_DICT = {
+    DS01: { code: 'DS01', name: 'Pharmacist order review', nameTh: 'เภสัชกรทบทวนคำสั่งยา', desc: 'ตรวจพบความคลาดเคลื่อนขณะตรวจสอบความถูกต้องของคำสั่งใช้ยา/ใบสั่งแพทย์' },
+    DS02: { code: 'DS02', name: 'Data entry / label check', nameTh: 'ตรวจการคีย์/ฉลาก', desc: 'ตรวจพบขณะคีย์ข้อมูลเข้าระบบหรือตรวจสอบสติ๊กเกอร์/ฉลากยาก่อนจัดยา' },
+    DS03: { code: 'DS03', name: 'During picking / preparation', nameTh: 'ระหว่างหยิบ/จัด/เตรียมยา', desc: 'ตรวจพบระหว่างเจ้าหน้าที่หยิบยาจากชั้นหรือผสมเตรียมยา' },
+    DS04: { code: 'DS04', name: 'Pharmacist final check', nameTh: 'เภสัชกรตรวจสอบยาขั้นสุดท้าย', desc: 'ตรวจพบขณะเภสัชกรตรวจสอบยาในตะกร้าเทียบกับใบสั่งยาก่อนส่งมอบ/จ่ายให้ผู้ป่วย' },
+    DS05: { code: 'DS05', name: 'Before sending to ward', nameTh: 'ก่อนส่งยาให้หอผู้ป่วย', desc: 'ตรวจพบขณะตรวจสอบยาก่อนนำส่งหรือนำส่งขึ้นหอผู้ป่วย (IPD)' },
+    DS06: { code: 'DS06', name: 'Ward check before patient', nameTh: 'หอผู้ป่วยตรวจพบก่อนถึงผู้ป่วย', desc: 'พยาบาลหรือเจ้าหน้าที่บนวอร์ดตรวจพบก่อนที่จะบริหารยาให้ผู้ป่วย' },
+    DS99: { code: 'DS99', name: 'Other before reaching patient', nameTh: 'อื่น ๆ ก่อนถึงผู้ป่วย', desc: 'ตรวจพบในขั้นตอนอื่น ๆ โดยยาสามารถสกัดกั้นได้ก่อนถึงตัวผู้ป่วย' }
+  };
+
+  const RISK_CODES_DICT = {
+    // Pre-dispensing (B)
+    B29: { code: 'B29', process: 'Pre-dispensing', group: 'B', nameTh: 'คนจัดยาหยิบผิดจำนวน/ปริมาณ', desc: 'จัดจำนวนเม็ด/ขวด/แผง ขาดหรือเกิน ไม่ตรงกับจำนวนที่ระบุในฉลากยา' },
+    B28: { code: 'B28', process: 'Pre-dispensing', group: 'B', nameTh: 'คนจัดยาหยิบผิดความแรง', desc: 'หยิบยาที่มีความแรงไม่ตรงตามฉลาก (เช่น ฉลาก 5 mg แต่หยิบ 10 mg)' },
+    B26: { code: 'B26', process: 'Pre-dispensing', group: 'B', nameTh: 'คนจัดยาหยิบผิดชนิดยา', desc: 'หยิบยาผิดตัว หรือยาที่มีชื่อ/ลักษณะคล้ายกัน (LASA)' },
+    B30: { code: 'B30', process: 'Pre-dispensing', group: 'B', nameTh: 'ยาตกหล่น/จัดไม่ครบรายการ', desc: 'ใบสั่งยามีหลายรายการ แต่จัดยามาไม่ครบ ตกหล่นบางรายการ' },
+    B31: { code: 'B31', process: 'Pre-dispensing', group: 'B', nameTh: 'ยาเกินรายการ/ไม่ได้สั่ง', desc: 'มีรายการยาเกินมาในตะกร้าที่แพทย์ไม่ได้สั่ง' },
+    B06: { code: 'B06', process: 'Pre-dispensing', group: 'B', nameTh: 'ห้องยาคีย์วิธีใช้/ฉลากยาผิด', desc: 'พิมพ์วิธีใช้ยา (SIG) หรือเวลาบริหารยาบนฉลากผิดจากคำสั่งแพทย์' },
+    B03: { code: 'B03', process: 'Pre-dispensing', group: 'B', nameTh: 'ห้องยาคีย์ผิดชนิดยา', desc: 'เจ้าหน้าที่ห้องยาคีย์เลือกชนิดยาเข้าระบบผิดรายการ' },
+    B08: { code: 'B08', process: 'Pre-dispensing', group: 'B', nameTh: 'ห้องยาคีย์ผิดจำนวน', desc: 'เจ้าหน้าที่ห้องยาคีย์จำนวนยาผิดจากที่แพทย์สั่ง' },
+    B09: { code: 'B09', process: 'Pre-dispensing', group: 'B', nameTh: 'ห้องยาคีย์ผิดระยะเวลา/ช่วงวันนัด', desc: 'คีย์จำนวนวันไม่ครอบคลุมถึงวันนัด หรือเกินช่วงเวลา' },
+    B21: { code: 'B21', process: 'Pre-dispensing', group: 'B', nameTh: 'ผิดประเภทคำสั่งยา (Continue/One Day)', desc: 'รับคำสั่งแพทย์ผิดประเภท เช่น สั่ง One Day แต่คีย์เป็น Continue' },
+    B22: { code: 'B22', process: 'Pre-dispensing', group: 'B', nameTh: 'ตกหล่นคำสั่งยา STAT/ด่วน', desc: 'มีคำสั่งยาด่วนแต่ห้องยาไม่ได้รับคำสั่ง หรือตกหล่นไม่ได้จัดส่งทันที' },
+    B23: { code: 'B23', process: 'Pre-dispensing', group: 'B', nameTh: 'ไม่หยุดยาตามคำสั่ง (ยังไม่ off ยา)', desc: 'แพทย์สั่ง off ยาแล้ว แต่ในระบบ Drug Profile ยังไม่ได้กดยกเลิก' },
+    B25: { code: 'B25', process: 'Pre-dispensing', group: 'B', nameTh: 'จัดยาผิดผู้ป่วย (ทั้งชุด)', desc: 'จัดยาผิดคนไข้ หรือสลับตะกร้ายาระหว่างคนไข้' },
+    B32: { code: 'B32', process: 'Pre-dispensing', group: 'B', nameTh: 'ยาหมดอายุ/เสื่อมสภาพ', desc: 'หยิบยาที่หมดอายุหรือมีลักษณะเสื่อมสภาพมาจัด' },
+    B34: { code: 'B34', process: 'Pre-dispensing', group: 'B', nameTh: 'จัดยาปนผู้ป่วยอื่น (บางรายการ)', desc: 'มียาของคนไข้อื่นปนเข้ามาในซอง/ตะกร้าบางรายการ' },
+    B35: { code: 'B35', process: 'Pre-dispensing', group: 'B', nameTh: 'บรรจุภัณฑ์/การป้องกันยาไม่เหมาะสม', desc: 'ยาที่ต้องป้องกันแสงไม่ได้ใส่ซองสีชา หรือบรรจุภัณฑ์ฉีกขาด' },
+
+    // Prescribing (A)
+    A01: { code: 'A01', process: 'Prescribing', group: 'A', nameTh: 'ความคลาดเคลื่อนเกี่ยวกับประวัติแพ้ยา', desc: 'แพทย์สั่งยาที่ผู้ป่วยมีประวัติเคยแพ้ หรือแพ้ข้ามกลุ่ม' },
+    A05: { code: 'A05', process: 'Prescribing', group: 'A', nameTh: 'แพทย์สั่งผิดความแรง', desc: 'สั่งความแรงยาไม่ตรงกับขนาดการรักษาหรือยาเดิมของผู้ป่วย' },
+    A07: { code: 'A07', process: 'Prescribing', group: 'A', nameTh: 'แพทย์สั่งผิดขนาดยา (Dose)', desc: 'สั่งขนาดรับประทานต่อครั้ง (เช่น เม็ดต่อครั้ง) สูงหรือต่ำเกินไป' },
+    A08: { code: 'A08', process: 'Prescribing', group: 'A', nameTh: 'ปฏิกิริยาระหว่างยา (Drug Interaction)', desc: 'แพทย์สั่งยาที่มีอันตรกิริยาตีกันที่ควรหลีกเลี่ยง' },
+    A10: { code: 'A10', process: 'Prescribing', group: 'A', nameTh: 'แพทย์สั่งผิดจำนวน/ไม่พอวันนัด', desc: 'คำนวณจำนวนยารวมไม่ตรงกับระยะเวลาจนถึงวันนัดถัดไป' },
+    A11: { code: 'A11', process: 'Prescribing', group: 'A', nameTh: 'แพทย์สั่งยาซ้ำ/ซ้ำซ้อน (Duplicate)', desc: 'มีรายการยาซ้ำกันในใบสั่งยาเดียวกัน หรือซ้ำกับกลุ่มยาเดิม' },
+    A15: { code: 'A15', process: 'Prescribing', group: 'A', nameTh: 'คำสั่งยาไม่ครบ/ไม่ชัดเจน', desc: 'ไม่ได้ระบุวิธีใช้ หรือระบุไม่ชัดเจน ไม่ครบถ้วน' },
+    A16: { code: 'A16', process: 'Prescribing', group: 'A', nameTh: 'ยาตกหล่น/แพทย์ลืมสั่ง', desc: 'ลืมสั่งยาประจำตัวของผู้ป่วย หรือสั่งไม่ครบรายการ' },
+    A17: { code: 'A17', process: 'Prescribing', group: 'A', nameTh: 'ผิด visit (Remed ผิด)', desc: 'ดึงข้อมูลยาเดิมมาจาก visit เก่าที่ไม่ได้ปรับปรุงล่าสุด' },
+
+    // Transcribing (E)
+    E05: { code: 'E05', process: 'Transcribing', group: 'E', nameTh: 'ปัญหาการสแกน/ภาพเอกสารไม่ชัด', desc: 'ภาพสแกนใบสั่งยาไม่ชัดเจน อ่านลายมือหรือคำสั่งไม่ได้' },
+    E06: { code: 'E06', process: 'Transcribing', group: 'E', nameTh: 'ฉลากระบุตัวผู้ป่วยผิด/ติดสติ๊กเกอร์ผิดคน', desc: 'ติดสติ๊กเกอร์ชื่อผู้ป่วยผิดคนบนใบสั่งยาหรือซองยา' },
+    E11: { code: 'E11', process: 'Transcribing', group: 'E', nameTh: 'ตกหล่นคำสั่ง STAT (ไม่ติดป้ายด่วน)', desc: 'วอร์ดไม่ได้ติดป้าย STAT หรือไม่ได้แจ้งเตือนห้องยา' }
+  };
+
+  const PRESETS_CONFIG = {
+    OPD: [
+      { key: 'b29', code: 'B29', icon: '📦', title: 'จัดผิดจำนวน (ขาด/เกิน)', desc: 'หยิบเม็ดยาขาดหรือเกิน', errorType: 'ผิดจำนวน/ปริมาณ', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: '30 เม็ด', defaultExpected: '60 เม็ด' },
+      { key: 'b28', code: 'B28', icon: '💊', title: 'จัดผิดความแรง', desc: 'หยิบความแรงผิด (เช่น 10 แทน 5mg)', errorType: 'ผิดความแรง', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: '10 mg', defaultExpected: '5 mg' },
+      { key: 'b26', code: 'B26', icon: '🔄', title: 'จัดผิดชนิดยา / LASA', desc: 'หยิบผิดตัวยาใกล้เคียง', errorType: 'ผิดชนิดยา', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'Tramadol', defaultExpected: 'Paracetamol' },
+      { key: 'b30', code: 'B30', icon: '📋', title: 'ยาตกหล่น / จัดไม่ครบ', desc: 'จัดมาไม่ครบตามใบสั่ง', errorType: 'ยาตกหล่น/ไม่ครบรายการ', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: '4 รายการ', defaultExpected: '5 รายการ' },
+      { key: 'b06', code: 'B06', icon: '🏷️', title: 'คีย์วิธีใช้/ฉลากผิด', desc: 'คีย์ฉลากไม่ตรงใบสั่ง', errorType: 'วิธีใช้/วิธีบริหารยาผิด', process: 'Pre-dispensing', processStage: 'PS02', defaultStage: 'DS02', defaultActual: 'วันละ 1 ครั้ง', defaultExpected: 'วันละ 2 ครั้ง' },
+      { key: 'a01', code: 'A01', icon: '⚠️', title: 'สั่งยาที่ประวัติแพ้', desc: 'แพทย์สั่งยาที่ผู้ป่วยแพ้', errorType: 'ความคลาดเคลื่อนเกี่ยวกับประวัติแพ้ยา', process: 'Prescribing', processStage: 'PS01', defaultStage: 'DS01', defaultActual: 'Amoxicillin', defaultExpected: 'งดสั่งยาแพ้' },
+      { key: 'a11', code: 'A11', icon: '🔁', title: 'แพทย์สั่งยาซ้ำซ้อน', desc: 'สั่งยาซ้ำ 2 รายการ', errorType: 'ยาซ้ำ/ซ้ำซ้อน', process: 'Prescribing', processStage: 'PS01', defaultStage: 'DS01', defaultActual: 'สั่งซ้ำ 2 รายการ', defaultExpected: '1 รายการ' },
+      { key: 'b35', code: 'B35', icon: '🚫', title: 'ไม่ใส่ซองสีชา / ไวแสง', desc: 'ยาไวแสงไม่ใส่ซองกันแสง', errorType: 'บรรจุภัณฑ์/การป้องกันยาไม่เหมาะสม', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'ซองใส', defaultExpected: 'ซองสีชากันแสง' }
+    ],
+    IPD: [
+      { key: 'b22', code: 'B22', icon: '⚡', title: 'ตกหล่นคำสั่ง STAT/ด่วน', desc: 'มี STAT แต่ห้องยาไม่ได้รับ', errorType: 'ตกหล่นคำสั่ง STAT/ด่วน', process: 'Pre-dispensing', processStage: 'PS03', defaultStage: 'DS05', defaultActual: 'ยังไม่ได้รับคำสั่ง', defaultExpected: 'จัดส่งทันที' },
+      { key: 'b23', code: 'B23', icon: '🛑', title: 'สั่ง off แต่ยังไม่ออฟ', desc: 'แพทย์สั่ง off แต่ยังค้างในระบบ', errorType: 'ไม่หยุดยาตามคำสั่ง', process: 'Pre-dispensing', processStage: 'PS02', defaultStage: 'DS01', defaultActual: 'ยังไม่ได้ off ใน profile', defaultExpected: 'หยุดยาตามคำสั่ง' },
+      { key: 'b29_ipd', code: 'B29', icon: '📦', title: 'จัดยาผิดจำนวน', desc: 'จัดเม็ด/ampule ขาดเกิน', errorType: 'ผิดจำนวน/ปริมาณ', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'จัดไม่ครบ', defaultExpected: 'ตามจำนวนคำสั่ง' },
+      { key: 'b21', code: 'B21', icon: '📅', title: 'Continue แทน One Day', desc: 'รับ order เป็น continue', errorType: 'ผิดประเภทคำสั่งยา', process: 'Pre-dispensing', processStage: 'PS02', defaultStage: 'DS01', defaultActual: 'Continue', defaultExpected: 'One day' },
+      { key: 'b25', code: 'B25', icon: '👤', title: 'จัดยาผิดเตียง / ผิดคน', desc: 'จัดยาผิดคนไข้ทั้งชุด', errorType: 'ผิดผู้ป่วย', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'จัดใส่เตียงผิด', defaultExpected: 'ตรวจทานชื่อคนไข้' },
+      { key: 'b28_ipd', code: 'B28', icon: '💊', title: 'จัดยาผิดความแรง', desc: 'หยิบความแรงยาไม่ตรงคำสั่ง', errorType: 'ผิดความแรง', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'ผิดความแรง', defaultExpected: 'ตามคำสั่งแพทย์' }
+    ]
+  };
 
   let state = {
     mode: 'OPD',
     alias: '',
     deviceId: '',
     currentParsed: null,
+    currentPreset: null,
     isRecording: false,
     isSaving: false,
     mediaRecorder: null,
@@ -2021,6 +2495,7 @@ const CatchME = (function() {
     } else {
       updateHeaderUI();
       renderRecentReports();
+      renderPresets();
       showScreen('screen-quick-report');
     }
 
@@ -2335,6 +2810,10 @@ const CatchME = (function() {
   function convertGeminiToParsed(geminiData, fallbackText) {
     const transcript = geminiData.transcript || fallbackText || '';
     const isCatB = geminiData.catBEligible !== false && geminiData.patientReached !== 'Yes';
+    const stageCode = geminiData.detectedStage || 'DS02';
+    const stageMeta = DETECTED_STAGES_DICT[stageCode];
+    const stageName = stageMeta ? stageMeta.nameTh : 'ตรวจการคีย์/ฉลาก';
+
     return {
       rawTranscript: transcript,
       normalizedTranscript: transcript,
@@ -2345,8 +2824,8 @@ const CatchME = (function() {
       errorType: geminiData.errorType || 'Medication Error',
       process: geminiData.process || 'Pre-dispensing',
       processStage: geminiData.process === 'Prescribing' ? 'PS01' : (geminiData.process === 'Transcribing' ? 'PS07' : 'PS04'),
-      detectedStage: geminiData.detectedStage || 'DS02',
-      detectedStageName: geminiData.detectedStage === 'DS01' ? 'ขั้นตอนตรวจความถูกต้องคำสั่งใช้ยา' : (geminiData.detectedStage === 'DS04' ? 'ขั้นตอนจัดยา' : 'ขั้นตอนจัด/ตรวจสอบยาก่อนส่งมอบ'),
+      detectedStage: stageCode,
+      detectedStageName: stageName,
       confidence: 'High',
       mode: state.mode || 'OPD',
       extractedEntities: {
@@ -2599,6 +3078,14 @@ const CatchME = (function() {
    */
   function renderConfirmationScreen(parsed) {
     document.getElementById('confirm-risk-code').innerText = parsed.legacyCode || 'Cat B';
+    
+    // Risk Code Description Badge
+    const riskMeta = RISK_CODES_DICT[parsed.legacyCode];
+    const riskSubEl = document.getElementById('confirm-risk-code-desc');
+    if (riskSubEl) {
+      riskSubEl.innerText = riskMeta ? (riskMeta.process + ' • ' + riskMeta.nameTh) : '';
+    }
+
     document.getElementById('confirm-error-type').innerText = parsed.errorType || 'Medication Error';
     
     // Medications
@@ -2631,8 +3118,14 @@ const CatchME = (function() {
       expectedSpan.innerText = 'ความมั่นใจ: ' + parsed.confidence;
     }
 
-    // Detected stage
-    document.getElementById('confirm-detected-stage').innerText = (parsed.detectedStage || 'DS01') + ' — ' + (parsed.detectedStageName || 'ตรวจพบก่อนถึงผู้ป่วย');
+    // Detected stage & explanation
+    const stageMeta = DETECTED_STAGES_DICT[parsed.detectedStage];
+    const stageName = stageMeta ? stageMeta.nameTh : (parsed.detectedStageName || 'ตรวจพบก่อนถึงผู้ป่วย');
+    document.getElementById('confirm-detected-stage').innerText = (parsed.detectedStage || 'DS01') + ' — ' + stageName;
+    const stageDescEl = document.getElementById('confirm-detected-stage-desc');
+    if (stageDescEl) {
+      stageDescEl.innerText = stageMeta ? stageMeta.desc : '';
+    }
 
     // Raw transcript
     document.getElementById('confirm-raw-transcript').innerText = '"' + (parsed.rawTranscript || '') + '"';
@@ -3053,6 +3546,7 @@ const CatchME = (function() {
     state.mode = (state.mode === 'OPD') ? 'IPD' : 'OPD';
     localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
     updateHeaderUI();
+    renderPresets();
   }
 
   /**
@@ -3102,6 +3596,7 @@ const CatchME = (function() {
     state.alias = alias;
 
     updateHeaderUI();
+    renderPresets();
     showScreen('screen-quick-report');
   }
 
@@ -3125,6 +3620,244 @@ const CatchME = (function() {
     }
   }
 
+  /**
+   * Renders Quick Presets based on current mode (OPD / IPD).
+   */
+  function renderPresets() {
+    const list = document.getElementById('quick-presets-list');
+    const titleEl = document.getElementById('preset-mode-title');
+    if (!list) return;
+
+    if (titleEl) {
+      titleEl.innerText = 'รายการพบบ่อย (' + state.mode + ')';
+    }
+
+    const presets = PRESETS_CONFIG[state.mode] || PRESETS_CONFIG.OPD;
+    list.innerHTML = '';
+
+    presets.forEach(function(item) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'preset-card-btn';
+      btn.innerHTML = `
+        <div class="preset-card-top">
+          <span class="preset-icon">${item.icon}</span>
+          <span class="preset-badge">${item.code}</span>
+        </div>
+        <div>
+          <div class="preset-title">${item.title}</div>
+          <div class="preset-desc">${item.desc}</div>
+        </div>
+      `;
+      btn.onclick = function() {
+        openPresetForm(item.key);
+      };
+      list.appendChild(btn);
+    });
+  }
+
+  /**
+   * Opens Quick Preset Form modal populated with default values.
+   */
+  function openPresetForm(presetKey) {
+    const presets = (PRESETS_CONFIG[state.mode] || []).concat(PRESETS_CONFIG.OPD || []).concat(PRESETS_CONFIG.IPD || []);
+    const found = presets.find(function(p) { return p.key === presetKey; });
+    if (!found) return;
+
+    state.currentPreset = found;
+
+    const badge = document.getElementById('quick-preset-badge');
+    const title = document.getElementById('quick-preset-modal-title');
+    const desc = document.getElementById('quick-preset-modal-desc');
+    const drugInput = document.getElementById('preset-drug-input');
+    const actualInput = document.getElementById('preset-actual-input');
+    const expectedInput = document.getElementById('preset-expected-input');
+    const stageSelect = document.getElementById('preset-stage-select');
+
+    if (badge) badge.innerText = found.code;
+    if (title) title.innerText = found.title;
+    if (desc) desc.innerText = found.desc + ' — แตะเลือกยาหรือจำนวน แล้วกดถัดไปเพื่อบันทึก';
+    if (drugInput) drugInput.value = '';
+    if (actualInput) actualInput.value = found.defaultActual || '';
+    if (expectedInput) expectedInput.value = found.defaultExpected || '';
+    if (stageSelect) stageSelect.value = found.defaultStage || 'DS04';
+
+    openModal('modal-quick-preset-form');
+  }
+
+  function setPresetDrug(name) {
+    const input = document.getElementById('preset-drug-input');
+    if (input) input.value = name;
+  }
+
+  function setPresetActual(val) {
+    const input = document.getElementById('preset-actual-input');
+    if (input) input.value = val;
+  }
+
+  function setPresetExpected(val) {
+    const input = document.getElementById('preset-expected-input');
+    if (input) input.value = val;
+  }
+
+  /**
+   * Submits quick preset form and routes to confirmation screen.
+   */
+  function submitQuickPresetForm() {
+    if (!state.currentPreset) return;
+
+    const drug = (document.getElementById('preset-drug-input').value || '').trim();
+    const actual = (document.getElementById('preset-actual-input').value || '').trim();
+    const expected = (document.getElementById('preset-expected-input').value || '').trim();
+    const stage = document.getElementById('preset-stage-select').value || 'DS04';
+
+    const preset = state.currentPreset;
+    const stageMeta = DETECTED_STAGES_DICT[stage];
+
+    const transcript = [
+      preset.process === 'Pre-dispensing' ? 'คนจัดยา' : (preset.process === 'Prescribing' ? 'หมอสั่ง' : 'ห้องยา'),
+      drug ? drug : '',
+      actual ? ('จัดจริง ' + actual) : '',
+      expected ? ('แต่ต้อง ' + expected) : '',
+      stageMeta ? stageMeta.nameTh : ''
+    ].filter(Boolean).join(' ');
+
+    const parsed = {
+      rawTranscript: transcript,
+      normalizedTranscript: transcript,
+      catBEligible: true,
+      patientReached: 'No',
+      safetyStopReason: '',
+      legacyCode: preset.code,
+      errorType: preset.errorType,
+      process: preset.process,
+      processStage: preset.processStage,
+      detectedStage: stage,
+      detectedStageName: stageMeta ? stageMeta.nameTh : '',
+      confidence: 'High',
+      mode: state.mode,
+      extractedEntities: {
+        drugs: drug ? [drug] : [],
+        actual: actual,
+        expected: expected
+      }
+    };
+
+    closeModal('modal-quick-preset-form');
+    handleParsedResult(parsed);
+  }
+
+  /**
+   * Code Dictionary Modal Logic.
+   */
+  function openCodeDictionary(tab, highlightCode) {
+    renderCodeDictionary();
+    if (tab === 'risk') {
+      switchDictTab('risk');
+    } else {
+      switchDictTab('stage');
+    }
+    openModal('modal-code-dictionary');
+
+    if (highlightCode) {
+      setTimeout(function() {
+        const target = document.getElementById('dict-item-' + highlightCode);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('highlight');
+          setTimeout(function() { target.classList.remove('highlight'); }, 2000);
+        }
+      }, 200);
+    }
+  }
+
+  function switchDictTab(tab) {
+    const tabStage = document.getElementById('dict-tab-stage');
+    const tabRisk = document.getElementById('dict-tab-risk');
+    const contentStage = document.getElementById('dict-content-stage');
+    const contentRisk = document.getElementById('dict-content-risk');
+
+    if (tab === 'risk') {
+      if (tabRisk) tabRisk.classList.add('active');
+      if (tabStage) tabStage.classList.remove('active');
+      if (contentRisk) contentRisk.classList.remove('hidden');
+      if (contentStage) contentStage.classList.add('hidden');
+    } else {
+      if (tabStage) tabStage.classList.add('active');
+      if (tabRisk) tabRisk.classList.remove('active');
+      if (contentStage) contentStage.classList.remove('hidden');
+      if (contentRisk) contentRisk.classList.add('hidden');
+    }
+  }
+
+  function renderCodeDictionary() {
+    // 1. Render DS Codes
+    const stageContainer = document.getElementById('dict-content-stage');
+    if (stageContainer && !stageContainer.hasChildNodes()) {
+      Object.keys(DETECTED_STAGES_DICT).forEach(function(code) {
+        const item = DETECTED_STAGES_DICT[code];
+        const el = document.createElement('div');
+        el.id = 'dict-item-' + code;
+        el.className = 'dict-item';
+        el.innerHTML = `
+          <div class="dict-item-header">
+            <span class="dict-code stage">${item.code}</span>
+            <span class="dict-item-name">${item.nameTh}</span>
+          </div>
+          <div class="dict-item-desc">${item.desc}</div>
+          <div class="dict-item-en">${item.name}</div>
+        `;
+        stageContainer.appendChild(el);
+      });
+    }
+
+    // 2. Render Risk Codes
+    const riskContainer = document.getElementById('dict-content-risk');
+    if (riskContainer && !riskContainer.hasChildNodes()) {
+      Object.keys(RISK_CODES_DICT).forEach(function(code) {
+        const item = RISK_CODES_DICT[code];
+        const badgeClass = item.group === 'B' ? 'risk-b' : (item.group === 'A' ? 'risk-a' : 'risk-e');
+        const el = document.createElement('div');
+        el.id = 'dict-item-' + code;
+        el.className = 'dict-item';
+        el.innerHTML = `
+          <div class="dict-item-header">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="dict-code ${badgeClass}">${item.code}</span>
+              <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary);">${item.process}</span>
+            </div>
+            <span class="dict-item-name">${item.nameTh}</span>
+          </div>
+          <div class="dict-item-desc">${item.desc}</div>
+        `;
+        riskContainer.appendChild(el);
+      });
+    }
+  }
+
+  function explainCurrentRiskCode() {
+    const code = state.currentParsed ? state.currentParsed.legacyCode : 'B29';
+    openCodeDictionary('risk', code);
+  }
+
+  function explainCurrentStage() {
+    const code = state.currentParsed ? state.currentParsed.detectedStage : 'DS04';
+    openCodeDictionary('stage', code);
+  }
+
+  function selectEditRiskCode(code) {
+    const input = document.getElementById('edit-risk-code');
+    if (input) input.value = code;
+  }
+
+  function appendFallbackText(phrase) {
+    const textarea = document.getElementById('fallback-text-input');
+    if (textarea) {
+      textarea.value = (textarea.value || '') + phrase;
+      textarea.focus();
+    }
+  }
+
   return {
     init: init,
     toggleMode: toggleMode,
@@ -3144,7 +3877,19 @@ const CatchME = (function() {
     handleRedirectToIncident: handleRedirectToIncident,
     goHome: goHome,
     openModal: openModal,
-    closeModal: closeModal
+    closeModal: closeModal,
+    renderPresets: renderPresets,
+    openPresetForm: openPresetForm,
+    setPresetDrug: setPresetDrug,
+    setPresetActual: setPresetActual,
+    setPresetExpected: setPresetExpected,
+    submitQuickPresetForm: submitQuickPresetForm,
+    openCodeDictionary: openCodeDictionary,
+    switchDictTab: switchDictTab,
+    explainCurrentRiskCode: explainCurrentRiskCode,
+    explainCurrentStage: explainCurrentStage,
+    selectEditRiskCode: selectEditRiskCode,
+    appendFallbackText: appendFallbackText
   };
 })();
 

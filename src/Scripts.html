@@ -51,12 +51,79 @@ const CatchME = (function() {
   "safetyStopReason": ""
 }`;
 
+  const DETECTED_STAGES_DICT = {
+    DS01: { code: 'DS01', name: 'Pharmacist order review', nameTh: 'เภสัชกรทบทวนคำสั่งยา', desc: 'ตรวจพบความคลาดเคลื่อนขณะตรวจสอบความถูกต้องของคำสั่งใช้ยา/ใบสั่งแพทย์' },
+    DS02: { code: 'DS02', name: 'Data entry / label check', nameTh: 'ตรวจการคีย์/ฉลาก', desc: 'ตรวจพบขณะคีย์ข้อมูลเข้าระบบหรือตรวจสอบสติ๊กเกอร์/ฉลากยาก่อนจัดยา' },
+    DS03: { code: 'DS03', name: 'During picking / preparation', nameTh: 'ระหว่างหยิบ/จัด/เตรียมยา', desc: 'ตรวจพบระหว่างเจ้าหน้าที่หยิบยาจากชั้นหรือผสมเตรียมยา' },
+    DS04: { code: 'DS04', name: 'Pharmacist final check', nameTh: 'เภสัชกรตรวจสอบยาขั้นสุดท้าย', desc: 'ตรวจพบขณะเภสัชกรตรวจสอบยาในตะกร้าเทียบกับใบสั่งยาก่อนส่งมอบ/จ่ายให้ผู้ป่วย' },
+    DS05: { code: 'DS05', name: 'Before sending to ward', nameTh: 'ก่อนส่งยาให้หอผู้ป่วย', desc: 'ตรวจพบขณะตรวจสอบยาก่อนนำส่งหรือนำส่งขึ้นหอผู้ป่วย (IPD)' },
+    DS06: { code: 'DS06', name: 'Ward check before patient', nameTh: 'หอผู้ป่วยตรวจพบก่อนถึงผู้ป่วย', desc: 'พยาบาลหรือเจ้าหน้าที่บนวอร์ดตรวจพบก่อนที่จะบริหารยาให้ผู้ป่วย' },
+    DS99: { code: 'DS99', name: 'Other before reaching patient', nameTh: 'อื่น ๆ ก่อนถึงผู้ป่วย', desc: 'ตรวจพบในขั้นตอนอื่น ๆ โดยยาสามารถสกัดกั้นได้ก่อนถึงตัวผู้ป่วย' }
+  };
+
+  const RISK_CODES_DICT = {
+    // Pre-dispensing (B)
+    B29: { code: 'B29', process: 'Pre-dispensing', group: 'B', nameTh: 'คนจัดยาหยิบผิดจำนวน/ปริมาณ', desc: 'จัดจำนวนเม็ด/ขวด/แผง ขาดหรือเกิน ไม่ตรงกับจำนวนที่ระบุในฉลากยา' },
+    B28: { code: 'B28', process: 'Pre-dispensing', group: 'B', nameTh: 'คนจัดยาหยิบผิดความแรง', desc: 'หยิบยาที่มีความแรงไม่ตรงตามฉลาก (เช่น ฉลาก 5 mg แต่หยิบ 10 mg)' },
+    B26: { code: 'B26', process: 'Pre-dispensing', group: 'B', nameTh: 'คนจัดยาหยิบผิดชนิดยา', desc: 'หยิบยาผิดตัว หรือยาที่มีชื่อ/ลักษณะคล้ายกัน (LASA)' },
+    B30: { code: 'B30', process: 'Pre-dispensing', group: 'B', nameTh: 'ยาตกหล่น/จัดไม่ครบรายการ', desc: 'ใบสั่งยามีหลายรายการ แต่จัดยามาไม่ครบ ตกหล่นบางรายการ' },
+    B31: { code: 'B31', process: 'Pre-dispensing', group: 'B', nameTh: 'ยาเกินรายการ/ไม่ได้สั่ง', desc: 'มีรายการยาเกินมาในตะกร้าที่แพทย์ไม่ได้สั่ง' },
+    B06: { code: 'B06', process: 'Pre-dispensing', group: 'B', nameTh: 'ห้องยาคีย์วิธีใช้/ฉลากยาผิด', desc: 'พิมพ์วิธีใช้ยา (SIG) หรือเวลาบริหารยาบนฉลากผิดจากคำสั่งแพทย์' },
+    B03: { code: 'B03', process: 'Pre-dispensing', group: 'B', nameTh: 'ห้องยาคีย์ผิดชนิดยา', desc: 'เจ้าหน้าที่ห้องยาคีย์เลือกชนิดยาเข้าระบบผิดรายการ' },
+    B08: { code: 'B08', process: 'Pre-dispensing', group: 'B', nameTh: 'ห้องยาคีย์ผิดจำนวน', desc: 'เจ้าหน้าที่ห้องยาคีย์จำนวนยาผิดจากที่แพทย์สั่ง' },
+    B09: { code: 'B09', process: 'Pre-dispensing', group: 'B', nameTh: 'ห้องยาคีย์ผิดระยะเวลา/ช่วงวันนัด', desc: 'คีย์จำนวนวันไม่ครอบคลุมถึงวันนัด หรือเกินช่วงเวลา' },
+    B21: { code: 'B21', process: 'Pre-dispensing', group: 'B', nameTh: 'ผิดประเภทคำสั่งยา (Continue/One Day)', desc: 'รับคำสั่งแพทย์ผิดประเภท เช่น สั่ง One Day แต่คีย์เป็น Continue' },
+    B22: { code: 'B22', process: 'Pre-dispensing', group: 'B', nameTh: 'ตกหล่นคำสั่งยา STAT/ด่วน', desc: 'มีคำสั่งยาด่วนแต่ห้องยาไม่ได้รับคำสั่ง หรือตกหล่นไม่ได้จัดส่งทันที' },
+    B23: { code: 'B23', process: 'Pre-dispensing', group: 'B', nameTh: 'ไม่หยุดยาตามคำสั่ง (ยังไม่ off ยา)', desc: 'แพทย์สั่ง off ยาแล้ว แต่ในระบบ Drug Profile ยังไม่ได้กดยกเลิก' },
+    B25: { code: 'B25', process: 'Pre-dispensing', group: 'B', nameTh: 'จัดยาผิดผู้ป่วย (ทั้งชุด)', desc: 'จัดยาผิดคนไข้ หรือสลับตะกร้ายาระหว่างคนไข้' },
+    B32: { code: 'B32', process: 'Pre-dispensing', group: 'B', nameTh: 'ยาหมดอายุ/เสื่อมสภาพ', desc: 'หยิบยาที่หมดอายุหรือมีลักษณะเสื่อมสภาพมาจัด' },
+    B34: { code: 'B34', process: 'Pre-dispensing', group: 'B', nameTh: 'จัดยาปนผู้ป่วยอื่น (บางรายการ)', desc: 'มียาของคนไข้อื่นปนเข้ามาในซอง/ตะกร้าบางรายการ' },
+    B35: { code: 'B35', process: 'Pre-dispensing', group: 'B', nameTh: 'บรรจุภัณฑ์/การป้องกันยาไม่เหมาะสม', desc: 'ยาที่ต้องป้องกันแสงไม่ได้ใส่ซองสีชา หรือบรรจุภัณฑ์ฉีกขาด' },
+
+    // Prescribing (A)
+    A01: { code: 'A01', process: 'Prescribing', group: 'A', nameTh: 'ความคลาดเคลื่อนเกี่ยวกับประวัติแพ้ยา', desc: 'แพทย์สั่งยาที่ผู้ป่วยมีประวัติเคยแพ้ หรือแพ้ข้ามกลุ่ม' },
+    A05: { code: 'A05', process: 'Prescribing', group: 'A', nameTh: 'แพทย์สั่งผิดความแรง', desc: 'สั่งความแรงยาไม่ตรงกับขนาดการรักษาหรือยาเดิมของผู้ป่วย' },
+    A07: { code: 'A07', process: 'Prescribing', group: 'A', nameTh: 'แพทย์สั่งผิดขนาดยา (Dose)', desc: 'สั่งขนาดรับประทานต่อครั้ง (เช่น เม็ดต่อครั้ง) สูงหรือต่ำเกินไป' },
+    A08: { code: 'A08', process: 'Prescribing', group: 'A', nameTh: 'ปฏิกิริยาระหว่างยา (Drug Interaction)', desc: 'แพทย์สั่งยาที่มีอันตรกิริยาตีกันที่ควรหลีกเลี่ยง' },
+    A10: { code: 'A10', process: 'Prescribing', group: 'A', nameTh: 'แพทย์สั่งผิดจำนวน/ไม่พอวันนัด', desc: 'คำนวณจำนวนยารวมไม่ตรงกับระยะเวลาจนถึงวันนัดถัดไป' },
+    A11: { code: 'A11', process: 'Prescribing', group: 'A', nameTh: 'แพทย์สั่งยาซ้ำ/ซ้ำซ้อน (Duplicate)', desc: 'มีรายการยาซ้ำกันในใบสั่งยาเดียวกัน หรือซ้ำกับกลุ่มยาเดิม' },
+    A15: { code: 'A15', process: 'Prescribing', group: 'A', nameTh: 'คำสั่งยาไม่ครบ/ไม่ชัดเจน', desc: 'ไม่ได้ระบุวิธีใช้ หรือระบุไม่ชัดเจน ไม่ครบถ้วน' },
+    A16: { code: 'A16', process: 'Prescribing', group: 'A', nameTh: 'ยาตกหล่น/แพทย์ลืมสั่ง', desc: 'ลืมสั่งยาประจำตัวของผู้ป่วย หรือสั่งไม่ครบรายการ' },
+    A17: { code: 'A17', process: 'Prescribing', group: 'A', nameTh: 'ผิด visit (Remed ผิด)', desc: 'ดึงข้อมูลยาเดิมมาจาก visit เก่าที่ไม่ได้ปรับปรุงล่าสุด' },
+
+    // Transcribing (E)
+    E05: { code: 'E05', process: 'Transcribing', group: 'E', nameTh: 'ปัญหาการสแกน/ภาพเอกสารไม่ชัด', desc: 'ภาพสแกนใบสั่งยาไม่ชัดเจน อ่านลายมือหรือคำสั่งไม่ได้' },
+    E06: { code: 'E06', process: 'Transcribing', group: 'E', nameTh: 'ฉลากระบุตัวผู้ป่วยผิด/ติดสติ๊กเกอร์ผิดคน', desc: 'ติดสติ๊กเกอร์ชื่อผู้ป่วยผิดคนบนใบสั่งยาหรือซองยา' },
+    E11: { code: 'E11', process: 'Transcribing', group: 'E', nameTh: 'ตกหล่นคำสั่ง STAT (ไม่ติดป้ายด่วน)', desc: 'วอร์ดไม่ได้ติดป้าย STAT หรือไม่ได้แจ้งเตือนห้องยา' }
+  };
+
+  const PRESETS_CONFIG = {
+    OPD: [
+      { key: 'b29', code: 'B29', icon: '📦', title: 'จัดผิดจำนวน (ขาด/เกิน)', desc: 'หยิบเม็ดยาขาดหรือเกิน', errorType: 'ผิดจำนวน/ปริมาณ', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: '30 เม็ด', defaultExpected: '60 เม็ด' },
+      { key: 'b28', code: 'B28', icon: '💊', title: 'จัดผิดความแรง', desc: 'หยิบความแรงผิด (เช่น 10 แทน 5mg)', errorType: 'ผิดความแรง', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: '10 mg', defaultExpected: '5 mg' },
+      { key: 'b26', code: 'B26', icon: '🔄', title: 'จัดผิดชนิดยา / LASA', desc: 'หยิบผิดตัวยาใกล้เคียง', errorType: 'ผิดชนิดยา', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'Tramadol', defaultExpected: 'Paracetamol' },
+      { key: 'b30', code: 'B30', icon: '📋', title: 'ยาตกหล่น / จัดไม่ครบ', desc: 'จัดมาไม่ครบตามใบสั่ง', errorType: 'ยาตกหล่น/ไม่ครบรายการ', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: '4 รายการ', defaultExpected: '5 รายการ' },
+      { key: 'b06', code: 'B06', icon: '🏷️', title: 'คีย์วิธีใช้/ฉลากผิด', desc: 'คีย์ฉลากไม่ตรงใบสั่ง', errorType: 'วิธีใช้/วิธีบริหารยาผิด', process: 'Pre-dispensing', processStage: 'PS02', defaultStage: 'DS02', defaultActual: 'วันละ 1 ครั้ง', defaultExpected: 'วันละ 2 ครั้ง' },
+      { key: 'a01', code: 'A01', icon: '⚠️', title: 'สั่งยาที่ประวัติแพ้', desc: 'แพทย์สั่งยาที่ผู้ป่วยแพ้', errorType: 'ความคลาดเคลื่อนเกี่ยวกับประวัติแพ้ยา', process: 'Prescribing', processStage: 'PS01', defaultStage: 'DS01', defaultActual: 'Amoxicillin', defaultExpected: 'งดสั่งยาแพ้' },
+      { key: 'a11', code: 'A11', icon: '🔁', title: 'แพทย์สั่งยาซ้ำซ้อน', desc: 'สั่งยาซ้ำ 2 รายการ', errorType: 'ยาซ้ำ/ซ้ำซ้อน', process: 'Prescribing', processStage: 'PS01', defaultStage: 'DS01', defaultActual: 'สั่งซ้ำ 2 รายการ', defaultExpected: '1 รายการ' },
+      { key: 'b35', code: 'B35', icon: '🚫', title: 'ไม่ใส่ซองสีชา / ไวแสง', desc: 'ยาไวแสงไม่ใส่ซองกันแสง', errorType: 'บรรจุภัณฑ์/การป้องกันยาไม่เหมาะสม', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'ซองใส', defaultExpected: 'ซองสีชากันแสง' }
+    ],
+    IPD: [
+      { key: 'b22', code: 'B22', icon: '⚡', title: 'ตกหล่นคำสั่ง STAT/ด่วน', desc: 'มี STAT แต่ห้องยาไม่ได้รับ', errorType: 'ตกหล่นคำสั่ง STAT/ด่วน', process: 'Pre-dispensing', processStage: 'PS03', defaultStage: 'DS05', defaultActual: 'ยังไม่ได้รับคำสั่ง', defaultExpected: 'จัดส่งทันที' },
+      { key: 'b23', code: 'B23', icon: '🛑', title: 'สั่ง off แต่ยังไม่ออฟ', desc: 'แพทย์สั่ง off แต่ยังค้างในระบบ', errorType: 'ไม่หยุดยาตามคำสั่ง', process: 'Pre-dispensing', processStage: 'PS02', defaultStage: 'DS01', defaultActual: 'ยังไม่ได้ off ใน profile', defaultExpected: 'หยุดยาตามคำสั่ง' },
+      { key: 'b29_ipd', code: 'B29', icon: '📦', title: 'จัดยาผิดจำนวน', desc: 'จัดเม็ด/ampule ขาดเกิน', errorType: 'ผิดจำนวน/ปริมาณ', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'จัดไม่ครบ', defaultExpected: 'ตามจำนวนคำสั่ง' },
+      { key: 'b21', code: 'B21', icon: '📅', title: 'Continue แทน One Day', desc: 'รับ order เป็น continue', errorType: 'ผิดประเภทคำสั่งยา', process: 'Pre-dispensing', processStage: 'PS02', defaultStage: 'DS01', defaultActual: 'Continue', defaultExpected: 'One day' },
+      { key: 'b25', code: 'B25', icon: '👤', title: 'จัดยาผิดเตียง / ผิดคน', desc: 'จัดยาผิดคนไข้ทั้งชุด', errorType: 'ผิดผู้ป่วย', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'จัดใส่เตียงผิด', defaultExpected: 'ตรวจทานชื่อคนไข้' },
+      { key: 'b28_ipd', code: 'B28', icon: '💊', title: 'จัดยาผิดความแรง', desc: 'หยิบความแรงยาไม่ตรงคำสั่ง', errorType: 'ผิดความแรง', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: 'ผิดความแรง', defaultExpected: 'ตามคำสั่งแพทย์' }
+    ]
+  };
 
   let state = {
     mode: 'OPD',
     alias: '',
     deviceId: '',
     currentParsed: null,
+    currentPreset: null,
     isRecording: false,
     isSaving: false,
     mediaRecorder: null,
@@ -80,6 +147,7 @@ const CatchME = (function() {
     } else {
       updateHeaderUI();
       renderRecentReports();
+      renderPresets();
       showScreen('screen-quick-report');
     }
 
@@ -394,6 +462,10 @@ const CatchME = (function() {
   function convertGeminiToParsed(geminiData, fallbackText) {
     const transcript = geminiData.transcript || fallbackText || '';
     const isCatB = geminiData.catBEligible !== false && geminiData.patientReached !== 'Yes';
+    const stageCode = geminiData.detectedStage || 'DS02';
+    const stageMeta = DETECTED_STAGES_DICT[stageCode];
+    const stageName = stageMeta ? stageMeta.nameTh : 'ตรวจการคีย์/ฉลาก';
+
     return {
       rawTranscript: transcript,
       normalizedTranscript: transcript,
@@ -404,8 +476,8 @@ const CatchME = (function() {
       errorType: geminiData.errorType || 'Medication Error',
       process: geminiData.process || 'Pre-dispensing',
       processStage: geminiData.process === 'Prescribing' ? 'PS01' : (geminiData.process === 'Transcribing' ? 'PS07' : 'PS04'),
-      detectedStage: geminiData.detectedStage || 'DS02',
-      detectedStageName: geminiData.detectedStage === 'DS01' ? 'ขั้นตอนตรวจความถูกต้องคำสั่งใช้ยา' : (geminiData.detectedStage === 'DS04' ? 'ขั้นตอนจัดยา' : 'ขั้นตอนจัด/ตรวจสอบยาก่อนส่งมอบ'),
+      detectedStage: stageCode,
+      detectedStageName: stageName,
       confidence: 'High',
       mode: state.mode || 'OPD',
       extractedEntities: {
@@ -658,6 +730,14 @@ const CatchME = (function() {
    */
   function renderConfirmationScreen(parsed) {
     document.getElementById('confirm-risk-code').innerText = parsed.legacyCode || 'Cat B';
+    
+    // Risk Code Description Badge
+    const riskMeta = RISK_CODES_DICT[parsed.legacyCode];
+    const riskSubEl = document.getElementById('confirm-risk-code-desc');
+    if (riskSubEl) {
+      riskSubEl.innerText = riskMeta ? (riskMeta.process + ' • ' + riskMeta.nameTh) : '';
+    }
+
     document.getElementById('confirm-error-type').innerText = parsed.errorType || 'Medication Error';
     
     // Medications
@@ -690,8 +770,14 @@ const CatchME = (function() {
       expectedSpan.innerText = 'ความมั่นใจ: ' + parsed.confidence;
     }
 
-    // Detected stage
-    document.getElementById('confirm-detected-stage').innerText = (parsed.detectedStage || 'DS01') + ' — ' + (parsed.detectedStageName || 'ตรวจพบก่อนถึงผู้ป่วย');
+    // Detected stage & explanation
+    const stageMeta = DETECTED_STAGES_DICT[parsed.detectedStage];
+    const stageName = stageMeta ? stageMeta.nameTh : (parsed.detectedStageName || 'ตรวจพบก่อนถึงผู้ป่วย');
+    document.getElementById('confirm-detected-stage').innerText = (parsed.detectedStage || 'DS01') + ' — ' + stageName;
+    const stageDescEl = document.getElementById('confirm-detected-stage-desc');
+    if (stageDescEl) {
+      stageDescEl.innerText = stageMeta ? stageMeta.desc : '';
+    }
 
     // Raw transcript
     document.getElementById('confirm-raw-transcript').innerText = '"' + (parsed.rawTranscript || '') + '"';
@@ -1112,6 +1198,7 @@ const CatchME = (function() {
     state.mode = (state.mode === 'OPD') ? 'IPD' : 'OPD';
     localStorage.setItem(STORAGE_KEYS.MODE, state.mode);
     updateHeaderUI();
+    renderPresets();
   }
 
   /**
@@ -1161,6 +1248,7 @@ const CatchME = (function() {
     state.alias = alias;
 
     updateHeaderUI();
+    renderPresets();
     showScreen('screen-quick-report');
   }
 
@@ -1184,6 +1272,244 @@ const CatchME = (function() {
     }
   }
 
+  /**
+   * Renders Quick Presets based on current mode (OPD / IPD).
+   */
+  function renderPresets() {
+    const list = document.getElementById('quick-presets-list');
+    const titleEl = document.getElementById('preset-mode-title');
+    if (!list) return;
+
+    if (titleEl) {
+      titleEl.innerText = 'รายการพบบ่อย (' + state.mode + ')';
+    }
+
+    const presets = PRESETS_CONFIG[state.mode] || PRESETS_CONFIG.OPD;
+    list.innerHTML = '';
+
+    presets.forEach(function(item) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'preset-card-btn';
+      btn.innerHTML = `
+        <div class="preset-card-top">
+          <span class="preset-icon">${item.icon}</span>
+          <span class="preset-badge">${item.code}</span>
+        </div>
+        <div>
+          <div class="preset-title">${item.title}</div>
+          <div class="preset-desc">${item.desc}</div>
+        </div>
+      `;
+      btn.onclick = function() {
+        openPresetForm(item.key);
+      };
+      list.appendChild(btn);
+    });
+  }
+
+  /**
+   * Opens Quick Preset Form modal populated with default values.
+   */
+  function openPresetForm(presetKey) {
+    const presets = (PRESETS_CONFIG[state.mode] || []).concat(PRESETS_CONFIG.OPD || []).concat(PRESETS_CONFIG.IPD || []);
+    const found = presets.find(function(p) { return p.key === presetKey; });
+    if (!found) return;
+
+    state.currentPreset = found;
+
+    const badge = document.getElementById('quick-preset-badge');
+    const title = document.getElementById('quick-preset-modal-title');
+    const desc = document.getElementById('quick-preset-modal-desc');
+    const drugInput = document.getElementById('preset-drug-input');
+    const actualInput = document.getElementById('preset-actual-input');
+    const expectedInput = document.getElementById('preset-expected-input');
+    const stageSelect = document.getElementById('preset-stage-select');
+
+    if (badge) badge.innerText = found.code;
+    if (title) title.innerText = found.title;
+    if (desc) desc.innerText = found.desc + ' — แตะเลือกยาหรือจำนวน แล้วกดถัดไปเพื่อบันทึก';
+    if (drugInput) drugInput.value = '';
+    if (actualInput) actualInput.value = found.defaultActual || '';
+    if (expectedInput) expectedInput.value = found.defaultExpected || '';
+    if (stageSelect) stageSelect.value = found.defaultStage || 'DS04';
+
+    openModal('modal-quick-preset-form');
+  }
+
+  function setPresetDrug(name) {
+    const input = document.getElementById('preset-drug-input');
+    if (input) input.value = name;
+  }
+
+  function setPresetActual(val) {
+    const input = document.getElementById('preset-actual-input');
+    if (input) input.value = val;
+  }
+
+  function setPresetExpected(val) {
+    const input = document.getElementById('preset-expected-input');
+    if (input) input.value = val;
+  }
+
+  /**
+   * Submits quick preset form and routes to confirmation screen.
+   */
+  function submitQuickPresetForm() {
+    if (!state.currentPreset) return;
+
+    const drug = (document.getElementById('preset-drug-input').value || '').trim();
+    const actual = (document.getElementById('preset-actual-input').value || '').trim();
+    const expected = (document.getElementById('preset-expected-input').value || '').trim();
+    const stage = document.getElementById('preset-stage-select').value || 'DS04';
+
+    const preset = state.currentPreset;
+    const stageMeta = DETECTED_STAGES_DICT[stage];
+
+    const transcript = [
+      preset.process === 'Pre-dispensing' ? 'คนจัดยา' : (preset.process === 'Prescribing' ? 'หมอสั่ง' : 'ห้องยา'),
+      drug ? drug : '',
+      actual ? ('จัดจริง ' + actual) : '',
+      expected ? ('แต่ต้อง ' + expected) : '',
+      stageMeta ? stageMeta.nameTh : ''
+    ].filter(Boolean).join(' ');
+
+    const parsed = {
+      rawTranscript: transcript,
+      normalizedTranscript: transcript,
+      catBEligible: true,
+      patientReached: 'No',
+      safetyStopReason: '',
+      legacyCode: preset.code,
+      errorType: preset.errorType,
+      process: preset.process,
+      processStage: preset.processStage,
+      detectedStage: stage,
+      detectedStageName: stageMeta ? stageMeta.nameTh : '',
+      confidence: 'High',
+      mode: state.mode,
+      extractedEntities: {
+        drugs: drug ? [drug] : [],
+        actual: actual,
+        expected: expected
+      }
+    };
+
+    closeModal('modal-quick-preset-form');
+    handleParsedResult(parsed);
+  }
+
+  /**
+   * Code Dictionary Modal Logic.
+   */
+  function openCodeDictionary(tab, highlightCode) {
+    renderCodeDictionary();
+    if (tab === 'risk') {
+      switchDictTab('risk');
+    } else {
+      switchDictTab('stage');
+    }
+    openModal('modal-code-dictionary');
+
+    if (highlightCode) {
+      setTimeout(function() {
+        const target = document.getElementById('dict-item-' + highlightCode);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.classList.add('highlight');
+          setTimeout(function() { target.classList.remove('highlight'); }, 2000);
+        }
+      }, 200);
+    }
+  }
+
+  function switchDictTab(tab) {
+    const tabStage = document.getElementById('dict-tab-stage');
+    const tabRisk = document.getElementById('dict-tab-risk');
+    const contentStage = document.getElementById('dict-content-stage');
+    const contentRisk = document.getElementById('dict-content-risk');
+
+    if (tab === 'risk') {
+      if (tabRisk) tabRisk.classList.add('active');
+      if (tabStage) tabStage.classList.remove('active');
+      if (contentRisk) contentRisk.classList.remove('hidden');
+      if (contentStage) contentStage.classList.add('hidden');
+    } else {
+      if (tabStage) tabStage.classList.add('active');
+      if (tabRisk) tabRisk.classList.remove('active');
+      if (contentStage) contentStage.classList.remove('hidden');
+      if (contentRisk) contentRisk.classList.add('hidden');
+    }
+  }
+
+  function renderCodeDictionary() {
+    // 1. Render DS Codes
+    const stageContainer = document.getElementById('dict-content-stage');
+    if (stageContainer && !stageContainer.hasChildNodes()) {
+      Object.keys(DETECTED_STAGES_DICT).forEach(function(code) {
+        const item = DETECTED_STAGES_DICT[code];
+        const el = document.createElement('div');
+        el.id = 'dict-item-' + code;
+        el.className = 'dict-item';
+        el.innerHTML = `
+          <div class="dict-item-header">
+            <span class="dict-code stage">${item.code}</span>
+            <span class="dict-item-name">${item.nameTh}</span>
+          </div>
+          <div class="dict-item-desc">${item.desc}</div>
+          <div class="dict-item-en">${item.name}</div>
+        `;
+        stageContainer.appendChild(el);
+      });
+    }
+
+    // 2. Render Risk Codes
+    const riskContainer = document.getElementById('dict-content-risk');
+    if (riskContainer && !riskContainer.hasChildNodes()) {
+      Object.keys(RISK_CODES_DICT).forEach(function(code) {
+        const item = RISK_CODES_DICT[code];
+        const badgeClass = item.group === 'B' ? 'risk-b' : (item.group === 'A' ? 'risk-a' : 'risk-e');
+        const el = document.createElement('div');
+        el.id = 'dict-item-' + code;
+        el.className = 'dict-item';
+        el.innerHTML = `
+          <div class="dict-item-header">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="dict-code ${badgeClass}">${item.code}</span>
+              <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary);">${item.process}</span>
+            </div>
+            <span class="dict-item-name">${item.nameTh}</span>
+          </div>
+          <div class="dict-item-desc">${item.desc}</div>
+        `;
+        riskContainer.appendChild(el);
+      });
+    }
+  }
+
+  function explainCurrentRiskCode() {
+    const code = state.currentParsed ? state.currentParsed.legacyCode : 'B29';
+    openCodeDictionary('risk', code);
+  }
+
+  function explainCurrentStage() {
+    const code = state.currentParsed ? state.currentParsed.detectedStage : 'DS04';
+    openCodeDictionary('stage', code);
+  }
+
+  function selectEditRiskCode(code) {
+    const input = document.getElementById('edit-risk-code');
+    if (input) input.value = code;
+  }
+
+  function appendFallbackText(phrase) {
+    const textarea = document.getElementById('fallback-text-input');
+    if (textarea) {
+      textarea.value = (textarea.value || '') + phrase;
+      textarea.focus();
+    }
+  }
+
   return {
     init: init,
     toggleMode: toggleMode,
@@ -1203,7 +1529,19 @@ const CatchME = (function() {
     handleRedirectToIncident: handleRedirectToIncident,
     goHome: goHome,
     openModal: openModal,
-    closeModal: closeModal
+    closeModal: closeModal,
+    renderPresets: renderPresets,
+    openPresetForm: openPresetForm,
+    setPresetDrug: setPresetDrug,
+    setPresetActual: setPresetActual,
+    setPresetExpected: setPresetExpected,
+    submitQuickPresetForm: submitQuickPresetForm,
+    openCodeDictionary: openCodeDictionary,
+    switchDictTab: switchDictTab,
+    explainCurrentRiskCode: explainCurrentRiskCode,
+    explainCurrentStage: explainCurrentStage,
+    selectEditRiskCode: selectEditRiskCode,
+    appendFallbackText: appendFallbackText
   };
 })();
 

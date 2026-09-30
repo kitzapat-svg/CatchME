@@ -8,6 +8,11 @@
       <span class="brand-title">CatchME</span>
     </div>
     <div class="header-actions">
+      <!-- Code Dictionary Help Button -->
+      <button type="button" onclick="CatchME.openCodeDictionary()" style="background: none; border: 1px solid rgba(255, 143, 171, 0.4); border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="ดูคู่มือความหมายรหัส DS และ Risk Code">
+        <span>📖</span>
+        <span>รหัสคืออะไร?</span>
+      </button>
       <!-- Mode Badge Pill -->
       <div id="header-mode-badge" class="mode-badge opd" onclick="CatchME.toggleMode()" title="แตะเพื่อสลับ OPD / IPD">
         <span id="mode-text">OPD</span>
@@ -75,6 +80,22 @@
         <button type="button" class="btn-secondary" onclick="CatchME.openTextFallback()">
           <span>⌨️ พิมพ์ข้อความแทน</span>
         </button>
+
+        <!-- Quick Presets for Common Medication Errors -->
+        <div class="quick-presets-container">
+          <div class="preset-section-header">
+            <span class="preset-section-title">
+              <span>⚡</span>
+              <span id="preset-mode-title">รายการพบบ่อย (OPD)</span>
+            </span>
+            <button type="button" onclick="CatchME.openCodeDictionary('risk')" style="background: none; border: none; font-size: 11px; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline;">
+              ดูรหัสทั้งหมด
+            </button>
+          </div>
+          <div id="quick-presets-list" class="preset-grid">
+            <!-- Dynamically rendered based on OPD/IPD -->
+          </div>
+        </div>
       </div>
 
       <!-- Recent Reports On This Device -->
@@ -146,8 +167,12 @@
             <span>Category B (Near Miss)</span>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 11px; font-weight: 600; color: var(--color-text-secondary);">Risk Code</div>
+            <div style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+              <span>RISK CODE</span>
+              <button type="button" onclick="CatchME.explainCurrentRiskCode()" style="background: none; border: none; font-size: 13px; color: var(--color-primary-dark); cursor: pointer; padding: 0 2px;" title="ดูความหมายรหัสนี้">ⓘ</button>
+            </div>
             <div id="confirm-risk-code" class="risk-code-display">-</div>
+            <div id="confirm-risk-code-desc" style="font-size: 11px; font-weight: 600; color: var(--color-primary-dark); max-width: 140px; text-align: right; line-height: 1.2; margin-top: 2px;">-</div>
           </div>
         </div>
 
@@ -184,8 +209,12 @@
           </div>
 
           <div>
-            <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">จุดที่ตรวจพบ</span>
-            <div id="confirm-detected-stage" style="font-size: 13px; color: #30628A; margin-top: 2px;">-</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">จุดที่ตรวจพบ (DETECTED STAGE)</span>
+              <button type="button" onclick="CatchME.explainCurrentStage()" style="background: none; border: none; font-size: 11px; color: #1E4F8A; cursor: pointer; text-decoration: underline;" title="ดูความหมายรหัส DS ทั้งหมด">รหัส DS คืออะไร ⓘ</button>
+            </div>
+            <div id="confirm-detected-stage" style="font-size: 14px; font-weight: 700; color: #1E4F8A; margin-top: 2px;">-</div>
+            <div id="confirm-detected-stage-desc" style="font-size: 11px; color: var(--color-text-secondary); margin-top: 1px;">-</div>
           </div>
 
           <!-- Expandable Raw Transcript -->
@@ -282,6 +311,19 @@
       <div class="input-group">
         <label class="input-label" for="edit-risk-code">รหัสความเสี่ยง (Risk Code)</label>
         <input type="text" id="edit-risk-code" class="input-field" placeholder="เช่น B29, A05">
+        <div style="margin-top: 6px;">
+          <span style="font-size: 11px; color: var(--color-text-secondary);">แตะเพื่อเลือกรหัสพบบ่อย:</span>
+          <div class="chip-group" style="margin-top: 4px;">
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B29')">B29 (จัดผิดจำนวน)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B28')">B28 (จัดผิดความแรง)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B26')">B26 (จัดผิดชนิด)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B30')">B30 (ยาตกหล่น)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('B06')">B06 (คีย์ฉลากผิด)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('A05')">A05 (สั่งผิดความแรง)</span>
+            <span class="chip-pill" onclick="CatchME.selectEditRiskCode('A01')">A01 (ประวัติแพ้)</span>
+            <span class="chip-pill" onclick="CatchME.openCodeDictionary('risk')">📖 ดูทั้งหมด...</span>
+          </div>
+        </div>
       </div>
 
       <div class="input-group">
@@ -320,12 +362,144 @@
       
       <textarea id="fallback-text-input" class="input-field" rows="4" style="resize: none;" placeholder="เช่น คนจัด amlodipine มา 30 เม็ด แต่ต้อง 60 เภสัชเช็คเจอ"></textarea>
 
+      <div style="margin-top: 8px;">
+        <span style="font-size: 11px; color: var(--color-text-secondary);">แตะคำลัดช่วยพิมพ์:</span>
+        <div class="chip-group" style="margin-top: 4px;">
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('คนจัด ')">+คนจัด</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('ห้องยาคีย์ ')">+ห้องยาคีย์</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('หมอสั่ง ')">+หมอสั่ง</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('amlodipine ')">+amlodipine</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('30 เม็ด แต่ต้อง 60 เม็ด ')">+30 แต่ต้อง 60</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('10 mg แทน 5 mg ')">+10 แทน 5mg</span>
+          <span class="chip-pill" onclick="CatchME.appendFallbackText('เภสัชเช็คเจอก่อนจ่าย')">+เภสัชเช็คเจอ</span>
+        </div>
+      </div>
+
       <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
         <button type="button" class="btn-primary" onclick="CatchME.submitTextFallback()">
           <span>วิเคราะห์ข้อความ</span>
           <span>→</span>
         </button>
         <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-text-fallback')">
+          <span>ยกเลิก</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Code Dictionary Guide Modal (ความหมายรหัส DS และ Risk Code) -->
+  <div id="modal-code-dictionary" class="modal-overlay hidden">
+    <div class="catchme-card" style="max-width: 420px; width: 100%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h2 style="font-size: 18px; font-weight: 800; color: var(--color-primary-dark); display: flex; align-items: center; gap: 6px;">
+          <span>📖</span>
+          <span>คู่มือรหัสความเสี่ยง & จุดตรวจพบ</span>
+        </h2>
+        <button type="button" onclick="CatchME.closeModal('modal-code-dictionary')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="dict-tab-bar">
+        <button id="dict-tab-stage" type="button" class="dict-tab-btn active" onclick="CatchME.switchDictTab('stage')">
+          จุดตรวจพบ (DS Codes)
+        </button>
+        <button id="dict-tab-risk" type="button" class="dict-tab-btn" onclick="CatchME.switchDictTab('risk')">
+          รหัสความเสี่ยง (Risk Codes)
+        </button>
+      </div>
+
+      <!-- Tab 1: DS Codes List -->
+      <div id="dict-content-stage" class="dict-list">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Tab 2: Risk Codes List -->
+      <div id="dict-content-risk" class="dict-list hidden">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div style="margin-top: 14px; text-align: center;">
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-code-dictionary')" style="width: 100%;">
+          <span>ปิดหน้าต่าง</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Quick Preset Fill Form Modal -->
+  <div id="modal-quick-preset-form" class="modal-overlay hidden">
+    <div class="catchme-card" style="max-width: 400px; width: 100%; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+        <div>
+          <span id="quick-preset-badge" class="preset-badge">B29</span>
+          <h2 id="quick-preset-modal-title" style="font-size: 17px; font-weight: 800; color: var(--color-primary-dark); margin-top: 4px;">
+            จัดยาผิดจำนวน (ขาด/เกิน)
+          </h2>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-quick-preset-form')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer;">✕</button>
+      </div>
+      <p id="quick-preset-modal-desc" style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 14px;">
+        กรอกข้อมูลหรือเลือกตัวช่วยด้านล่าง แล้วกดถัดไป
+      </p>
+
+      <!-- Drug Name Selection -->
+      <div class="input-group">
+        <label class="input-label" for="preset-drug-input">ชื่อยาที่เกี่ยวข้อง (Medication)</label>
+        <input type="text" id="preset-drug-input" class="input-field" placeholder="เช่น Amlodipine 5mg">
+        <div style="margin-top: 6px;">
+          <span style="font-size: 11px; color: var(--color-text-secondary);">ยาพบบ่อย (แตะเพื่อเลือก):</span>
+          <div class="chip-group" style="margin-top: 4px;">
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Amlodipine')">Amlodipine</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Metformin')">Metformin</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Paracetamol')">Paracetamol</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Simvastatin')">Simvastatin</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Losartan')">Losartan</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Tramadol')">Tramadol</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Prednisolone')">Prednisolone</span>
+            <span class="chip-pill" onclick="CatchME.setPresetDrug('Omeprazole')">Omeprazole</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actual vs Expected -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+        <div class="input-group">
+          <label class="input-label" for="preset-actual-input">จัดจริง / สั่งจริง</label>
+          <input type="text" id="preset-actual-input" class="input-field" placeholder="เช่น 30 เม็ด">
+          <div class="chip-group" style="margin-top: 4px;">
+            <span class="chip-pill" onclick="CatchME.setPresetActual('30 เม็ด')">30 เม็ด</span>
+            <span class="chip-pill" onclick="CatchME.setPresetActual('10 mg')">10 mg</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="preset-expected-input">ควรเป็น</label>
+          <input type="text" id="preset-expected-input" class="input-field" placeholder="เช่น 60 เม็ด">
+          <div class="chip-group" style="margin-top: 4px;">
+            <span class="chip-pill" onclick="CatchME.setPresetExpected('60 เม็ด')">60 เม็ด</span>
+            <span class="chip-pill" onclick="CatchME.setPresetExpected('5 mg')">5 mg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detected Stage Selector -->
+      <div class="input-group" style="margin-top: 10px;">
+        <label class="input-label" for="preset-stage-select">จุดที่ตรวจพบ (Detected Stage)</label>
+        <select id="preset-stage-select" class="input-field" style="background-color: #FFFFFF;">
+          <option value="DS04">DS04 — เภสัชกรตรวจสอบยาขั้นสุดท้ายก่อนจ่าย</option>
+          <option value="DS02">DS02 — ตรวจการคีย์/ฉลาก (Data entry / label check)</option>
+          <option value="DS01">DS01 — เภสัชกรทบทวนคำสั่งยา</option>
+          <option value="DS03">DS03 — ระหว่างหยิบ/จัด/เตรียมยา</option>
+          <option value="DS05">DS05 — ก่อนส่งยาให้หอผู้ป่วย</option>
+          <option value="DS06">DS06 — หอผู้ป่วยตรวจพบก่อนถึงผู้ป่วย</option>
+        </select>
+      </div>
+
+      <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+        <button type="button" class="btn-primary" onclick="CatchME.submitQuickPresetForm()">
+          <span>ถัดไป: ตรวจสอบและบันทึก</span>
+          <span>→</span>
+        </button>
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-quick-preset-form')">
           <span>ยกเลิก</span>
         </button>
       </div>
