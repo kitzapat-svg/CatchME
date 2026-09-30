@@ -1445,7 +1445,8 @@ const CatchME = (function() {
   function renderCodeDictionary() {
     // 1. Render DS Codes
     const stageContainer = document.getElementById('dict-content-stage');
-    if (stageContainer && !stageContainer.hasChildNodes()) {
+    if (stageContainer && stageContainer.children.length === 0) {
+      stageContainer.innerHTML = '';
       Object.keys(DETECTED_STAGES_DICT).forEach(function(code) {
         const item = DETECTED_STAGES_DICT[code];
         const el = document.createElement('div');
@@ -1465,7 +1466,8 @@ const CatchME = (function() {
 
     // 2. Render Risk Codes
     const riskContainer = document.getElementById('dict-content-risk');
-    if (riskContainer && !riskContainer.hasChildNodes()) {
+    if (riskContainer && riskContainer.children.length === 0) {
+      riskContainer.innerHTML = '';
       Object.keys(RISK_CODES_DICT).forEach(function(code) {
         const item = RISK_CODES_DICT[code];
         const badgeClass = item.group === 'B' ? 'risk-b' : (item.group === 'A' ? 'risk-a' : 'risk-e');

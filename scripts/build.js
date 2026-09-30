@@ -9,7 +9,7 @@ const appHtml = fs.readFileSync(path.join(srcDir, 'App.html'), 'utf8');
 const parserGs = fs.readFileSync(path.join(srcDir, 'Parser.gs'), 'utf8');
 const scriptsHtml = fs.readFileSync(path.join(srcDir, 'Scripts.html'), 'utf8');
 
-const htmlTemplate = `<!DOCTYPE html>
+const htmlContent = `<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="utf-8">
@@ -37,7 +37,7 @@ ${scriptsHtml}
 </html>
 `;
 
-fs.writeFileSync(path.join(rootDir, 'index.html'), htmlTemplate, 'utf8');
-fs.writeFileSync(path.join(rootDir, 'tests', 'preview.html'), htmlTemplate, 'utf8');
+fs.writeFileSync(path.join(rootDir, 'index.html'), htmlContent, 'utf8');
+fs.writeFileSync(path.join(rootDir, 'tests', 'preview.html'), htmlContent, 'utf8');
 
 console.log('Build completed: index.html and tests/preview.html generated successfully.');
