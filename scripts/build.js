@@ -41,3 +41,4 @@ fs.writeFileSync(path.join(rootDir, 'index.html'), htmlContent, 'utf8');
 fs.writeFileSync(path.join(rootDir, 'tests', 'preview.html'), htmlContent, 'utf8');
 
 console.log('Build completed: index.html and tests/preview.html generated successfully.');
+

@@ -620,4 +620,246 @@
   .hidden {
     display: none !important;
   }
+
+  /* Quick Presets Section */
+  .quick-presets-container {
+    margin-top: 16px;
+    text-align: left;
+  }
+
+  .preset-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 0 2px;
+  }
+
+  .preset-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .preset-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .preset-card-btn {
+    font-family: inherit;
+    background: #FFFFFF;
+    border: 1.5px solid #FFE5EC;
+    border-radius: 16px;
+    padding: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(255, 143, 171, 0.08);
+    outline: none;
+  }
+
+  .preset-card-btn:hover {
+    border-color: var(--color-primary);
+    background: #FFFDFC;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 143, 171, 0.2);
+  }
+
+  .preset-card-btn:active {
+    transform: scale(0.97);
+  }
+
+  .preset-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .preset-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .preset-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: var(--color-primary-container);
+    color: var(--color-primary-dark);
+    letter-spacing: 0.5px;
+  }
+
+  .preset-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.3;
+  }
+
+  .preset-desc {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    line-height: 1.25;
+  }
+
+  /* Drug & Quantity Chip Pills */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .chip-pill {
+    padding: 5px 12px;
+    background: #FFF0F3;
+    border: 1px solid #FFE5EC;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-primary-dark);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    font-family: inherit;
+  }
+
+  .chip-pill:hover {
+    background: #FFE5EC;
+    border-color: var(--color-primary);
+  }
+
+  .chip-pill:active {
+    transform: scale(0.95);
+  }
+
+  .chip-pill.active {
+    background: var(--color-primary-dark);
+    color: #FFFFFF;
+    border-color: var(--color-primary-dark);
+  }
+
+  /* Code Dictionary Tabs & List */
+  .dict-tab-bar {
+    display: flex;
+    background: #FFF0F3;
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid #FFE5EC;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .dict-tab-btn {
+    flex: 1;
+    font-family: inherit;
+    border: none;
+    background: transparent;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    outline: none;
+  }
+
+  .dict-tab-btn.active {
+    background: #FFFFFF;
+    color: var(--color-primary-dark);
+    box-shadow: 0 2px 8px rgba(155, 51, 86, 0.12);
+  }
+
+  .dict-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 52vh;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .dict-item {
+    background: #FFFFFF;
+    border: 1px solid #FFE5EC;
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .dict-item.highlight {
+    background: #FFF5F7;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(255, 143, 171, 0.4);
+  }
+
+  .dict-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .dict-code {
+    display: inline-block;
+    font-family: monospace;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #F1F5F9;
+    color: #1E293B;
+  }
+
+  .dict-code.stage {
+    background: #E0F2FE;
+    color: #0369A1;
+  }
+
+  .dict-code.risk-b {
+    background: #FFE4E6;
+    color: #9F1239;
+  }
+
+  .dict-code.risk-a {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  .dict-code.risk-e {
+    background: #EDE9FE;
+    color: #5B21B6;
+  }
+
+  .dict-item-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .dict-item-desc {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.35;
+  }
+
+  .dict-item-en {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
 </style>
