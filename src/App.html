@@ -88,9 +88,15 @@
               <span>⚡</span>
               <span id="preset-mode-title">รายการพบบ่อย (OPD)</span>
             </span>
-            <button type="button" onclick="CatchME.openCodeDictionary('risk')" style="background: none; border: none; font-size: 11px; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline;">
-              ดูรหัสทั้งหมด
-            </button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" onclick="CatchME.openCustomizeModal()" style="background: none; border: 1px solid #FFE5EC; border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); cursor: pointer; padding: 3px 8px; display: flex; align-items: center; gap: 4px;" title="ปรับแต่งรายการพบบ่อย">
+                <span>⚙️</span>
+                <span>ปรับแต่ง</span>
+              </button>
+              <button type="button" onclick="CatchME.openCodeDictionary('risk')" style="background: none; border: none; font-size: 11px; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline;">
+                ดูรหัสทั้งหมด
+              </button>
+            </div>
           </div>
           <div id="quick-presets-list" class="preset-grid">
             <!-- Dynamically rendered based on OPD/IPD -->
@@ -497,6 +503,94 @@
         </button>
         <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-quick-preset-form')">
           <span>ยกเลิก</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Customize Presets Modal (ปรับแต่งรายการที่พบบ่อย) -->
+  <div id="modal-customize-presets" class="modal-overlay hidden">
+    <div class="catchme-card" style="max-width: 420px; width: 100%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h2 style="font-size: 17px; font-weight: 800; color: var(--color-primary-dark); display: flex; align-items: center; gap: 6px;">
+          <span>⚙️</span>
+          <span id="cust-modal-title">ปรับแต่งรายการพบบ่อย</span>
+        </h2>
+        <button type="button" onclick="CatchME.closeModal('modal-customize-presets')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+      <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px;">
+        เลือกเปิด/ปิดรายการที่ต้องการแสดงบนหน้าหลัก หรือสร้างปุ่มลัดใหม่เฉพาะตัว
+      </p>
+
+      <!-- Presets List with checkboxes & delete -->
+      <div id="customize-presets-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 38vh; overflow-y: auto; padding-right: 4px; margin-bottom: 12px;">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Add New Custom Preset Toggle / Box -->
+      <div style="border-top: 1px solid #FFE5EC; padding-top: 10px;">
+        <button id="btn-toggle-add-preset" type="button" class="btn-secondary" onclick="CatchME.toggleAddPresetForm()" style="font-size: 12px; padding: 8px 12px; margin-bottom: 8px; width: 100%;">
+          <span>+ สร้างปุ่มลัดใหม่ของฉัน</span>
+        </button>
+
+        <!-- Expandable Add Preset Form -->
+        <div id="add-preset-form" class="hidden" style="background: #FFF5F7; border: 1px solid #FFE5EC; border-radius: 14px; padding: 12px; margin-bottom: 10px; max-height: 30vh; overflow-y: auto;">
+          <div style="font-size: 13px; font-weight: 700; color: var(--color-primary-dark); margin-bottom: 8px;">
+            ระบุรายละเอียดปุ่มลัดใหม่
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="new-preset-code">รหัสความเสี่ยง (Risk Code)</label>
+            <select id="new-preset-code" class="input-field" style="background: #FFF;" onchange="CatchME.onNewPresetCodeChange()">
+              <!-- Populated from RISK_CODES_DICT -->
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 60px 1fr; gap: 8px;">
+            <div class="input-group">
+              <label class="input-label" for="new-preset-icon">ไอคอน</label>
+              <input type="text" id="new-preset-icon" class="input-field" value="⚡" style="text-align: center; font-size: 18px;" maxlength="2">
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="new-preset-title">ชื่อปุ่มที่แสดง</label>
+              <input type="text" id="new-preset-title" class="input-field" placeholder="เช่น จัด Amlodipine ขาด">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="new-preset-desc">คำอธิบายย่อ</label>
+            <input type="text" id="new-preset-desc" class="input-field" placeholder="เช่น หยิบไม่ครบ 60 เม็ด">
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="new-preset-drug">ชื่อยาตั้งต้น (ระบุหรือไม่ก็ได้)</label>
+            <input type="text" id="new-preset-drug" class="input-field" placeholder="เช่น Amlodipine 5mg">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div class="input-group">
+              <label class="input-label" for="new-preset-actual">จัดจริงเริ่มต้น</label>
+              <input type="text" id="new-preset-actual" class="input-field" placeholder="เช่น 30 เม็ด">
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="new-preset-expected">ควรเป็นเริ่มต้น</label>
+              <input type="text" id="new-preset-expected" class="input-field" placeholder="เช่น 60 เม็ด">
+            </div>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="CatchME.saveNewCustomPreset()" style="margin-top: 8px; padding: 9px;">
+            <span>✓ บันทึกปุ่มลัดใหม่</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+        <button type="button" onclick="CatchME.resetPresetsToDefault()" style="background: none; border: none; font-size: 11px; color: var(--color-alert-text); cursor: pointer; text-decoration: underline;">
+          คืนค่าเริ่มต้นทั้งหมด
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-customize-presets')" style="width: auto; padding: 7px 18px; font-size: 13px;">
+          <span>เสร็จสิ้น</span>
         </button>
       </div>
     </div>

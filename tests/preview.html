@@ -876,6 +876,54 @@
     color: var(--color-text-muted);
     font-style: italic;
   }
+
+  /* Customize Presets Card in Modal */
+  .custom-preset-row {
+    background: #FFFFFF;
+    border: 1.5px solid #FFE5EC;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: all 0.15s ease;
+  }
+
+  .custom-preset-row.disabled {
+    opacity: 0.5;
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+  }
+
+  .custom-preset-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .custom-preset-toggle {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-primary-dark);
+  }
+
+  .custom-preset-del-btn {
+    background: none;
+    border: none;
+    color: #94A3B8;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  .custom-preset-del-btn:hover {
+    color: #B91C1C;
+  }
 </style>
 
 </head>
@@ -970,9 +1018,15 @@
               <span>⚡</span>
               <span id="preset-mode-title">รายการพบบ่อย (OPD)</span>
             </span>
-            <button type="button" onclick="CatchME.openCodeDictionary('risk')" style="background: none; border: none; font-size: 11px; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline;">
-              ดูรหัสทั้งหมด
-            </button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" onclick="CatchME.openCustomizeModal()" style="background: none; border: 1px solid #FFE5EC; border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); cursor: pointer; padding: 3px 8px; display: flex; align-items: center; gap: 4px;" title="ปรับแต่งรายการพบบ่อย">
+                <span>⚙️</span>
+                <span>ปรับแต่ง</span>
+              </button>
+              <button type="button" onclick="CatchME.openCodeDictionary('risk')" style="background: none; border: none; font-size: 11px; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline;">
+                ดูรหัสทั้งหมด
+              </button>
+            </div>
           </div>
           <div id="quick-presets-list" class="preset-grid">
             <!-- Dynamically rendered based on OPD/IPD -->
@@ -1379,6 +1433,94 @@
         </button>
         <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-quick-preset-form')">
           <span>ยกเลิก</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Customize Presets Modal (ปรับแต่งรายการที่พบบ่อย) -->
+  <div id="modal-customize-presets" class="modal-overlay hidden">
+    <div class="catchme-card" style="max-width: 420px; width: 100%; max-height: 90vh; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <h2 style="font-size: 17px; font-weight: 800; color: var(--color-primary-dark); display: flex; align-items: center; gap: 6px;">
+          <span>⚙️</span>
+          <span id="cust-modal-title">ปรับแต่งรายการพบบ่อย</span>
+        </h2>
+        <button type="button" onclick="CatchME.closeModal('modal-customize-presets')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+      <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px;">
+        เลือกเปิด/ปิดรายการที่ต้องการแสดงบนหน้าหลัก หรือสร้างปุ่มลัดใหม่เฉพาะตัว
+      </p>
+
+      <!-- Presets List with checkboxes & delete -->
+      <div id="customize-presets-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 38vh; overflow-y: auto; padding-right: 4px; margin-bottom: 12px;">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Add New Custom Preset Toggle / Box -->
+      <div style="border-top: 1px solid #FFE5EC; padding-top: 10px;">
+        <button id="btn-toggle-add-preset" type="button" class="btn-secondary" onclick="CatchME.toggleAddPresetForm()" style="font-size: 12px; padding: 8px 12px; margin-bottom: 8px; width: 100%;">
+          <span>+ สร้างปุ่มลัดใหม่ของฉัน</span>
+        </button>
+
+        <!-- Expandable Add Preset Form -->
+        <div id="add-preset-form" class="hidden" style="background: #FFF5F7; border: 1px solid #FFE5EC; border-radius: 14px; padding: 12px; margin-bottom: 10px; max-height: 30vh; overflow-y: auto;">
+          <div style="font-size: 13px; font-weight: 700; color: var(--color-primary-dark); margin-bottom: 8px;">
+            ระบุรายละเอียดปุ่มลัดใหม่
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="new-preset-code">รหัสความเสี่ยง (Risk Code)</label>
+            <select id="new-preset-code" class="input-field" style="background: #FFF;" onchange="CatchME.onNewPresetCodeChange()">
+              <!-- Populated from RISK_CODES_DICT -->
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 60px 1fr; gap: 8px;">
+            <div class="input-group">
+              <label class="input-label" for="new-preset-icon">ไอคอน</label>
+              <input type="text" id="new-preset-icon" class="input-field" value="⚡" style="text-align: center; font-size: 18px;" maxlength="2">
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="new-preset-title">ชื่อปุ่มที่แสดง</label>
+              <input type="text" id="new-preset-title" class="input-field" placeholder="เช่น จัด Amlodipine ขาด">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="new-preset-desc">คำอธิบายย่อ</label>
+            <input type="text" id="new-preset-desc" class="input-field" placeholder="เช่น หยิบไม่ครบ 60 เม็ด">
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="new-preset-drug">ชื่อยาตั้งต้น (ระบุหรือไม่ก็ได้)</label>
+            <input type="text" id="new-preset-drug" class="input-field" placeholder="เช่น Amlodipine 5mg">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div class="input-group">
+              <label class="input-label" for="new-preset-actual">จัดจริงเริ่มต้น</label>
+              <input type="text" id="new-preset-actual" class="input-field" placeholder="เช่น 30 เม็ด">
+            </div>
+            <div class="input-group">
+              <label class="input-label" for="new-preset-expected">ควรเป็นเริ่มต้น</label>
+              <input type="text" id="new-preset-expected" class="input-field" placeholder="เช่น 60 เม็ด">
+            </div>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="CatchME.saveNewCustomPreset()" style="margin-top: 8px; padding: 9px;">
+            <span>✓ บันทึกปุ่มลัดใหม่</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+        <button type="button" onclick="CatchME.resetPresetsToDefault()" style="background: none; border: none; font-size: 11px; color: var(--color-alert-text); cursor: pointer; text-decoration: underline;">
+          คืนค่าเริ่มต้นทั้งหมด
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-customize-presets')" style="width: auto; padding: 7px 18px; font-size: 13px;">
+          <span>เสร็จสิ้น</span>
         </button>
       </div>
     </div>
@@ -2455,7 +2597,7 @@ const CatchME = (function() {
     E11: { code: 'E11', process: 'Transcribing', group: 'E', nameTh: 'ตกหล่นคำสั่ง STAT (ไม่ติดป้ายด่วน)', desc: 'วอร์ดไม่ได้ติดป้าย STAT หรือไม่ได้แจ้งเตือนห้องยา' }
   };
 
-  const PRESETS_CONFIG = {
+  const DEFAULT_PRESETS_CONFIG = {
     OPD: [
       { key: 'b29', code: 'B29', icon: '📦', title: 'จัดผิดจำนวน (ขาด/เกิน)', desc: 'หยิบเม็ดยาขาดหรือเกิน', errorType: 'ผิดจำนวน/ปริมาณ', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: '30 เม็ด', defaultExpected: '60 เม็ด' },
       { key: 'b28', code: 'B28', icon: '💊', title: 'จัดผิดความแรง', desc: 'หยิบความแรงผิด (เช่น 10 แทน 5mg)', errorType: 'ผิดความแรง', process: 'Pre-dispensing', processStage: 'PS04', defaultStage: 'DS04', defaultActual: '10 mg', defaultExpected: '5 mg' },
@@ -3642,8 +3784,15 @@ const CatchME = (function() {
       titleEl.innerText = 'รายการพบบ่อย (' + state.mode + ')';
     }
 
-    const presets = PRESETS_CONFIG[state.mode] || PRESETS_CONFIG.OPD;
+    const presets = getPresetsForCurrentMode().filter(function(item) {
+      return item.disabled !== true;
+    });
     list.innerHTML = '';
+
+    if (presets.length === 0) {
+      list.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 14px; font-size: 12px; color: var(--color-text-secondary); background: #FFF0F3; border-radius: 12px; border: 1px dashed #FFB3C6;">ยังไม่มีปุ่มลัดที่เปิดใช้งาน แตะ <strong>⚙️ ปรับแต่ง</strong> เพื่อเลือกรายการ</div>';
+      return;
+    }
 
     presets.forEach(function(item) {
       const btn = document.createElement('button');
@@ -3651,12 +3800,12 @@ const CatchME = (function() {
       btn.className = 'preset-card-btn';
       btn.innerHTML = `
         <div class="preset-card-top">
-          <span class="preset-icon">${item.icon}</span>
+          <span class="preset-icon">${item.icon || '⚡'}</span>
           <span class="preset-badge">${item.code}</span>
         </div>
         <div>
           <div class="preset-title">${item.title}</div>
-          <div class="preset-desc">${item.desc}</div>
+          <div class="preset-desc">${item.desc || ''}</div>
         </div>
       `;
       btn.onclick = function() {
@@ -3666,11 +3815,31 @@ const CatchME = (function() {
     });
   }
 
+  function getPresetsForCurrentMode() {
+    const key = 'catchme_presets_' + state.mode;
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {}
+    }
+    return JSON.parse(JSON.stringify(DEFAULT_PRESETS_CONFIG[state.mode] || DEFAULT_PRESETS_CONFIG.OPD));
+  }
+
+  function savePresetsForCurrentMode(presets) {
+    const key = 'catchme_presets_' + state.mode;
+    localStorage.setItem(key, JSON.stringify(presets));
+    renderPresets();
+  }
+
   /**
    * Opens Quick Preset Form modal populated with default values.
    */
   function openPresetForm(presetKey) {
-    const presets = (PRESETS_CONFIG[state.mode] || []).concat(PRESETS_CONFIG.OPD || []).concat(PRESETS_CONFIG.IPD || []);
+    const presets = getPresetsForCurrentMode();
     const found = presets.find(function(p) { return p.key === presetKey; });
     if (!found) return;
 
@@ -3686,11 +3855,11 @@ const CatchME = (function() {
 
     if (badge) badge.innerText = found.code;
     if (title) title.innerText = found.title;
-    if (desc) desc.innerText = found.desc + ' — แตะเลือกยาหรือจำนวน แล้วกดถัดไปเพื่อบันทึก';
-    if (drugInput) drugInput.value = '';
+    if (desc) desc.innerText = (found.desc || '') + ' — แตะเลือกยาหรือจำนวน แล้วกดถัดไปเพื่อบันทึก';
+    if (drugInput) drugInput.value = found.defaultDrug || '';
     if (actualInput) actualInput.value = found.defaultActual || '';
     if (expectedInput) expectedInput.value = found.defaultExpected || '';
-    if (stageSelect) stageSelect.value = found.defaultStage || 'DS04';
+    if (stageSelect) stageSelect.value = found.defaultStage || (found.process === 'Prescribing' ? 'DS01' : 'DS04');
 
     openModal('modal-quick-preset-form');
   }
@@ -3739,7 +3908,7 @@ const CatchME = (function() {
       patientReached: 'No',
       safetyStopReason: '',
       legacyCode: preset.code,
-      errorType: preset.errorType,
+      errorType: preset.errorType || (RISK_CODES_DICT[preset.code] ? RISK_CODES_DICT[preset.code].nameTh : 'Medication Error'),
       process: preset.process,
       processStage: preset.processStage,
       detectedStage: stage,
@@ -3755,6 +3924,186 @@ const CatchME = (function() {
 
     closeModal('modal-quick-preset-form');
     handleParsedResult(parsed);
+  }
+
+  /**
+   * Custom Presets Modal logic.
+   */
+  function openCustomizeModal() {
+    const modalTitle = document.getElementById('cust-modal-title');
+    if (modalTitle) {
+      modalTitle.innerText = 'ปรับแต่งรายการพบบ่อย (' + state.mode + ')';
+    }
+
+    // Populate Risk Code select dropdown if empty
+    const codeSelect = document.getElementById('new-preset-code');
+    if (codeSelect && codeSelect.children.length === 0) {
+      codeSelect.innerHTML = '';
+      Object.keys(RISK_CODES_DICT).forEach(function(code) {
+        const item = RISK_CODES_DICT[code];
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.innerText = item.code + ' (' + item.process + ') — ' + item.nameTh;
+        codeSelect.appendChild(opt);
+      });
+      onNewPresetCodeChange();
+    }
+
+    // Hide add form by default
+    const addForm = document.getElementById('add-preset-form');
+    if (addForm) addForm.classList.add('hidden');
+
+    renderCustomizeList();
+    openModal('modal-customize-presets');
+  }
+
+  function renderCustomizeList() {
+    const container = document.getElementById('customize-presets-list');
+    if (!container) return;
+
+    const presets = getPresetsForCurrentMode();
+    container.innerHTML = '';
+
+    presets.forEach(function(item) {
+      const row = document.createElement('div');
+      row.className = 'custom-preset-row' + (item.disabled ? ' disabled' : '');
+      const isChecked = !item.disabled;
+
+      row.innerHTML = `
+        <div class="custom-preset-info">
+          <input type="checkbox" class="custom-preset-toggle" ${isChecked ? 'checked' : ''} onchange="CatchME.togglePresetActive('${item.key}')" title="เปิด/ปิดการแสดงผลบนหน้าหลัก">
+          <span style="font-size: 20px;">${item.icon || '⚡'}</span>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 13px; font-weight: 700; color: var(--color-text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>${item.title}</span>
+              <span class="preset-badge" style="font-size: 10px; padding: 1px 5px;">${item.code}</span>
+            </div>
+            <div style="font-size: 11px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${item.desc || item.errorType || ''}
+            </div>
+          </div>
+        </div>
+        ${item.isCustom ? `<button type="button" class="custom-preset-del-btn" onclick="CatchME.deleteCustomPreset('${item.key}')" title="ลบปุ่มลัดนี้">🗑️</button>` : ''}
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  function togglePresetActive(presetKey) {
+    const presets = getPresetsForCurrentMode();
+    const item = presets.find(function(p) { return p.key === presetKey; });
+    if (item) {
+      item.disabled = !item.disabled;
+      savePresetsForCurrentMode(presets);
+      renderCustomizeList();
+    }
+  }
+
+  function toggleAddPresetForm() {
+    const addForm = document.getElementById('add-preset-form');
+    if (addForm) {
+      addForm.classList.toggle('hidden');
+      if (!addForm.classList.contains('hidden')) {
+        addForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }
+
+  function onNewPresetCodeChange() {
+    const codeSelect = document.getElementById('new-preset-code');
+    if (!codeSelect) return;
+    const code = codeSelect.value;
+    const meta = RISK_CODES_DICT[code];
+    if (!meta) return;
+
+    const titleInput = document.getElementById('new-preset-title');
+    const descInput = document.getElementById('new-preset-desc');
+    const iconInput = document.getElementById('new-preset-icon');
+
+    if (titleInput && (!titleInput.value || titleInput.dataset.autofilled)) {
+      titleInput.value = meta.nameTh;
+      titleInput.dataset.autofilled = 'true';
+    }
+    if (descInput && (!descInput.value || descInput.dataset.autofilled)) {
+      descInput.value = meta.desc;
+      descInput.dataset.autofilled = 'true';
+    }
+    if (iconInput) {
+      iconInput.value = meta.group === 'B' ? '📦' : (meta.group === 'A' ? '⚠️' : '📋');
+    }
+  }
+
+  function saveNewCustomPreset() {
+    const codeSelect = document.getElementById('new-preset-code');
+    const titleInput = document.getElementById('new-preset-title');
+    const descInput = document.getElementById('new-preset-desc');
+    const iconInput = document.getElementById('new-preset-icon');
+    const drugInput = document.getElementById('new-preset-drug');
+    const actualInput = document.getElementById('new-preset-actual');
+    const expectedInput = document.getElementById('new-preset-expected');
+
+    const code = codeSelect ? codeSelect.value : 'B29';
+    const title = titleInput ? titleInput.value.trim() : '';
+    if (!title) {
+      alert('กรุณาระบุชื่อปุ่มที่แสดง');
+      if (titleInput) titleInput.focus();
+      return;
+    }
+
+    const meta = RISK_CODES_DICT[code] || { process: 'Pre-dispensing', nameTh: title };
+    const desc = descInput ? descInput.value.trim() : meta.desc;
+    const icon = (iconInput && iconInput.value.trim()) ? iconInput.value.trim() : '⚡';
+    const drug = drugInput ? drugInput.value.trim() : '';
+    const actual = actualInput ? actualInput.value.trim() : '';
+    const expected = expectedInput ? expectedInput.value.trim() : '';
+
+    const newPreset = {
+      key: 'custom_' + Date.now().toString(36),
+      isCustom: true,
+      code: code,
+      icon: icon,
+      title: title,
+      desc: desc,
+      errorType: meta.nameTh,
+      process: meta.process,
+      processStage: meta.process === 'Prescribing' ? 'PS01' : (meta.process === 'Transcribing' ? 'PS07' : 'PS04'),
+      defaultStage: meta.process === 'Prescribing' ? 'DS01' : 'DS04',
+      defaultDrug: drug,
+      defaultActual: actual,
+      defaultExpected: expected,
+      disabled: false
+    };
+
+    const presets = getPresetsForCurrentMode();
+    presets.push(newPreset);
+    savePresetsForCurrentMode(presets);
+
+    // Reset inputs
+    if (titleInput) { titleInput.value = ''; delete titleInput.dataset.autofilled; }
+    if (descInput) { descInput.value = ''; delete descInput.dataset.autofilled; }
+    if (drugInput) drugInput.value = '';
+    if (actualInput) actualInput.value = '';
+    if (expectedInput) expectedInput.value = '';
+
+    const addForm = document.getElementById('add-preset-form');
+    if (addForm) addForm.classList.add('hidden');
+
+    renderCustomizeList();
+  }
+
+  function deleteCustomPreset(presetKey) {
+    if (!confirm('ต้องการลบปุ่มลัดนี้ใช่หรือไม่?')) return;
+    let presets = getPresetsForCurrentMode();
+    presets = presets.filter(function(p) { return p.key !== presetKey; });
+    savePresetsForCurrentMode(presets);
+    renderCustomizeList();
+  }
+
+  function resetPresetsToDefault() {
+    if (!confirm('ต้องการคืนค่ารายการพบบ่อยเป็นค่าเริ่มต้นของระบบใช่หรือไม่?')) return;
+    localStorage.removeItem('catchme_presets_' + state.mode);
+    renderPresets();
+    renderCustomizeList();
   }
 
   /**
@@ -3901,7 +4250,14 @@ const CatchME = (function() {
     explainCurrentRiskCode: explainCurrentRiskCode,
     explainCurrentStage: explainCurrentStage,
     selectEditRiskCode: selectEditRiskCode,
-    appendFallbackText: appendFallbackText
+    appendFallbackText: appendFallbackText,
+    openCustomizeModal: openCustomizeModal,
+    togglePresetActive: togglePresetActive,
+    toggleAddPresetForm: toggleAddPresetForm,
+    onNewPresetCodeChange: onNewPresetCodeChange,
+    saveNewCustomPreset: saveNewCustomPreset,
+    deleteCustomPreset: deleteCustomPreset,
+    resetPresetsToDefault: resetPresetsToDefault
   };
 })();
 

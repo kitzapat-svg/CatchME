@@ -862,4 +862,52 @@
     color: var(--color-text-muted);
     font-style: italic;
   }
+
+  /* Customize Presets Card in Modal */
+  .custom-preset-row {
+    background: #FFFFFF;
+    border: 1.5px solid #FFE5EC;
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: all 0.15s ease;
+  }
+
+  .custom-preset-row.disabled {
+    opacity: 0.5;
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+  }
+
+  .custom-preset-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .custom-preset-toggle {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-primary-dark);
+  }
+
+  .custom-preset-del-btn {
+    background: none;
+    border: none;
+    color: #94A3B8;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  .custom-preset-del-btn:hover {
+    color: #B91C1C;
+  }
 </style>
