@@ -1084,6 +1084,114 @@
     gap: 6px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.03);
   }
+
+  /* High Alert Drug (HAD) Smart Card */
+  .had-smart-card {
+    background: #FFF5F5;
+    border: 1.5px solid #FCA5A5;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08);
+  }
+
+  .had-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #FECACA;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+
+  .badge-had-cat {
+    font-size: 10px;
+    font-weight: 800;
+    background: #DC2626;
+    color: #FFFFFF;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    letter-spacing: 0.5px;
+  }
+
+  .had-card-body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Status Badges */
+  .badge-status-normal {
+    font-size: 11px;
+    font-weight: 700;
+    background: #E2E8F0;
+    color: #334155;
+    padding: 2px 8px;
+    border-radius: 9999px;
+  }
+
+  .badge-status-reviewed {
+    font-size: 11px;
+    font-weight: 700;
+    background: #DBEAFE;
+    color: #1E40AF;
+    padding: 2px 8px;
+    border-radius: 9999px;
+  }
+
+  .badge-status-void {
+    font-size: 11px;
+    font-weight: 700;
+    background: #FEE2E2;
+    color: #DC2626;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    text-decoration: line-through;
+  }
+
+  /* Contributing Factor Chips */
+  .factor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .factor-chip {
+    background: #FFFFFF;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+
+  .factor-chip:hover {
+    border-color: #3B82F6;
+    background: #EFF6FF;
+  }
+
+  .factor-chip.active {
+    background: #1E40AF;
+    border-color: #1E40AF;
+    color: #FFFFFF;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3);
+  }
+
+  /* HAD Dictionary Item Cards */
+  .had-item-card {
+    background: #FFFFFF;
+    border: 1.5px solid #FEE2E2;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
 </style>
 
 </head>
@@ -1364,6 +1472,30 @@
               <div class="input-group" style="margin-top: 8px; margin-bottom: 0;">
                 <label class="input-label" for="confirm-trade-name" style="font-size: 11px;">ชื่อการค้า/ยี่ห้อเฉพาะ (ถ้ามี เช่น บรรจุภัณฑ์คล้ายกันเฉพาะยี่ห้อนี้)</label>
                 <input type="text" id="confirm-trade-name" class="input-field" style="padding: 6px 10px; font-size: 12px;" placeholder="เช่น กล่องสีส้มคล้ายกัน, ยี่ห้อ A vs B" oninput="CatchME.updateTradeName(this.value)">
+              </div>
+            </div>
+          </div>
+
+          <!-- High Alert Drug (HAD) Safety Card -->
+          <div id="confirm-had-card" class="had-smart-card hidden">
+            <div class="had-card-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">⚠️</span>
+                <span style="font-size: 13px; font-weight: 800; color: #991B1B;">ยาความเสี่ยงสูง (High Alert Drug: HAD)</span>
+              </div>
+              <span id="confirm-had-cat-badge" class="badge-had-cat">หมวด 1</span>
+            </div>
+            <div class="had-card-body">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; font-weight: 800; color: #7F1D1D;" id="confirm-had-drug-name">-</div>
+                <button type="button" onclick="CatchME.openHadDictionary()" style="background: none; border: none; font-size: 11px; font-weight: 700; color: #B91C1C; cursor: pointer; text-decoration: underline;">
+                  บัญชี HAD รพ.สวรรคโลก ⓘ
+                </button>
+              </div>
+              <div style="font-size: 11px; color: #991B1B; margin-top: 3px; line-height: 1.3;" id="confirm-had-alert-msg">-</div>
+              <div style="font-size: 11px; color: #78350F; background: #FEF3C7; border-radius: 6px; padding: 4px 8px; margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+                <span>📋</span>
+                <span id="confirm-had-cat-name">-</span>
               </div>
             </div>
           </div>
@@ -1804,6 +1936,359 @@
     </div>
   </div>
 
+  <!-- Modal: Report Detail Modal / Drawer -->
+  <div id="modal-report-detail" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">📄</span>
+            <h2 style="font-size: 17px; font-weight: 800; color: var(--color-primary-dark); margin: 0;">
+              รายละเอียดเหตุการณ์
+            </h2>
+            <span id="detail-status-badge" class="badge-status-normal">Confirmed</span>
+          </div>
+          <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 4px;">
+            <span id="detail-mode-badge" style="font-weight: 700; color: var(--color-primary-dark);">OPD</span> • 
+            <span id="detail-created-at">-</span> • 
+            บันทึกโดย: <span id="detail-reporter-alias" style="font-weight: 600;">-</span>
+          </div>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-report-detail')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Transcript Card -->
+      <div style="background: #FFF5F7; border-left: 3px solid var(--color-primary); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px;">
+        <span style="font-size: 10px; font-weight: 700; color: var(--color-primary-dark); text-transform: uppercase;">ข้อความเสียงต้นฉบับ:</span>
+        <div id="detail-raw-transcript" style="font-size: 13px; color: var(--color-text-primary); font-style: italic; margin-top: 2px;">"-"</div>
+      </div>
+
+      <!-- Detail Grid -->
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+        <div style="background: #F8FAFC; border-radius: 8px; padding: 10px; border: 1px solid #E2E8F0;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary);">ความคลาดเคลื่อน / รหัสความเสี่ยง</span>
+            <span id="detail-legacy-code" style="font-size: 12px; font-weight: 800; background: var(--color-primary); color: white; padding: 2px 8px; border-radius: 6px;">-</span>
+          </div>
+          <div id="detail-error-type" style="font-size: 14px; font-weight: 700; color: var(--color-text-primary); margin-top: 4px;">-</div>
+          <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
+            ขั้นตอน: <span id="detail-process-stage" style="color: var(--color-text-secondary); font-weight: 600;">-</span> | 
+            ตรวจพบที่: <span id="detail-detected-stage" style="color: #1E4F8A; font-weight: 600;">-</span>
+          </div>
+        </div>
+
+        <!-- Drug & Values -->
+        <div style="background: #F8FAFC; border-radius: 8px; padding: 10px; border: 1px solid #E2E8F0;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary);">ยาที่เกี่ยวข้อง</span>
+            <span id="detail-drug-name" style="font-size: 13px; font-weight: 700; color: var(--color-primary-dark);">-</span>
+          </div>
+          <div class="comparison-row" style="margin-top: 6px;">
+            <span id="detail-actual" class="val-actual">จัดจริง: -</span>
+            <span id="detail-expected" class="val-expected">ควรเป็น: -</span>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--color-text-secondary);">
+            <span>HN: <strong id="detail-hn">-</strong></span>
+            <span>AN: <strong id="detail-an">-</strong></span>
+            <span>Ward/จุดเกิด: <strong id="detail-ward">-</strong></span>
+          </div>
+        </div>
+
+        <!-- Safety Flags Section -->
+        <div id="detail-safety-section" style="display: flex; flex-direction: column; gap: 6px;">
+          <div id="detail-lasa-banner" class="hidden" style="background: #FDF2F8; border: 1px solid #FBCFE8; border-radius: 6px; padding: 8px 10px; font-size: 12px;">
+            <span style="color: #9D174D; font-weight: 700;">🏷️ คู่ยา LASA:</span> 
+            <span id="detail-lasa-pair" style="font-weight: 600; color: #831843;">-</span>
+          </div>
+          <div id="detail-had-banner" class="hidden" style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; padding: 8px 10px; font-size: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="color: #991B1B; font-weight: 800;">⚠️ High Alert Drug (HAD):</span>
+              <span id="detail-had-cat" style="font-size: 10px; background: #B91C1C; color: white; padding: 1px 6px; border-radius: 4px;">-</span>
+            </div>
+            <div id="detail-had-drug" style="font-weight: 700; color: #7F1D1D; margin-top: 2px;">-</div>
+          </div>
+          <div id="detail-void-banner" class="hidden" style="background: #F1F5F9; border: 1px dashed #94A3B8; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: #475569;">
+            <strong style="color: #DC2626;">🚫 รายการนี้ถูกยกเลิก (VOID):</strong>
+            <div id="detail-void-reason" style="margin-top: 2px; font-style: italic;">-</div>
+          </div>
+        </div>
+
+        <!-- Review Summary (If Reviewed) -->
+        <div id="detail-review-section" class="hidden" style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; font-weight: 800; color: #1E40AF;">🩺 ผลการทบทวนความปลอดภัย (ME Review)</span>
+            <span id="detail-review-status" style="font-size: 10px; font-weight: 700; background: #2563EB; color: white; padding: 1px 6px; border-radius: 4px;">CLOSED</span>
+          </div>
+          <div style="font-size: 11px; color: #1E3A8A; margin-top: 4px;">
+            ผู้ทบทวน: <strong id="detail-reviewed-by">-</strong> • <span id="detail-reviewed-at">-</span>
+          </div>
+          <div style="font-size: 11px; color: #1E3A8A; margin-top: 4px;" id="detail-contributing-factors-row">
+            <strong>ปัจจัยเชิงระบบ:</strong> <span id="detail-contributing-factors">-</span>
+          </div>
+          <div style="font-size: 11px; color: #1E3A8A; margin-top: 2px;" id="detail-actions-row">
+            <strong>มาตรการแก้ไข:</strong> <span id="detail-actions">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button type="button" id="btn-detail-edit" class="btn-secondary" onclick="CatchME.openQuickEditCurrent()" style="flex: 1; padding: 8px; font-size: 12px;">
+          <span>✏️ แก้ไขข้อมูล</span>
+        </button>
+        <button type="button" id="btn-detail-void" class="btn-secondary" onclick="CatchME.openVoidCurrent()" style="flex: 1; padding: 8px; font-size: 12px; color: #DC2626; border-color: #FECACA;">
+          <span>🚫 ยกเลิกเคส</span>
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.openSafetyReviewCurrent()" style="flex: 1.2; padding: 8px; font-size: 12px; background: linear-gradient(135deg, #1E4F8A 0%, #0F3260 100%);">
+          <span>🩺 ทบทวน (Review)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Quick Edit Form Modal -->
+  <div id="modal-quick-edit" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 420px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <h2 style="font-size: 16px; font-weight: 800; color: var(--color-primary-dark); margin: 0;">
+            ✏️ แก้ไขข้อมูลรายงาน
+          </h2>
+          <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+            แก้ไขรายละเอียดเคสที่บันทึกจากเครื่องนี้
+          </p>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-quick-edit')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="edit-field-drug">ชื่อยา (Medication Name)</label>
+          <input type="text" id="edit-field-drug" class="input-field" placeholder="เช่น Warfarin 3mg">
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="edit-field-strength">ความแรง (Strength)</label>
+          <input type="text" id="edit-field-strength" class="input-field" placeholder="เช่น 3 mg, 10 mg/ml">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="edit-field-actual">จัดจริง / สั่งจริง</label>
+            <input type="text" id="edit-field-actual" class="input-field" placeholder="เช่น 5 mg">
+          </div>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="edit-field-expected">ควรเป็น</label>
+            <input type="text" id="edit-field-expected" class="input-field" placeholder="เช่น 3 mg">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="edit-field-hn">HN (ถ้ามี)</label>
+            <input type="text" id="edit-field-hn" class="input-field" placeholder="เช่น 66012345">
+          </div>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="edit-field-ward">Ward / จุดเกิดเหตุ</label>
+            <input type="text" id="edit-field-ward" class="input-field" placeholder="เช่น หอผู้ป่วยชาย, ห้องยา">
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-quick-edit')" style="width: auto; padding: 7px 16px; font-size: 13px;">
+          ยกเลิก
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.submitQuickEdit()" style="width: auto; padding: 7px 20px; font-size: 13px;">
+          <span>✓ บันทึกแก้ไข</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: VOID Confirmation Modal -->
+  <div id="modal-void-report" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 400px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 22px;">🚫</span>
+        <h2 style="font-size: 16px; font-weight: 800; color: #DC2626; margin: 0;">
+          ยืนยันการยกเลิกรายงาน (VOID)
+        </h2>
+      </div>
+      <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px; line-height: 1.4;">
+        ข้อมูลจะไม่ถูกลบออกจากฐานข้อมูล แต่จะถูกทำเครื่องหมายเป็น <strong>VOID</strong> พร้อมบันทึกเหตุผลในระบบ Audit Log เพื่อความโปร่งใส
+      </p>
+
+      <div class="input-group">
+        <label class="input-label" for="void-reason-input" style="color: #991B1B;">เหตุผลในการยกเลิก (ระบุจำเป็น)</label>
+        <textarea id="void-reason-input" class="input-field" rows="3" placeholder="เช่น รายงานซ้ำซ้อน, กรอกข้อมูลทดสอบระบบ, ผู้ป่วยถูกยกเลิกคำสั่งยา"></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-void-report')" style="width: auto; padding: 7px 16px; font-size: 13px;">
+          ย้อนกลับ
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.submitVoidReport()" style="width: auto; padding: 7px 20px; font-size: 13px; background: #DC2626;">
+          <span>🚫 ยืนยันยกเลิกเคส</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Medication Safety Review Drawer / Modal -->
+  <div id="modal-safety-review" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 480px; max-height: 92vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 20px;">🩺</span>
+            <h2 style="font-size: 17px; font-weight: 800; color: #1E4F8A; margin: 0;">
+              Medication Safety Review
+            </h2>
+          </div>
+          <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+            แบบทบทวนความปลอดภัยทางยาและวิเคราะห์ปัจจัยเชิงระบบ (Pharmacist Reviewer)
+          </p>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-safety-review')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Reviewer & Status -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="review-field-reviewer">เภสัชกรผู้ทบทวน</label>
+            <input type="text" id="review-field-reviewer" class="input-field" placeholder="ชื่อ/รหัสเภสัชกร">
+          </div>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="review-field-status">สถานะการทบทวน</label>
+            <select id="review-field-status" class="input-field" style="font-size: 12px;">
+              <option value="CLOSED">CLOSED (เสร็จสิ้น)</option>
+              <option value="OPEN">OPEN (ติดตามต่อ)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Risk Characteristics Verification -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">คุณลักษณะความเสี่ยง (Risk Characteristics)</span>
+          <div style="display: flex; gap: 16px; margin-top: 6px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-text-primary); cursor: pointer;">
+              <input type="checkbox" id="review-check-lasa">
+              <span>🏷️ เป็นคู่ยา LASA</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-text-primary); cursor: pointer;">
+              <input type="checkbox" id="review-check-had">
+              <span>⚠️ เป็นยาเสี่ยงสูง (HAD)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Contributing Factors (Systemic Checklist) -->
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">ปัจจัยเชิงระบบที่ส่งผล (Contributing Factors)</span>
+          <p style="font-size: 11px; color: var(--color-text-muted); margin-top: 1px; margin-bottom: 6px;">แตะเลือกปัจจัยที่ตรวจพบได้มากกว่าหนึ่งข้อ:</p>
+          <div id="contributing-factors-chips" class="factor-grid">
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Look-alike packaging')">📦 เม็ดยา/บรรจุภัณฑ์คล้าย</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Sound-alike name')">🔊 ชื่อยาพ้องรูป/พ้องเสียง</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Storage proximity')">🗄️ จัดเก็บวางใกล้เคียงกัน</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'High workload / Rush')">⏳ ภาระงานหนาแน่น/เร่งรีบ</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Interruption / Distraction')">🔔 ถูกขัดจังหวะ/สิ่งรบกวน</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Illegible handwriting')">📝 ลายมือแพทย์อ่านยาก</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'New staff / Inexperienced')">👤 เจ้าหน้าที่ใหม่/ขาดทักษะ</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'System / Display glitch')">💻 ระบบคอมพิวเตอร์/จอแสดงผล</button>
+          </div>
+        </div>
+
+        <!-- Immediate & Corrective Action -->
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="review-field-immediate">การแก้ไขจัดการทันที (Immediate Action)</label>
+          <input type="text" id="review-field-immediate" class="input-field" placeholder="เช่น เปลี่ยนยาให้ถูกต้องก่อนจ่าย, แจ้งแพทย์ปรับแก้ไข">
+        </div>
+
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="review-field-corrective">แนวทางป้องกันเชิงระบบ (Corrective / Preventive Action)</label>
+          <input type="text" id="review-field-corrective" class="input-field" placeholder="เช่น ติดป้ายเตือน LASA, ย้ายตำแหน่งจัดเก็บ, เพิ่ม Alert ในระบบ">
+        </div>
+
+        <!-- Follow-up & Notes -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-text-primary); cursor: pointer; margin-top: 18px;">
+            <input type="checkbox" id="review-check-followup" onchange="CatchME.toggleFollowUpDue(this.checked)">
+            <span>ต้องติดตามผล (Follow-up)</span>
+          </label>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="review-field-due">กำหนดวันที่ติดตาม</label>
+            <input type="date" id="review-field-due" class="input-field" disabled>
+          </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="review-field-notes">บันทึกข้อเสนอแนะเพิ่มเติม (Review Notes)</label>
+          <textarea id="review-field-notes" class="input-field" rows="2" placeholder="ความคิดเห็นเพิ่มเติมของเภสัชกรผู้ทบทวน"></textarea>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-safety-review')" style="width: auto; padding: 7px 16px; font-size: 13px;">
+          ยกเลิก
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.submitSafetyReview()" style="width: auto; padding: 7px 22px; font-size: 13px; background: linear-gradient(135deg, #1E4F8A 0%, #0F3260 100%);">
+          <span>✓ บันทึกผลการทบทวน</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Sawankhalok Hospital High Alert Drugs (HAD) Dictionary Modal -->
+  <div id="modal-had-dictionary" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 20px;">📋</span>
+            <h2 style="font-size: 17px; font-weight: 800; color: #991B1B; margin: 0;">
+              บัญชียาความเสี่ยงสูง (High Alert Drugs)
+            </h2>
+          </div>
+          <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+            กลุ่มงานเภสัชกรรมและคุ้มครองผู้บริโภค โรงพยาบาลสวรรคโลก (29 รายการ 3 หมวดหมู่)
+          </p>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-had-dictionary')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div style="display: flex; gap: 4px; margin-bottom: 12px;">
+        <button type="button" id="tab-had-all" class="btn-secondary active" onclick="CatchME.filterHadCategory(0)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+          ทั้งหมด (29)
+        </button>
+        <button type="button" id="tab-had-cat1" class="btn-secondary" onclick="CatchME.filterHadCategory(1)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+          หมวด 1 (22)
+        </button>
+        <button type="button" id="tab-had-cat2" class="btn-secondary" onclick="CatchME.filterHadCategory(2)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+          หมวด 2 (5)
+        </button>
+        <button type="button" id="tab-had-cat3" class="btn-secondary" onclick="CatchME.filterHadCategory(3)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+          หมวด 3 (2)
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="input-group" style="margin-bottom: 10px;">
+        <input type="text" id="had-search-input" class="input-field" placeholder="🔍 ค้นหายา HAD (เช่น Warfarin, Insulin, 10%)..." oninput="CatchME.searchHadList(this.value)">
+      </div>
+
+      <!-- HAD List Container -->
+      <div id="had-dictionary-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto; padding-right: 2px;">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+        <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-had-dictionary')" style="width: auto; padding: 7px 18px; font-size: 13px;">
+          <span>ปิดหน้าต่าง</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Tagline Footer -->
   <footer class="tagline-footer">
     Catch ME before it reaches the patient.
@@ -1934,7 +2419,30 @@
     { name: 'Risperidone', key: 'risperidone', patterns: [/risperidone/gi, /ริสเพอริโดน/gi, /ริสเพอริดอน/gi, /ริสเพอริ/gi] },
     { name: 'Seretide', key: 'seretide', patterns: [/seretide(?:\s*evohaler)?/gi, /evohaler/gi, /เซเรไทด์/gi, /เซริไทด์/gi, /ซีรีไทด์/gi] },
     { name: 'Ferrous sulfate', key: 'ferrous sulfate', patterns: [/ferrous(?:\s*sulfate)?/gi, /เฟอร์รัส(?:\s*ซัลเฟต)?/gi, /เฟอรัส/gi, /ธาตุเหล็ก/gi] },
-    { name: 'Ibuprofen', key: 'ibuprofen', patterns: [/ibuprofen/gi, /ไอบูโพรเฟน/gi, /ไอบูโปรเฟน/gi, /ไอบู/gi] }
+    { name: 'Ibuprofen', key: 'ibuprofen', patterns: [/ibuprofen/gi, /ไอบูโพรเฟน/gi, /ไอบูโปรเฟน/gi, /ไอบู/gi] },
+    // Sawankhalok Hospital High Alert Drugs (HAD)
+    { name: 'Adrenaline', key: 'adrenaline', patterns: [/adrenaline/gi, /อะดรีนาลีน/gi, /epinephrine/gi, /เอพิเนฟริน/gi] },
+    { name: 'Dobutamine', key: 'dobutamine', patterns: [/dobutamine/gi, /โดบูทามีน/gi, /โดบูตามีน/gi, /dobutrex/gi] },
+    { name: 'Dopamine', key: 'dopamine', patterns: [/dopamine/gi, /โดพามีน/gi, /โดปามีน/gi, /inotropin/gi] },
+    { name: 'Nicardipine', key: 'nicardipine', patterns: [/nicardipine/gi, /นิคาร์ดิปีน/gi, /นิคาร์ดิพีน/gi, /cardene/gi] },
+    { name: 'Nitroglycerine', key: 'nitroglycerine', patterns: [/nitroglycerine/gi, /nitroglycerin/gi, /ไนโตรกลีเซอรีน/gi, /\bntg\b/gi] },
+    { name: 'Adenosine', key: 'adenosine', patterns: [/adenosine/gi, /อะดีโนซีน/gi, /adenocor/gi] },
+    { name: 'Cisatracurium', key: 'cisatracurium', patterns: [/cisatracurium/gi, /ซิสอะทราคูเรียม/gi, /nimbex/gi] },
+    { name: 'Oxytocin', key: 'oxytocin', patterns: [/oxytocin/gi, /ออกซิโทซิน/gi, /ออกซิโตซิน/gi, /syntocinon/gi] },
+    { name: 'Terbutaline', key: 'terbutaline', patterns: [/terbutaline/gi, /เทอร์บูทาลีน/gi, /bricanyl/gi, /บริคานิล/gi] },
+    { name: 'Apixaban', key: 'apixaban', patterns: [/apixaban/gi, /อะพิกซาแบน/gi, /eliquis/gi, /เอลิควิส/gi] },
+    { name: 'Heparin', key: 'heparin', patterns: [/heparin/gi, /เฮพาริน/gi, /เฮพารีน/gi] },
+    { name: 'Streptokinase', key: 'streptokinase', patterns: [/streptokinase/gi, /สเตรปโตไคเนส/gi, /streptase/gi] },
+    { name: '3% Sodium Chloride', key: '3% sodium chloride', patterns: [/3%\s*sodium\s*chloride/gi, /3%\s*nacl/gi, /3%\s*โซเดียมคลอไรด์/gi] },
+    { name: '10% Calcium gluconate', key: '10% calcium gluconate', patterns: [/10%\s*calcium\s*gluconate/gi, /calcium\s*gluconate/gi, /แคลเซียมกลูโคเนต/gi] },
+    { name: 'Magnesium Sulfate', key: 'magnesium sulfate', patterns: [/magnesium\s*sulfate/gi, /\bmgso4\b/gi, /แมกนีเซียมซัลเฟต/gi] },
+    { name: 'Regular Insulin', key: 'regular insulin', patterns: [/regular\s*insulin/gi, /\bri\b/gi, /actrapid/gi, /humulin\s*r/gi, /อินซูลิน/gi] },
+    { name: 'Fentanyl', key: 'fentanyl', patterns: [/fentanyl/gi, /เฟนทานิล/gi, /sublimaze/gi] },
+    { name: 'Morphine', key: 'morphine', patterns: [/morphine/gi, /มอร์ฟีน/gi, /mst\b/gi] },
+    { name: 'Pethidine', key: 'pethidine', patterns: [/pethidine/gi, /เพทิดีน/gi, /เปทิดีน/gi, /demerol/gi] },
+    { name: 'Midazolam', key: 'midazolam', patterns: [/midazolam/gi, /ไมด้าโซแลม/gi, /มิดาโซแลม/gi, /dormicum/gi, /ดอร์มิคุม/gi] },
+    { name: 'Ketamine', key: 'ketamine', patterns: [/ketamine/gi, /เคตามีน/gi, /ketalar/gi] },
+    { name: 'Allopurinol', key: 'allopurinol', patterns: [/allopurinol/gi, /อัลโลพูรินอล/gi, /zyloric/gi] }
   ];
 
   // Hospital LASA Master Reference
@@ -2145,6 +2653,334 @@
       lasaType: 'Sound-alike',
       scope: 'IPD',
       riskLevel: 'High Alert Drug'
+    }
+  ];
+
+  // Sawankhalok Hospital High Alert Drugs (HAD) List — 29 Items Across 3 Categories
+  var HOSPITAL_HAD_LIST = [
+    // --- หมวดที่ 1: ยาที่มีช่วงความปลอดภัยในการรักษาแคบ หรือผลของความคลาดเคลื่อนก่อให้เกิดผลเสียรุนแรงต่อผู้ป่วย (22 รายการ) ---
+    {
+      hadId: 'HAD-01',
+      genericName: 'Adrenaline',
+      key: 'adrenaline',
+      patterns: [/adrenaline|อะดรีนาลีน|\bepinephrine\b|เอพิเนฟริน/i],
+      dosageForm: 'injection',
+      strengths: ['1 mg/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ระวังหัวใจเต้นผิดจังหวะ / ความดันโลหิตสูงวิกฤต'
+    },
+    {
+      hadId: 'HAD-02',
+      genericName: 'Norepinephrine',
+      key: 'norepinephrine',
+      patterns: [/norepinephrine|นอร์เอพิเนฟริน|นอร์อิพิเนฟริน|noradrenaline|เลโวเฟด|levophed/i],
+      dosageForm: 'injection',
+      strengths: ['4 mg/4ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ห้าม IV push เด็ดขาด ต้องให้ผ่าน Infusion pump และระวัง Extravasation'
+    },
+    {
+      hadId: 'HAD-03',
+      genericName: 'Dobutamine',
+      key: 'dobutamine',
+      patterns: [/dobutamine|โดบูทามีน|โดบูตามีน|dobutrex/i],
+      dosageForm: 'injection',
+      strengths: ['250 mg/5ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ติดตาม HR, BP, ECG อย่างใกล้ชิด'
+    },
+    {
+      hadId: 'HAD-04',
+      genericName: 'Dopamine',
+      key: 'dopamine',
+      patterns: [/dopamine|โดพามีน|โดปามีน|inotropin/i],
+      dosageForm: 'injection',
+      strengths: ['250 mg/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ควบคุมผ่าน Infusion pump ระวัง Extravasation'
+    },
+    {
+      hadId: 'HAD-05',
+      genericName: 'Digoxin',
+      key: 'digoxin',
+      patterns: [/digoxin|ไดจอกซิน|ไดก๊อกซิน|lanoxin|ลานอกซิน/i],
+      dosageForm: 'injection, tablet',
+      strengths: ['0.25 mg/ml', '0.25 mg'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ช่วงการรักษาแคบ ตรวจสอบ HR และระดับ K+ ก่อนให้ยา'
+    },
+    {
+      hadId: 'HAD-06',
+      genericName: 'Nicardipine',
+      key: 'nicardipine',
+      patterns: [/nicardipine|นิคาร์ดิปีน|นิคาร์ดิพีน|cardene/i],
+      dosageForm: 'injection',
+      strengths: ['10 mg/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ระวังความดันโลหิตตกอย่างรวดเร็ว ตรวจวัด BP ทุก 5-15 นาที'
+    },
+    {
+      hadId: 'HAD-07',
+      genericName: 'Nitroglycerine',
+      key: 'nitroglycerine',
+      patterns: [/nitroglycerine|nitroglycerin|ไนโตรกลีเซอรีน|ntg/i],
+      dosageForm: 'injection',
+      strengths: ['50 mg/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ใช้สายให้ยา Non-PVC ติดตาม BP อย่างสม่ำเสมอ'
+    },
+    {
+      hadId: 'HAD-08',
+      genericName: 'Adenosine',
+      key: 'adenosine',
+      patterns: [/adenosine|อะดีโนซีน|adenocor/i],
+      dosageForm: 'injection',
+      strengths: ['6 mg/2ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'Rapid IV push ตามด้วย NSS flush ทันที ติดตาม ECG'
+    },
+    {
+      hadId: 'HAD-09',
+      genericName: 'Amiodarone',
+      key: 'amiodarone',
+      patterns: [/amiodarone|อะมิโอดาโรน|อามิโอดาโรน|cordarone|คอร์ดาโรน/i],
+      dosageForm: 'injection',
+      strengths: ['150 mg/3ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ผสมใน D5W เท่านั้น ห้ามผสม NSS ติดตาม BP และ ECG'
+    },
+    {
+      hadId: 'HAD-10',
+      genericName: 'Cisatracurium',
+      key: 'cisatracurium',
+      patterns: [/cisatracurium|ซิสอะทราคูเรียม|ซิสอาทราคูเรียม|nimbex/i],
+      dosageForm: 'injection',
+      strengths: ['10 mg/5ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ยาหย่อนกล้ามเนื้อ ต้องมั่นใจว่าผู้ป่วยใส่ท่อช่วยหายใจแล้วเท่านั้น'
+    },
+    {
+      hadId: 'HAD-11',
+      genericName: 'Oxytocin',
+      key: 'oxytocin',
+      patterns: [/oxytocin|ออกซิโทซิน|ออกซิโตซิน|syntocinon/i],
+      dosageForm: 'injection',
+      strengths: ['10 unit/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ควบคุมผ่าน Infusion pump ระวัง Uterine rupture / Fetal distress'
+    },
+    {
+      hadId: 'HAD-12',
+      genericName: 'Terbutaline',
+      key: 'terbutaline',
+      patterns: [/terbutaline|เทอร์บูทาลีน|bricanyl|บริคานิล/i],
+      dosageForm: 'injection',
+      strengths: ['0.5 mg/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ระวัง Tachycardia, Tremor, Hypokalemia'
+    },
+    {
+      hadId: 'HAD-13',
+      genericName: 'Apixaban',
+      key: 'apixaban',
+      patterns: [/apixaban|อะพิกซาแบน|eliquis|เอลิควิส/i],
+      dosageForm: 'tablet',
+      strengths: ['5 mg', '2.5 mg'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ยากลุ่ม NOAC ระวังภาวะเลือดออกผิดปกติ และปรับขนาดยาตามไต/อายุ/น้ำหนัก'
+    },
+    {
+      hadId: 'HAD-14',
+      genericName: 'Enoxaparin',
+      key: 'enoxaparin',
+      patterns: [/enoxaparin|อีนอกซาพาริน|clexane|คลีเซน/i],
+      dosageForm: 'injection',
+      strengths: ['60 mg/0.6ml', '40 mg/0.4ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ฉีด Subcut บริเวณหน้าท้อง ห้ามไล่ฟองอากาศในเข็มสำเร็จรูป'
+    },
+    {
+      hadId: 'HAD-15',
+      genericName: 'Heparin',
+      key: 'heparin',
+      patterns: [/heparin|เฮพาริน|เฮพารีน/i],
+      dosageForm: 'injection',
+      strengths: ['25000 IU/5ml', '5000 IU/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ติดตาม aPTT สม่ำเสมอ ระวังภาวะเลือดออกและ HIT'
+    },
+    {
+      hadId: 'HAD-16',
+      genericName: 'Streptokinase',
+      key: 'streptokinase',
+      patterns: [/streptokinase|สเตรปโตไคเนส|streptase/i],
+      dosageForm: 'injection',
+      strengths: ['1.5 mIU/Vial'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ยาสลายลิ่มเลือด ระวัง Major bleeding และ Allergic reaction'
+    },
+    {
+      hadId: 'HAD-17',
+      genericName: 'Warfarin',
+      key: 'warfarin',
+      patterns: [/warfarin|วาร์ฟาริน|วาร์ฟารีน|coumadin|orfarin/i],
+      dosageForm: 'tablet',
+      strengths: ['1 mg', '2 mg', '3 mg', '5 mg'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ติดตามค่า INR สม่ำเสมอ ระวัง Drug Interaction สูง'
+    },
+    {
+      hadId: 'HAD-18',
+      genericName: '3% Sodium Chloride',
+      key: '3% sodium chloride',
+      patterns: [/3%\s*sodium\s*chloride|3%\s*nacl|3%\s*โซเดียมคลอไรด์|3\s*เปอร์เซ็นต์\s*nacl/i],
+      dosageForm: 'sterile solution',
+      strengths: ['500 ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'โซเดียมเข้มข้นสูง ระวัง Hypernatremia / ODS ให้ผ่าน Infusion pump'
+    },
+    {
+      hadId: 'HAD-19',
+      genericName: '10% Calcium gluconate',
+      key: '10% calcium gluconate',
+      patterns: [/10%\s*calcium\s*gluconate|calcium\s*gluconate|แคลเซียมกลูโคเนต|10%\s*แคลเซียม/i],
+      dosageForm: 'injection',
+      strengths: ['1 g/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ห้ามฉีดเร็ว อาจเกิด Cardiac arrest หรือ Extravasation necrosis'
+    },
+    {
+      hadId: 'HAD-20',
+      genericName: 'Magnesium Sulfate',
+      key: 'magnesium sulfate',
+      patterns: [/magnesium\s*sulfate|mgso4|แมกนีเซียมซัลเฟต/i],
+      dosageForm: 'injection',
+      strengths: ['1 g/10ml (10%)', '1 g/2ml (50%)'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ติดตาม DTR, RR, Urine output ระวัง Mg toxicity'
+    },
+    {
+      hadId: 'HAD-21',
+      genericName: 'Potassium Chloride',
+      key: 'potassium chloride',
+      patterns: [/potassium\s*chloride|kcl|โพแทสเซียมคลอไรด์/i],
+      dosageForm: 'injection',
+      strengths: ['20 mEq/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ห้าม IV push เด็ดขาด ต้องเจือจางและให้ผ่าน Infusion pump เท่านั้น'
+    },
+    {
+      hadId: 'HAD-22',
+      genericName: 'Regular Insulin',
+      key: 'regular insulin',
+      patterns: [/regular\s*insulin|\bri\b|actrapid|humulin\s*r|อินซูลิน/i],
+      dosageForm: 'injection',
+      strengths: ['1000 IU/10ml', '100 IU/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ระวัง Hypoglycemia ใช้เข็มฉีด Insulin โดยเฉพาะ'
+    },
+
+    // --- หมวดที่ 2: ยาเสพติดให้โทษประเภทที่ 2 และ วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2 (5 รายการ) ---
+    {
+      hadId: 'HAD-23',
+      genericName: 'Fentanyl',
+      key: 'fentanyl',
+      patterns: [/fentanyl|เฟนทานิล|sublimaze/i],
+      dosageForm: 'injection',
+      strengths: ['50 mcg/ml (2ml, 10ml)'],
+      categoryNo: 2,
+      categoryName: 'ยาเสพติดให้โทษประเภทที่ 2',
+      alertMessage: 'กดการหายใจรุนแรง ต้องมี Naloxone พร้อมใช้'
+    },
+    {
+      hadId: 'HAD-24',
+      genericName: 'Morphine',
+      key: 'morphine',
+      patterns: [/morphine|มอร์ฟีน|morphine\s*sulfate|mst/i],
+      dosageForm: 'injection, tablet',
+      strengths: ['10 mg/ml', '10 mg', '30 mg'],
+      categoryNo: 2,
+      categoryName: 'ยาเสพติดให้โทษประเภทที่ 2',
+      alertMessage: 'ติดตามอัตราการหายใจ (RR < 10/min) และระดับความรู้สึกตัว'
+    },
+    {
+      hadId: 'HAD-25',
+      genericName: 'Pethidine',
+      key: 'pethidine',
+      patterns: [/pethidine|เพทิดีน|เปทิดีน|demerol/i],
+      dosageForm: 'injection',
+      strengths: ['50 mg/ml'],
+      categoryNo: 2,
+      categoryName: 'ยาเสพติดให้โทษประเภทที่ 2',
+      alertMessage: 'ระวังพิษสะสม Norpethidine ชักได้ หลีกเลี่ยงในผู้ป่วยไตบกพร่อง'
+    },
+    {
+      hadId: 'HAD-26',
+      genericName: 'Midazolam',
+      key: 'midazolam',
+      patterns: [/midazolam|ไมด้าโซแลม|มิดาโซแลม|dormicum|ดอร์มิคุม/i],
+      dosageForm: 'injection',
+      strengths: ['5 mg/ml (1ml, 3ml)'],
+      categoryNo: 2,
+      categoryName: 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2',
+      alertMessage: 'ระวัง Respiratory depression และ Sedation ลึกเกินไป'
+    },
+    {
+      hadId: 'HAD-27',
+      genericName: 'Ketamine',
+      key: 'ketamine',
+      patterns: [/ketamine|เคตามีน|ketalar/i],
+      dosageForm: 'injection',
+      strengths: ['500 mg/10ml'],
+      categoryNo: 2,
+      categoryName: 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2',
+      alertMessage: 'เฝ้าระวังความดันโลหิต ชีพจร และ Hallucination ขณะฟื้นตัว'
+    },
+
+    // --- หมวดที่ 3: ยาที่เกิดอุบัติการณ์ความคลาดเคลื่อนทางยาในระดับรุนแรง (2 รายการ) ---
+    {
+      hadId: 'HAD-28',
+      genericName: 'Allopurinol',
+      key: 'allopurinol',
+      patterns: [/allopurinol|อัลโลพูรินอล|zyloric/i],
+      dosageForm: 'tablet',
+      strengths: ['100 mg', '300 mg'],
+      categoryNo: 3,
+      categoryName: 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง',
+      alertMessage: 'เสี่ยงแพ้ยารุนแรง SCARs/SJS/TEN ต้องตรวจยีน HLA-B*5801 และปรับตามไต'
+    },
+    {
+      hadId: 'HAD-29',
+      genericName: 'Phenytoin',
+      key: 'phenytoin',
+      patterns: [/phenytoin|ฟีนิโทอิน|dilantin|ไดแลนติน/i],
+      dosageForm: 'oral, injection',
+      strengths: ['oral 50 mg, 100 mg', 'inj 50mg/ml'],
+      categoryNo: 3,
+      categoryName: 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง',
+      alertMessage: 'ช่วงการรักษาแคบ ระวัง Purple glove syndrome, Arrythmia, Nystagmus, Ataxia'
     }
   ];
 
@@ -2564,6 +3400,76 @@
     };
   }
 
+  function detectHadInfo(text, entities) {
+    var lower = text.toLowerCase();
+    var bestHad = null;
+    var earliestPos = Infinity;
+
+    for (var i = 0; i < HOSPITAL_HAD_LIST.length; i++) {
+      var had = HOSPITAL_HAD_LIST[i];
+      var matched = false;
+      var pos = -1;
+
+      // 1. Direct key search
+      pos = lower.indexOf(had.key);
+      if (pos !== -1) {
+        matched = true;
+      }
+
+      // 2. Pattern search
+      if (!matched && had.patterns && had.patterns.length > 0) {
+        for (var p = 0; p < had.patterns.length; p++) {
+          var m = had.patterns[p].exec(lower);
+          if (m) {
+            matched = true;
+            pos = m.index;
+            break;
+          }
+        }
+      }
+
+      // 3. Extracted entity matching
+      if (!matched && entities && entities.drugs && entities.drugs.length > 0) {
+        for (var d = 0; d < entities.drugs.length; d++) {
+          var drug = entities.drugs[d].toLowerCase();
+          if (drug === had.key || drug.indexOf(had.key) !== -1 || had.key.indexOf(drug) !== -1) {
+            matched = true;
+            pos = lower.indexOf(drug);
+            if (pos === -1) pos = 0;
+            break;
+          }
+        }
+      }
+
+      if (matched && pos !== -1 && pos < earliestPos) {
+        earliestPos = pos;
+        bestHad = had;
+      }
+    }
+
+    if (bestHad) {
+      return {
+        isHad: true,
+        hadId: bestHad.hadId,
+        genericName: bestHad.genericName,
+        categoryNo: bestHad.categoryNo,
+        categoryName: bestHad.categoryName,
+        alertMessage: bestHad.alertMessage,
+        strengths: bestHad.strengths
+      };
+    }
+
+    return {
+      isHad: false,
+      hadId: '',
+      genericName: '',
+      categoryNo: 0,
+      categoryName: '',
+      alertMessage: '',
+      strengths: []
+    };
+  }
+
   function extractEntities(text) {
     var lower = text.toLowerCase();
     var drugsFound = [];
@@ -2649,6 +3555,7 @@
     }
 
     var lasaInfo = detectLasaInfo(normalized, entities, parseResult, currentMode);
+    var hadInfo = detectHadInfo(normalized, entities);
 
     return {
       parserVersion: PARSER_VERSION,
@@ -2674,6 +3581,10 @@
       lasaDispensed: lasaInfo.lasaDispensed,
       lasaPairKey: lasaInfo.lasaPairKey,
       lasaMatchedMaster: lasaInfo.matchedMaster,
+      isHad: hadInfo.isHad,
+      hadCategory: hadInfo.categoryName || '',
+      hadDrug: hadInfo.genericName || '',
+      hadDetails: hadInfo.isHad ? hadInfo : null,
       tradeName: '',
       extractedEntities: {
         drugs: entities.drugs,
@@ -3276,6 +4187,8 @@
     parseMedicationError: parseMedicationError,
     detectLasaInfo: detectLasaInfo,
     HOSPITAL_LASA_PAIRS: HOSPITAL_LASA_PAIRS,
+    detectHadInfo: detectHadInfo,
+    HOSPITAL_HAD_LIST: HOSPITAL_HAD_LIST,
     DETECTED_STAGES: DETECTED_STAGES
   };
 });
@@ -4086,11 +4999,41 @@ const CatchME = (function() {
     // Render Smart LASA Card
     renderLasaCard(parsed);
 
+    // Render High Alert Drug (HAD) Card
+    renderHadCard(parsed);
+
     // Reset save button state
     const saveBtn = document.getElementById('btn-save-report');
     if (saveBtn) {
       saveBtn.disabled = false;
       saveBtn.innerHTML = '<span>บันทึก (Save)</span><span>✓</span>';
+    }
+  }
+
+  /**
+   * Renders the High Alert Drug (HAD) Card on confirmation screen.
+   */
+  function renderHadCard(parsed) {
+    const hadCard = document.getElementById('confirm-had-card');
+    if (!hadCard) return;
+
+    if (parsed && parsed.isHad) {
+      hadCard.classList.remove('hidden');
+      const drugNameEl = document.getElementById('confirm-had-drug-name');
+      const alertMsgEl = document.getElementById('confirm-had-alert-msg');
+      const catBadgeEl = document.getElementById('confirm-had-cat-badge');
+      const catNameEl = document.getElementById('confirm-had-cat-name');
+
+      const hadDetails = parsed.hadDetails || {};
+      const genericName = hadDetails.genericName || parsed.hadDrug || 'High Alert Drug';
+      const strengths = (hadDetails.strengths && hadDetails.strengths.length > 0) ? ' (' + hadDetails.strengths.join(', ') + ')' : '';
+
+      if (drugNameEl) drugNameEl.innerText = genericName + strengths;
+      if (alertMsgEl) alertMsgEl.innerText = hadDetails.alertMessage || 'ยาความเสี่ยงสูงของ รพ.สวรรคโลก ระวังผลกระทบรุนแรง';
+      if (catBadgeEl) catBadgeEl.innerText = 'หมวด ' + (hadDetails.categoryNo || 1);
+      if (catNameEl) catNameEl.innerText = hadDetails.categoryName || 'ยาเสี่ยงสูง รพ.สวรรคโลก';
+    } else {
+      hadCard.classList.add('hidden');
     }
   }
 
@@ -4415,7 +5358,10 @@ const CatchME = (function() {
       lasaPrescribed: state.currentParsed.lasaPrescribed || (state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.expected : ''),
       lasaDispensed: state.currentParsed.lasaDispensed || (state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.actual : ''),
       lasaPairKey: state.currentParsed.lasaPairKey || '',
-      tradeName: state.currentTradeName || state.currentParsed.tradeName || ''
+      tradeName: state.currentTradeName || state.currentParsed.tradeName || '',
+      isHad: (state.currentParsed && state.currentParsed.isHad) ? 'Yes' : 'No',
+      hadCategory: (state.currentParsed && (state.currentParsed.hadCategory || (state.currentParsed.hadDetails ? state.currentParsed.hadDetails.categoryName : ''))) || '',
+      hadDrug: (state.currentParsed && (state.currentParsed.hadDrug || (state.currentParsed.hadDetails ? state.currentParsed.hadDetails.genericName : ''))) || ''
     };
 
     const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxcYrhDehjEu0lngU7o64v4ldrhYuXmfnJJnRyTt0x7d7GhK2SEb9G8z1SAWcKLVsGfCA/exec';
@@ -4479,9 +5425,23 @@ const CatchME = (function() {
     addRecentReport({
       recordId: recordId,
       time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+      createdAt: new Date().toISOString(),
+      mode: payload.mode || state.mode || 'OPD',
       legacyCode: payload.legacyCode || 'Cat B',
       errorType: payload.errorType,
-      drugName: payload.drugName
+      drugName: payload.drugName,
+      actual: payload.actual,
+      expected: payload.expected,
+      isLasa: payload.isLasa === 'Yes',
+      lasaType: payload.lasaType,
+      isHad: payload.isHad === 'Yes',
+      hadCategory: payload.hadCategory,
+      hadDrug: payload.hadDrug,
+      rawTranscript: payload.rawTranscript,
+      process: payload.process,
+      processStage: payload.processStage,
+      detectedStage: payload.detectedStage,
+      status: 'Confirmed'
     });
 
     state.currentParsed = null;
@@ -4520,19 +5480,41 @@ const CatchME = (function() {
     }
 
     list.innerHTML = '';
-    recent.slice(0, 5).forEach(function(item) {
+    recent.slice(0, 6).forEach(function(item) {
       const itemEl = document.createElement('div');
-      itemEl.style.cssText = 'background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;';
+      const isVoid = item.status === 'VOID';
+      itemEl.style.cssText = 'background: ' + (isVoid ? '#F1F5F9' : '#FFFFFF') + '; border: 1.5px solid ' + (isVoid ? '#CBD5E1' : '#FFE5EC') + '; border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);';
+      
+      let badgesHtml = '';
+      if (isVoid) {
+        badgesHtml += '<span class="badge-status-void">VOID</span>';
+      } else if (item.status === 'Reviewed') {
+        badgesHtml += '<span class="badge-status-reviewed">Reviewed</span>';
+      }
+
+      if (item.isHad) {
+        badgesHtml += '<span style="font-size: 10px; font-weight: 800; background: #DC2626; color: white; padding: 1px 6px; border-radius: 4px;">⚠️ HAD</span>';
+      }
+      if (item.isLasa) {
+        badgesHtml += '<span style="font-size: 10px; font-weight: 800; background: #C9184A; color: white; padding: 1px 6px; border-radius: 4px;">🏷️ LASA</span>';
+      }
+
       itemEl.innerHTML = `
-        <div>
-          <div style="font-size: 14px; font-weight: 700; color: var(--color-text-primary);">${item.errorType || item.legacyCode}</div>
-          <div style="font-size: 12px; color: var(--color-text-secondary);">${item.drugName || '-'}</div>
+        <div style="flex: 1; min-width: 0; padding-right: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span style="font-size: 14px; font-weight: 700; color: ` + (isVoid ? '#64748B' : 'var(--color-text-primary)') + `; text-decoration: ` + (isVoid ? 'line-through' : 'none') + `;">${item.errorType || item.legacyCode}</span>
+            ${badgesHtml}
+          </div>
+          <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; text-decoration: ` + (isVoid ? 'line-through' : 'none') + `;">${item.drugName || '-'}</div>
         </div>
-        <div style="text-align: right;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--color-primary-dark);">${item.legacyCode}</span>
+        <div style="text-align: right; flex-shrink: 0;">
+          <span style="font-size: 13px; font-weight: 800; color: ` + (isVoid ? '#94A3B8' : 'var(--color-primary-dark)') + `;">${item.legacyCode}</span>
           <div style="font-size: 11px; color: var(--color-text-muted);">${item.time || ''}</div>
         </div>
       `;
+      itemEl.onclick = function() {
+        openReportDetail(item.recordId);
+      };
       list.appendChild(itemEl);
     });
   }
@@ -5438,6 +6420,470 @@ const CatchME = (function() {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Phase 2: Report Detail, Edit, VOID & Medication Safety Review
+  // ---------------------------------------------------------------------------
+
+  const HOSPITAL_HAD_DATA = [
+    { id: 'HAD-01', name: 'Adrenaline', form: 'injection', strength: '1 mg/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ระวังหัวใจเต้นผิดจังหวะ / ความดันโลหิตสูงวิกฤต' },
+    { id: 'HAD-02', name: 'Norepinephrine (Levophed)', form: 'injection', strength: '4 mg/4ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ห้าม IV push เด็ดขาด ต้องให้ผ่าน Infusion pump และระวัง Extravasation' },
+    { id: 'HAD-03', name: 'Dobutamine (Dobutrex)', form: 'injection', strength: '250 mg/5ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ติดตาม HR, BP, ECG อย่างใกล้ชิด' },
+    { id: 'HAD-04', name: 'Dopamine (Inotropin)', form: 'injection', strength: '250 mg/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ควบคุมผ่าน Infusion pump ระวัง Extravasation' },
+    { id: 'HAD-05', name: 'Digoxin (Lanoxin)', form: 'injection, tablet', strength: '0.25 mg/ml, 0.25 mg', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ช่วงการรักษาแคบ ตรวจสอบ HR และระดับ K+ ก่อนให้ยา' },
+    { id: 'HAD-06', name: 'Nicardipine (Cardene)', form: 'injection', strength: '10 mg/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ระวังความดันโลหิตตกอย่างรวดเร็ว ตรวจวัด BP ทุก 5-15 นาที' },
+    { id: 'HAD-07', name: 'Nitroglycerine (NTG)', form: 'injection', strength: '50 mg/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ใช้สายให้ยา Non-PVC ติดตาม BP อย่างสม่ำเสมอ' },
+    { id: 'HAD-08', name: 'Adenosine (Adenocor)', form: 'injection', strength: '6 mg/2ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'Rapid IV push ตามด้วย NSS flush ทันที ติดตาม ECG' },
+    { id: 'HAD-09', name: 'Amiodarone (Cordarone)', form: 'injection', strength: '150 mg/3ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ผสมใน D5W เท่านั้น ห้ามผสม NSS ติดตาม BP และ ECG' },
+    { id: 'HAD-10', name: 'Cisatracurium (Nimbex)', form: 'injection', strength: '10 mg/5ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ยาหย่อนกล้ามเนื้อ ต้องมั่นใจว่าผู้ป่วยใส่ท่อช่วยหายใจแล้วเท่านั้น' },
+    { id: 'HAD-11', name: 'Oxytocin (Syntocinon)', form: 'injection', strength: '10 unit/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ควบคุมผ่าน Infusion pump ระวัง Uterine rupture / Fetal distress' },
+    { id: 'HAD-12', name: 'Terbutaline (Bricanyl)', form: 'injection', strength: '0.5 mg/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ระวัง Tachycardia, Tremor, Hypokalemia' },
+    { id: 'HAD-13', name: 'Apixaban (Eliquis)', form: 'tablet', strength: '5 mg, 2.5 mg', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ยากลุ่ม NOAC ระวังภาวะเลือดออกผิดปกติ และปรับขนาดยาตามไต/อายุ/น้ำหนัก' },
+    { id: 'HAD-14', name: 'Enoxaparin (Clexane)', form: 'injection', strength: '60 mg/0.6ml, 40 mg/0.4ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ฉีด Subcut บริเวณหน้าท้อง ห้ามไล่ฟองอากาศในเข็มสำเร็จรูป' },
+    { id: 'HAD-15', name: 'Heparin', form: 'injection', strength: '25000 IU/5ml, 5000 IU/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ติดตาม aPTT สม่ำเสมอ ระวังภาวะเลือดออกและ HIT' },
+    { id: 'HAD-16', name: 'Streptokinase (Streptase)', form: 'injection', strength: '1.5 mIU/Vial', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ยาสลายลิ่มเลือด ระวัง Major bleeding และ Allergic reaction' },
+    { id: 'HAD-17', name: 'Warfarin (Coumadin/Orfarin)', form: 'tablet', strength: '1 mg, 2 mg, 3 mg, 5 mg', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ติดตามค่า INR สม่ำเสมอ ระวัง Drug Interaction สูง' },
+    { id: 'HAD-18', name: '3% Sodium Chloride', form: 'sterile solution', strength: '500 ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'โซเดียมเข้มข้นสูง ระวัง Hypernatremia / ODS ให้ผ่าน Infusion pump' },
+    { id: 'HAD-19', name: '10% Calcium gluconate', form: 'injection', strength: '1 g/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ห้ามฉีดเร็ว อาจเกิด Cardiac arrest หรือ Extravasation necrosis' },
+    { id: 'HAD-20', name: 'Magnesium Sulfate (MgSO4)', form: 'injection', strength: '1 g/10ml (10%), 1 g/2ml (50%)', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ติดตาม DTR, RR, Urine output ระวัง Mg toxicity' },
+    { id: 'HAD-21', name: 'Potassium Chloride (KCl)', form: 'injection', strength: '20 mEq/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ห้าม IV push เด็ดขาด ต้องเจือจางและให้ผ่าน Infusion pump เท่านั้น' },
+    { id: 'HAD-22', name: 'Regular Insulin (RI / Actrapid)', form: 'injection', strength: '1000 IU/10ml, 100 IU/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ระวัง Hypoglycemia ใช้เข็มฉีด Insulin โดยเฉพาะ' },
+    { id: 'HAD-23', name: 'Fentanyl (Sublimaze)', form: 'injection', strength: '50 mcg/ml (2ml, 10ml)', cat: 2, catName: 'ยาเสพติดให้โทษประเภทที่ 2', msg: 'กดการหายใจรุนแรง ต้องมี Naloxone พร้อมใช้' },
+    { id: 'HAD-24', name: 'Morphine', form: 'injection, tablet', strength: '10 mg/ml, 10 mg, 30 mg', cat: 2, catName: 'ยาเสพติดให้โทษประเภทที่ 2', msg: 'ติดตามอัตราการหายใจ (RR < 10/min) และระดับความรู้สึกตัว' },
+    { id: 'HAD-25', name: 'Pethidine (Demerol)', form: 'injection', strength: '50 mg/ml', cat: 2, catName: 'ยาเสพติดให้โทษประเภทที่ 2', msg: 'ระวังพิษสะสม Norpethidine ชักได้ หลีกเลี่ยงในผู้ป่วยไตบกพร่อง' },
+    { id: 'HAD-26', name: 'Midazolam (Dormicum)', form: 'injection', strength: '5 mg/ml (1ml, 3ml)', cat: 2, catName: 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2', msg: 'ระวัง Respiratory depression และ Sedation ลึกเกินไป' },
+    { id: 'HAD-27', name: 'Ketamine (Ketalar)', form: 'injection', strength: '500 mg/10ml', cat: 2, catName: 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2', msg: 'เฝ้าระวังความดันโลหิต ชีพจร และ Hallucination ขณะฟื้นตัว' },
+    { id: 'HAD-28', name: 'Allopurinol (Zyloric)', form: 'tablet', strength: '100 mg, 300 mg', cat: 3, catName: 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง', msg: 'เสี่ยงแพ้ยารุนแรง SCARs/SJS/TEN ต้องตรวจยีน HLA-B*5801 และปรับตามไต' },
+    { id: 'HAD-29', name: 'Phenytoin (Dilantin)', form: 'oral, injection', strength: 'oral 50 mg, 100 mg, inj 50mg/ml', cat: 3, catName: 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง', msg: 'ช่วงการรักษาแคบ ระวัง Purple glove syndrome, Arrythmia, Nystagmus, Ataxia' }
+  ];
+
+  function openReportDetail(recordId) {
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]'); } catch (e) {}
+    let item = recent.find(function(r) { return r.recordId === recordId; }) || { recordId: recordId };
+
+    state.currentDetailRecordId = recordId;
+    state.currentDetailReport = item;
+
+    populateDetailModal(item);
+    openModal('modal-report-detail');
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(serverReport) {
+          if (serverReport) {
+            state.currentDetailReport = serverReport;
+            populateDetailModal(serverReport);
+          }
+        })
+        .apiGetReportDetail(recordId);
+    }
+  }
+
+  function populateDetailModal(r) {
+    if (!r) return;
+
+    // Status Badge
+    const statusBadge = document.getElementById('detail-status-badge');
+    const isVoid = r.status === 'VOID';
+    if (statusBadge) {
+      statusBadge.innerText = r.status || 'Confirmed';
+      statusBadge.className = isVoid ? 'badge-status-void' : (r.status === 'Reviewed' ? 'badge-status-reviewed' : 'badge-status-normal');
+    }
+
+    // Header info
+    const modeBadge = document.getElementById('detail-mode-badge');
+    if (modeBadge) modeBadge.innerText = r.mode || state.mode || 'OPD';
+    const createdAtEl = document.getElementById('detail-created-at');
+    if (createdAtEl) createdAtEl.innerText = r.createdAt ? new Date(r.createdAt).toLocaleString('th-TH') : (r.time || '-');
+    const aliasEl = document.getElementById('detail-reporter-alias');
+    if (aliasEl) aliasEl.innerText = r.reporterAlias || state.alias || 'Anon';
+
+    // Transcript
+    const rawTranscriptEl = document.getElementById('detail-raw-transcript');
+    if (rawTranscriptEl) rawTranscriptEl.innerText = '"' + (r.rawTranscript || r.normalizedTranscript || '-') + '"';
+
+    // Risk Code & Error Type
+    const codeEl = document.getElementById('detail-legacy-code');
+    if (codeEl) codeEl.innerText = r.legacyCode || '-';
+    const errorEl = document.getElementById('detail-error-type');
+    if (errorEl) errorEl.innerText = r.errorType || '-';
+    const procEl = document.getElementById('detail-process-stage');
+    if (procEl) procEl.innerText = (r.process || '-') + (r.processStage ? ' (' + r.processStage + ')' : '');
+    const stageEl = document.getElementById('detail-detected-stage');
+    if (stageEl) stageEl.innerText = r.detectedStage || '-';
+
+    // Drug and comparison
+    const drugEl = document.getElementById('detail-drug-name');
+    if (drugEl) drugEl.innerText = r.drugName || '-';
+    const actEl = document.getElementById('detail-actual');
+    if (actEl) actEl.innerText = 'จัดจริง/สั่งจริง: ' + (r.actual || '-');
+    const expEl = document.getElementById('detail-expected');
+    if (expEl) expEl.innerText = 'ควรเป็น: ' + (r.expected || '-');
+
+    const hnEl = document.getElementById('detail-hn');
+    if (hnEl) hnEl.innerText = r.hn || '-';
+    const anEl = document.getElementById('detail-an');
+    if (anEl) anEl.innerText = r.an || '-';
+    const wardEl = document.getElementById('detail-ward');
+    if (wardEl) wardEl.innerText = r.wardClinic || '-';
+
+    // Safety Banners
+    const lasaBanner = document.getElementById('detail-lasa-banner');
+    const lasaPairEl = document.getElementById('detail-lasa-pair');
+    if (lasaBanner) {
+      if (r.isLasa) {
+        lasaBanner.classList.remove('hidden');
+        if (lasaPairEl) lasaPairEl.innerText = (r.lasaPairKey || r.drugName || 'Look-alike/Sound-alike') + (r.lasaType ? ' (' + r.lasaType + ')' : '');
+      } else {
+        lasaBanner.classList.add('hidden');
+      }
+    }
+
+    const hadBanner = document.getElementById('detail-had-banner');
+    const hadDrugEl = document.getElementById('detail-had-drug');
+    const hadCatEl = document.getElementById('detail-had-cat');
+    if (hadBanner) {
+      if (r.isHad) {
+        hadBanner.classList.remove('hidden');
+        if (hadDrugEl) hadDrugEl.innerText = r.hadDrug || r.drugName || 'High Alert Drug';
+        if (hadCatEl) hadCatEl.innerText = r.hadCategory || 'HAD รพ.สวรรคโลก';
+      } else {
+        hadBanner.classList.add('hidden');
+      }
+    }
+
+    const voidBanner = document.getElementById('detail-void-banner');
+    const voidReasonEl = document.getElementById('detail-void-reason');
+    if (voidBanner) {
+      if (isVoid) {
+        voidBanner.classList.remove('hidden');
+        if (voidReasonEl) voidReasonEl.innerText = r.voidReason || 'ไม่มีการระบุเหตุผล';
+      } else {
+        voidBanner.classList.add('hidden');
+      }
+    }
+
+    // Review section
+    const reviewSec = document.getElementById('detail-review-section');
+    if (reviewSec) {
+      if (r.review || r.status === 'Reviewed') {
+        reviewSec.classList.remove('hidden');
+        const rv = r.review || {};
+        document.getElementById('detail-review-status').innerText = rv.reviewStatus || 'CLOSED';
+        document.getElementById('detail-reviewed-by').innerText = rv.reviewedBy || r.reviewedBy || '-';
+        document.getElementById('detail-reviewed-at').innerText = rv.reviewedAt ? new Date(rv.reviewedAt).toLocaleDateString('th-TH') : (r.reviewedAt || '-');
+        document.getElementById('detail-contributing-factors').innerText = rv.contributingFactors || '-';
+        document.getElementById('detail-actions').innerText = (rv.immediateAction ? 'เฉพาะหน้า: ' + rv.immediateAction : '') + (rv.correctiveAction ? ' | ป้องกัน: ' + rv.correctiveAction : '-');
+      } else {
+        reviewSec.classList.add('hidden');
+      }
+    }
+
+    // Action button states if void
+    const editBtn = document.getElementById('btn-detail-edit');
+    const voidBtn = document.getElementById('btn-detail-void');
+    if (editBtn) editBtn.disabled = isVoid;
+    if (voidBtn) voidBtn.disabled = isVoid;
+  }
+
+  function openQuickEditCurrent() {
+    const r = state.currentDetailReport;
+    if (!r) return;
+    document.getElementById('edit-field-drug').value = r.drugName || '';
+    document.getElementById('edit-field-strength').value = r.strength || '';
+    document.getElementById('edit-field-actual').value = r.actual || '';
+    document.getElementById('edit-field-expected').value = r.expected || '';
+    document.getElementById('edit-field-hn').value = r.hn || '';
+    document.getElementById('edit-field-ward').value = r.wardClinic || '';
+    openModal('modal-quick-edit');
+  }
+
+  function submitQuickEdit() {
+    const recordId = state.currentDetailRecordId;
+    if (!recordId) return;
+
+    const updateData = {
+      drugName: document.getElementById('edit-field-drug').value.trim(),
+      strength: document.getElementById('edit-field-strength').value.trim(),
+      actual: document.getElementById('edit-field-actual').value.trim(),
+      expected: document.getElementById('edit-field-expected').value.trim(),
+      hn: document.getElementById('edit-field-hn').value.trim(),
+      wardClinic: document.getElementById('edit-field-ward').value.trim()
+    };
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            alert('✓ บันทึกการแก้ไขข้อมูลเรียบร้อยแล้ว');
+            closeModal('modal-quick-edit');
+            syncRecentReportEdit(recordId, updateData);
+            openReportDetail(recordId);
+          } else {
+            alert('ไม่สามารถแก้ไขได้: ' + (res ? res.error : 'Unknown error'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .apiUpdateReport(recordId, updateData, state.deviceId, state.alias);
+    } else {
+      syncRecentReportEdit(recordId, updateData);
+      closeModal('modal-quick-edit');
+      openReportDetail(recordId);
+      alert('✓ บันทึกการแก้ไขข้อมูล (Local Preview) เรียบร้อยแล้ว');
+    }
+  }
+
+  function syncRecentReportEdit(recordId, updateData) {
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]'); } catch (e) {}
+    for (let i = 0; i < recent.length; i++) {
+      if (recent[i].recordId === recordId) {
+        if (updateData.drugName) recent[i].drugName = updateData.drugName;
+        if (updateData.actual) recent[i].actual = updateData.actual;
+        if (updateData.expected) recent[i].expected = updateData.expected;
+        if (updateData.hn) recent[i].hn = updateData.hn;
+        if (updateData.wardClinic) recent[i].wardClinic = updateData.wardClinic;
+        break;
+      }
+    }
+    localStorage.setItem(STORAGE_KEYS.RECENT_REPORTS, JSON.stringify(recent));
+    renderRecentReports();
+    if (state.currentDetailReport && state.currentDetailReport.recordId === recordId) {
+      Object.assign(state.currentDetailReport, updateData);
+    }
+  }
+
+  function openVoidCurrent() {
+    document.getElementById('void-reason-input').value = '';
+    openModal('modal-void-report');
+  }
+
+  function submitVoidReport() {
+    const recordId = state.currentDetailRecordId;
+    const reason = document.getElementById('void-reason-input').value.trim();
+    if (!recordId) return;
+    if (!reason) {
+      alert('กรุณาระบุเหตุผลในการยกเลิกรายงาน (VOID)');
+      return;
+    }
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            alert('✓ ยกเลิกรายงาน (VOID) เรียบร้อยแล้ว');
+            closeModal('modal-void-report');
+            syncRecentReportVoid(recordId, reason);
+            openReportDetail(recordId);
+          } else {
+            alert('ไม่สามารถยกเลิกได้: ' + (res ? res.error : 'Unknown error'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .apiVoidReport(recordId, reason, state.deviceId, state.alias);
+    } else {
+      syncRecentReportVoid(recordId, reason);
+      closeModal('modal-void-report');
+      openReportDetail(recordId);
+      alert('✓ ยกเลิกรายงาน (VOID Local Preview) เรียบร้อยแล้ว');
+    }
+  }
+
+  function syncRecentReportVoid(recordId, reason) {
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]'); } catch (e) {}
+    for (let i = 0; i < recent.length; i++) {
+      if (recent[i].recordId === recordId) {
+        recent[i].status = 'VOID';
+        recent[i].voidReason = reason;
+        break;
+      }
+    }
+    localStorage.setItem(STORAGE_KEYS.RECENT_REPORTS, JSON.stringify(recent));
+    renderRecentReports();
+    if (state.currentDetailReport && state.currentDetailReport.recordId === recordId) {
+      state.currentDetailReport.status = 'VOID';
+      state.currentDetailReport.voidReason = reason;
+    }
+  }
+
+  function openSafetyReviewCurrent() {
+    const r = state.currentDetailReport;
+    if (!r) return;
+
+    document.getElementById('review-field-reviewer').value = state.alias || 'Pharmacist Reviewer';
+    document.getElementById('review-field-status').value = 'CLOSED';
+    document.getElementById('review-check-lasa').checked = !!r.isLasa;
+    document.getElementById('review-check-had').checked = !!r.isHad;
+
+    // Reset factor chips
+    const chips = document.querySelectorAll('#contributing-factors-chips .factor-chip');
+    chips.forEach(function(c) { c.classList.remove('active'); });
+
+    document.getElementById('review-field-immediate').value = '';
+    document.getElementById('review-field-corrective').value = '';
+    document.getElementById('review-check-followup').checked = false;
+    document.getElementById('review-field-due').value = '';
+    document.getElementById('review-field-due').disabled = true;
+    document.getElementById('review-field-notes').value = '';
+
+    openModal('modal-safety-review');
+  }
+
+  function toggleFactorChip(el) {
+    if (!el) return;
+    el.classList.toggle('active');
+  }
+
+  function toggleFollowUpDue(checked) {
+    const dueInput = document.getElementById('review-field-due');
+    if (dueInput) {
+      dueInput.disabled = !checked;
+      if (!checked) dueInput.value = '';
+    }
+  }
+
+  function submitSafetyReview() {
+    const recordId = state.currentDetailRecordId;
+    if (!recordId) return;
+
+    const reviewer = document.getElementById('review-field-reviewer').value.trim() || state.alias || 'Pharmacist Reviewer';
+    const status = document.getElementById('review-field-status').value;
+    const isLasa = document.getElementById('review-check-lasa').checked;
+    const isHad = document.getElementById('review-check-had').checked;
+
+    const selectedChips = document.querySelectorAll('#contributing-factors-chips .factor-chip.active');
+    const factors = [];
+    selectedChips.forEach(function(c) { factors.push(c.innerText.trim()); });
+
+    const immediate = document.getElementById('review-field-immediate').value.trim();
+    const corrective = document.getElementById('review-field-corrective').value.trim();
+    const followUp = document.getElementById('review-check-followup').checked;
+    const due = followUp ? document.getElementById('review-field-due').value : '';
+    const notes = document.getElementById('review-field-notes').value.trim();
+
+    const reviewPayload = {
+      recordId: recordId,
+      reviewedBy: reviewer,
+      reviewStatus: status,
+      lasa: isLasa,
+      had: isHad,
+      hadDrug: state.currentDetailReport ? (state.currentDetailReport.hadDrug || state.currentDetailReport.drugName) : '',
+      contributingFactors: factors,
+      immediateAction: immediate,
+      correctiveAction: corrective,
+      followUpRequired: followUp,
+      followUpDue: due,
+      reviewNote: notes
+    };
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            alert('✓ บันทึกผลการทบทวนความปลอดภัยทางยา (ME Review) เรียบร้อยแล้ว');
+            closeModal('modal-safety-review');
+            if (state.currentDetailReport) {
+              state.currentDetailReport.review = reviewPayload;
+              state.currentDetailReport.status = 'Reviewed';
+            }
+            openReportDetail(recordId);
+          } else {
+            alert('ไม่สามารถบันทึกการทบทวนได้: ' + (res ? res.error : 'Unknown error'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .apiSaveMedicationReview(reviewPayload);
+    } else {
+      closeModal('modal-safety-review');
+      if (state.currentDetailReport) {
+        state.currentDetailReport.review = reviewPayload;
+        state.currentDetailReport.status = 'Reviewed';
+      }
+      openReportDetail(recordId);
+      alert('✓ บันทึกผลการทบทวน (Local Preview) เรียบร้อยแล้ว');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sawankhalok High Alert Drugs (HAD) Dictionary
+  // ---------------------------------------------------------------------------
+
+  let currentHadFilterCat = 0;
+  let currentHadSearchQuery = '';
+
+  function openHadDictionary() {
+    currentHadFilterCat = 0;
+    currentHadSearchQuery = '';
+    const searchInput = document.getElementById('had-search-input');
+    if (searchInput) searchInput.value = '';
+    updateHadTabsUI();
+    renderHadDictionaryList();
+    openModal('modal-had-dictionary');
+  }
+
+  function filterHadCategory(catNo) {
+    currentHadFilterCat = catNo;
+    updateHadTabsUI();
+    renderHadDictionaryList();
+  }
+
+  function updateHadTabsUI() {
+    ['tab-had-all', 'tab-had-cat1', 'tab-had-cat2', 'tab-had-cat3'].forEach(function(id, idx) {
+      const btn = document.getElementById(id);
+      if (btn) btn.classList.toggle('active', currentHadFilterCat === idx);
+    });
+  }
+
+  function searchHadList(val) {
+    currentHadSearchQuery = (val || '').trim().toLowerCase();
+    renderHadDictionaryList();
+  }
+
+  function renderHadDictionaryList() {
+    const listEl = document.getElementById('had-dictionary-list');
+    if (!listEl) return;
+
+    let filtered = HOSPITAL_HAD_DATA.filter(function(item) {
+      const matchCat = (currentHadFilterCat === 0 || item.cat === currentHadFilterCat);
+      const matchQuery = !currentHadSearchQuery || 
+        item.name.toLowerCase().indexOf(currentHadSearchQuery) !== -1 ||
+        item.strength.toLowerCase().indexOf(currentHadSearchQuery) !== -1 ||
+        item.msg.toLowerCase().indexOf(currentHadSearchQuery) !== -1;
+      return matchCat && matchQuery;
+    });
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div style="text-align: center; color: var(--color-text-muted); padding: 20px 0; font-size: 13px;">ไม่พบรายการยาที่ตรงกับเงื่อนไข</div>';
+      return;
+    }
+
+    let html = '';
+    filtered.forEach(function(item) {
+      const catBadgeColor = item.cat === 1 ? '#DC2626' : (item.cat === 2 ? '#B45309' : '#4338CA');
+      html += `
+        <div class="had-item-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <span style="font-size: 14px; font-weight: 800; color: #1E293B;">${item.name}</span>
+              <span style="font-size: 11px; color: #64748B; margin-left: 4px;">(${item.strength})</span>
+            </div>
+            <span style="font-size: 10px; font-weight: 800; background: ${catBadgeColor}; color: white; padding: 2px 7px; border-radius: 9999px;">หมวด ${item.cat}</span>
+          </div>
+          <div style="font-size: 11px; color: #B91C1C; font-weight: 600; line-height: 1.3;">⚠️ ${item.msg}</div>
+          <div style="font-size: 11px; color: #64748B;">รูปแบบ: <strong>${item.form}</strong> • ${item.catName}</div>
+        </div>
+      `;
+    });
+    listEl.innerHTML = html;
+  }
+
   return {
     init: init,
     toggleMode: toggleMode,
@@ -5486,7 +6932,19 @@ const CatchME = (function() {
     openEmergingLasaModal: openEmergingLasaModal,
     setEmergingFilter: setEmergingFilter,
     promoteEmergingItem: promoteEmergingItem,
-    promoteCurrentEmergingPair: promoteCurrentEmergingPair
+    promoteCurrentEmergingPair: promoteCurrentEmergingPair,
+    openReportDetail: openReportDetail,
+    openQuickEditCurrent: openQuickEditCurrent,
+    submitQuickEdit: submitQuickEdit,
+    openVoidCurrent: openVoidCurrent,
+    submitVoidReport: submitVoidReport,
+    openSafetyReviewCurrent: openSafetyReviewCurrent,
+    toggleFactorChip: toggleFactorChip,
+    toggleFollowUpDue: toggleFollowUpDue,
+    submitSafetyReview: submitSafetyReview,
+    openHadDictionary: openHadDictionary,
+    filterHadCategory: filterHadCategory,
+    searchHadList: searchHadList
   };
 })();
 

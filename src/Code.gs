@@ -3,7 +3,7 @@
  * Main Entry Point (Web App)
  */
 
-const APP_VERSION = '0.2.0';
+const APP_VERSION = '0.4.0';
 
 /**
  * Serves the HTML web app for the CatchME user interface.
@@ -65,6 +65,62 @@ function apiSaveQuickReport(reportData) {
  */
 function apiGetRecentReports(deviceSessionId, limit) {
   return getRecentReports(deviceSessionId, limit);
+}
+
+/**
+ * Client-callable endpoint to retrieve report detail.
+ */
+function apiGetReportDetail(recordId) {
+  return getReportDetail(recordId);
+}
+
+/**
+ * Client-callable endpoint to update a report.
+ */
+function apiUpdateReport(recordId, updateData, deviceSessionId, reporterAlias) {
+  return updateReport(recordId, updateData, deviceSessionId, reporterAlias);
+}
+
+/**
+ * Client-callable endpoint to mark a report as VOID.
+ */
+function apiVoidReport(recordId, reason, deviceSessionId, reporterAlias) {
+  return voidReport(recordId, reason, deviceSessionId, reporterAlias);
+}
+
+/**
+ * Client-callable endpoint to save medication review.
+ */
+function apiSaveMedicationReview(reviewData) {
+  return saveMedicationReview(reviewData);
+}
+
+/**
+ * Client-callable endpoint to retrieve active High Alert Drugs master list.
+ */
+function apiGetHadMasterList() {
+  return getHadMasterList();
+}
+
+/**
+ * Client-callable endpoint to retrieve LASA master list.
+ */
+function apiGetLasaMasterList() {
+  return getLasaMasterList();
+}
+
+/**
+ * Client-callable endpoint to retrieve emerging LASA pairs.
+ */
+function apiGetEmergingLasaPairs(mode, threshold) {
+  return getEmergingLasaPairs(mode, threshold);
+}
+
+/**
+ * Client-callable endpoint to promote an emerging pair into LASA master.
+ */
+function apiPromoteEmergingLasa(pairData) {
+  return promoteEmergingLasa(pairData);
 }
 
 /**

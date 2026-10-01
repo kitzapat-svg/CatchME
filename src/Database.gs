@@ -9,7 +9,9 @@ const DB_CONFIG = {
     APP_SETTINGS: 'App_Settings',
     AUDIT_LOG: 'Audit_Log',
     DRUG_MASTER: 'Drug_Master',
-    LASA_MASTER: 'LASA_Master'
+    LASA_MASTER: 'LASA_Master',
+    HAD_MASTER: 'HAD_Master',
+    ME_REVIEW: 'ME_Review'
   },
   HEADERS: {
     ME_LOG: [
@@ -20,7 +22,8 @@ const DB_CONFIG = {
       'detected_stage_code', 'drug_name', 'strength', 'actual_value', 'expected_value',
       'hn', 'an', 'ward_clinic', 'severity', 'patient_reached', 'status',
       'confirmed_at', 'review_required', 'reviewed_at', 'reviewed_by',
-      'is_lasa', 'lasa_type', 'lasa_prescribed_drug', 'lasa_dispensed_drug', 'lasa_pair_key', 'trade_name'
+      'is_lasa', 'lasa_type', 'lasa_prescribed_drug', 'lasa_dispensed_drug', 'lasa_pair_key', 'trade_name',
+      'is_had', 'had_category', 'had_drug', 'void_reason', 'updated_at'
     ],
     APP_SETTINGS: ['setting_key', 'setting_value', 'description', 'updated_at'],
     AUDIT_LOG: [
@@ -32,6 +35,12 @@ const DB_CONFIG = {
     ],
     LASA_MASTER: [
       'pair_id', 'drug_1', 'drug_2', 'lasa_type', 'scope', 'risk_level', 'tallman_1', 'tallman_2', 'notes', 'active', 'updated_at'
+    ],
+    HAD_MASTER: [
+      'had_id', 'generic_name', 'trade_names', 'dosage_form', 'strengths', 'category_no', 'category_name', 'alert_message', 'active', 'updated_at'
+    ],
+    ME_REVIEW: [
+      'review_id', 'record_id', 'reviewed_at', 'reviewed_by', 'lasa', 'lasa_pair', 'had', 'had_drug', 'contributing_factors', 'root_cause_note', 'immediate_action', 'corrective_action', 'follow_up_required', 'follow_up_due', 'review_status', 'review_note'
     ]
   }
 };
@@ -101,6 +110,13 @@ function setupDatabase(spreadsheetId) {
     // 5. Setup LASA_Master
     var lasaSheet = ensureSheetWithHeaders(ss, DB_CONFIG.SHEETS.LASA_MASTER, DB_CONFIG.HEADERS.LASA_MASTER);
     populateDefaultLasaMasterIfEmpty(lasaSheet, now);
+
+    // 6. Setup HAD_Master (29 Items - Sawankhalok Hospital)
+    var hadSheet = ensureSheetWithHeaders(ss, DB_CONFIG.SHEETS.HAD_MASTER, DB_CONFIG.HEADERS.HAD_MASTER);
+    populateDefaultHadMasterIfEmpty(hadSheet, now);
+
+    // 7. Setup ME_Review
+    ensureSheetWithHeaders(ss, DB_CONFIG.SHEETS.ME_REVIEW, DB_CONFIG.HEADERS.ME_REVIEW);
 
     // Remove default "Sheet1" if empty and our sheets exist
     var defaultSheet = ss.getSheetByName('Sheet1') || ss.getSheetByName('แผ่นงาน1');
@@ -193,3 +209,51 @@ function populateDefaultLasaMasterIfEmpty(sheet, timestamp) {
     range.setValues(initialPairs);
   }
 }
+
+/**
+ * Populates default Sawankhalok Hospital High Alert Drugs (29 items across 3 categories)
+ * if the HAD_Master sheet is empty.
+ */
+function populateDefaultHadMasterIfEmpty(sheet, timestamp) {
+  if (sheet.getLastRow() <= 1) {
+    var initialHad = [
+      // --- หมวดที่ 1: ยาที่มีช่วงความปลอดภัยในการรักษาแคบ หรือผลของความคลาดเคลื่อนก่อให้เกิดผลเสียรุนแรงต่อผู้ป่วย (22 รายการ) ---
+      ['HAD-01', 'adrenaline', 'Adrenaline', 'injection', '1 mg/ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ระวังหัวใจเต้นผิดจังหวะ / ความดันโลหิตสูงวิกฤต', true, timestamp],
+      ['HAD-02', 'norepinephrine', 'Levophed', 'injection', '4 mg/4ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ห้าม IV push เด็ดขาด ต้องให้ผ่าน Infusion pump และระวัง Extravasation', true, timestamp],
+      ['HAD-03', 'dobutamine', 'Dobutrex', 'injection', '250 mg/5ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ติดตาม HR, BP, ECG อย่างใกล้ชิด', true, timestamp],
+      ['HAD-04', 'dopamine', 'Inotropin', 'injection', '250 mg/10ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ควบคุมผ่าน Infusion pump ระวัง Extravasation', true, timestamp],
+      ['HAD-05', 'digoxin', 'Lanoxin', 'injection', '0.25 mg/ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ช่วงการรักษาแคบ ตรวจสอบ HR และระดับ K+ ก่อนให้ยา', true, timestamp],
+      ['HAD-06', 'nicardipine', 'Cardene', 'injection', '10 mg/10ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ระวังความดันโลหิตตกอย่างรวดเร็ว ตรวจวัด BP ทุก 5-15 นาที', true, timestamp],
+      ['HAD-07', 'nitroglycerine', 'NTG', 'injection', '50 mg/10ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ใช้สายให้ยา Non-PVC ติดตาม BP อย่างสม่ำเสมอ', true, timestamp],
+      ['HAD-08', 'adenosine', 'Adenocor', 'injection', '6 mg/2ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'Rapid IV push ตามด้วย NSS flush ทันที ติดตาม ECG', true, timestamp],
+      ['HAD-09', 'amiodarone', 'Cordarone', 'injection', '150 mg/3ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ผสมใน D5W เท่านั้น ห้ามผสม NSS ติดตาม BP และ ECG', true, timestamp],
+      ['HAD-10', 'cisatracurium', 'Nimbex', 'injection', '10 mg/5ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ยาหย่อนกล้ามเนื้อ ต้องมั่นใจว่าผู้ป่วยใส่ท่อช่วยหายใจแล้วเท่านั้น', true, timestamp],
+      ['HAD-11', 'oxytocin', 'Syntocinon', 'injection', '10 unit/ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ควบคุมผ่าน Infusion pump ระวัง Uterine rupture / Fetal distress', true, timestamp],
+      ['HAD-12', 'terbutaline', 'Bricanyl', 'injection', '0.5 mg/ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ระวัง Tachycardia, Tremor, Hypokalemia', true, timestamp],
+      ['HAD-13', 'apixaban', 'Eliquis', 'tablet', '5 mg', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ยากลุ่ม NOAC ระวังภาวะเลือดออกผิดปกติ และปรับขนาดยาตามไต/อายุ/น้ำหนัก', true, timestamp],
+      ['HAD-14', 'enoxaparin', 'Clexane', 'injection', '60 mg/0.6ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ฉีด Subcut บริเวณหน้าท้อง ห้ามไล่ฟองอากาศในเข็มสำเร็จรูป', true, timestamp],
+      ['HAD-15', 'heparin', 'Unfractionated Heparin', 'injection', '25000 IU/5ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ติดตาม aPTT สม่ำเสมอ ระวังภาวะเลือดออกและ HIT', true, timestamp],
+      ['HAD-16', 'streptokinase', 'Streptase', 'injection', '1.5 mIU/Vial', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ยาสลายลิ่มเลือด ระวัง Major bleeding และ Allergic reaction', true, timestamp],
+      ['HAD-17', 'warfarin', 'Coumadin, Orfarin', 'tablet', '1 mg, 3 mg', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ติดตามค่า INR สม่ำเสมอ ระวัง Drug Interaction สูง', true, timestamp],
+      ['HAD-18', '3% sodium chloride', '3% NaCl', 'sterile solution', '500 ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'โซเดียมเข้มข้นสูง ระวัง Hypernatremia / ODS ให้ผ่าน Infusion pump', true, timestamp],
+      ['HAD-19', '10% calcium gluconate', 'Calcium gluconate', 'injection', '1 g/10ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ห้ามฉีดเร็ว อาจเกิด Cardiac arrest หรือ Extravasation necrosis', true, timestamp],
+      ['HAD-20', 'magnesium sulfate', 'MgSO4', 'injection', '1 g/10ml (10%), 1 g/2ml (50%)', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ติดตาม DTR, RR, Urine output ระวัง Mg toxicity', true, timestamp],
+      ['HAD-21', 'potassium chloride', 'KCl', 'injection', '20 mEq/10ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ห้าม IV push เด็ดขาด ต้องเจือจางและให้ผ่าน Infusion pump เท่านั้น', true, timestamp],
+      ['HAD-22', 'regular insulin', 'Actrapid, Humulin R', 'injection', '1000 IU/10ml', 1, 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง', 'ระวัง Hypoglycemia ใช้เข็มฉีด Insulin โดยเฉพาะ', true, timestamp],
+
+      // --- หมวดที่ 2: ยาเสพติดให้โทษประเภทที่ 2 และ วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2 (5 รายการ) ---
+      ['HAD-23', 'fentanyl', 'Sublimaze', 'injection', '50 mcg/ml (2ml, 10ml)', 2, 'ยาเสพติดให้โทษประเภทที่ 2', 'กดการหายใจรุนแรง ต้องมี Naloxone พร้อมใช้', true, timestamp],
+      ['HAD-24', 'morphine', 'Morphine sulfate', 'injection', '10 mg/ml', 2, 'ยาเสพติดให้โทษประเภทที่ 2', 'ติดตามอัตราการหายใจ (RR < 10/min) และระดับความรู้สึกตัว', true, timestamp],
+      ['HAD-25', 'pethidine', 'Demerol', 'injection', '50 mg/ml', 2, 'ยาเสพติดให้โทษประเภทที่ 2', 'ระวังพิษสะสม Norpethidine ชักได้ หลีกเลี่ยงในผู้ป่วยไตบกพร่อง', true, timestamp],
+      ['HAD-26', 'midazolam', 'Dormicum', 'injection', '5 mg/ml (1ml, 3ml)', 2, 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2', 'ระวัง Respiratory depression และ Sedation ลึกเกินไป', true, timestamp],
+      ['HAD-27', 'ketamine', 'Ketalar', 'injection', '500 mg/10ml', 2, 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2', 'เฝ้าระวังความดันโลหิต ชีพจร และ Hallucination ขณะฟื้นตัว', true, timestamp],
+
+      // --- หมวดที่ 3: ยาที่เกิดอุบัติการณ์ความคลาดเคลื่อนทางยาในระดับรุนแรง (2 รายการ) ---
+      ['HAD-28', 'allopurinol', 'Zyloric', 'tablet', '100 mg', 3, 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง', 'เสี่ยงแพ้ยารุนแรง SCARs/SJS/TEN ต้องตรวจยีน HLA-B*5801 และปรับตามไต', true, timestamp],
+      ['HAD-29', 'phenytoin', 'Dilantin', 'oral, injection', 'oral 50 mg, 100 mg, inj 50mg/ml', 3, 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง', 'ช่วงการรักษาแคบ ระวัง Purple glove syndrome, Arrythmia, Nystagmus, Ataxia', true, timestamp]
+    ];
+    var range = sheet.getRange(2, 1, initialHad.length, initialHad[0].length);
+    range.setValues(initialHad);
+  }
+}
+

@@ -119,7 +119,30 @@
     { name: 'Risperidone', key: 'risperidone', patterns: [/risperidone/gi, /ริสเพอริโดน/gi, /ริสเพอริดอน/gi, /ริสเพอริ/gi] },
     { name: 'Seretide', key: 'seretide', patterns: [/seretide(?:\s*evohaler)?/gi, /evohaler/gi, /เซเรไทด์/gi, /เซริไทด์/gi, /ซีรีไทด์/gi] },
     { name: 'Ferrous sulfate', key: 'ferrous sulfate', patterns: [/ferrous(?:\s*sulfate)?/gi, /เฟอร์รัส(?:\s*ซัลเฟต)?/gi, /เฟอรัส/gi, /ธาตุเหล็ก/gi] },
-    { name: 'Ibuprofen', key: 'ibuprofen', patterns: [/ibuprofen/gi, /ไอบูโพรเฟน/gi, /ไอบูโปรเฟน/gi, /ไอบู/gi] }
+    { name: 'Ibuprofen', key: 'ibuprofen', patterns: [/ibuprofen/gi, /ไอบูโพรเฟน/gi, /ไอบูโปรเฟน/gi, /ไอบู/gi] },
+    // Sawankhalok Hospital High Alert Drugs (HAD)
+    { name: 'Adrenaline', key: 'adrenaline', patterns: [/adrenaline/gi, /อะดรีนาลีน/gi, /epinephrine/gi, /เอพิเนฟริน/gi] },
+    { name: 'Dobutamine', key: 'dobutamine', patterns: [/dobutamine/gi, /โดบูทามีน/gi, /โดบูตามีน/gi, /dobutrex/gi] },
+    { name: 'Dopamine', key: 'dopamine', patterns: [/dopamine/gi, /โดพามีน/gi, /โดปามีน/gi, /inotropin/gi] },
+    { name: 'Nicardipine', key: 'nicardipine', patterns: [/nicardipine/gi, /นิคาร์ดิปีน/gi, /นิคาร์ดิพีน/gi, /cardene/gi] },
+    { name: 'Nitroglycerine', key: 'nitroglycerine', patterns: [/nitroglycerine/gi, /nitroglycerin/gi, /ไนโตรกลีเซอรีน/gi, /\bntg\b/gi] },
+    { name: 'Adenosine', key: 'adenosine', patterns: [/adenosine/gi, /อะดีโนซีน/gi, /adenocor/gi] },
+    { name: 'Cisatracurium', key: 'cisatracurium', patterns: [/cisatracurium/gi, /ซิสอะทราคูเรียม/gi, /nimbex/gi] },
+    { name: 'Oxytocin', key: 'oxytocin', patterns: [/oxytocin/gi, /ออกซิโทซิน/gi, /ออกซิโตซิน/gi, /syntocinon/gi] },
+    { name: 'Terbutaline', key: 'terbutaline', patterns: [/terbutaline/gi, /เทอร์บูทาลีน/gi, /bricanyl/gi, /บริคานิล/gi] },
+    { name: 'Apixaban', key: 'apixaban', patterns: [/apixaban/gi, /อะพิกซาแบน/gi, /eliquis/gi, /เอลิควิส/gi] },
+    { name: 'Heparin', key: 'heparin', patterns: [/heparin/gi, /เฮพาริน/gi, /เฮพารีน/gi] },
+    { name: 'Streptokinase', key: 'streptokinase', patterns: [/streptokinase/gi, /สเตรปโตไคเนส/gi, /streptase/gi] },
+    { name: '3% Sodium Chloride', key: '3% sodium chloride', patterns: [/3%\s*sodium\s*chloride/gi, /3%\s*nacl/gi, /3%\s*โซเดียมคลอไรด์/gi] },
+    { name: '10% Calcium gluconate', key: '10% calcium gluconate', patterns: [/10%\s*calcium\s*gluconate/gi, /calcium\s*gluconate/gi, /แคลเซียมกลูโคเนต/gi] },
+    { name: 'Magnesium Sulfate', key: 'magnesium sulfate', patterns: [/magnesium\s*sulfate/gi, /\bmgso4\b/gi, /แมกนีเซียมซัลเฟต/gi] },
+    { name: 'Regular Insulin', key: 'regular insulin', patterns: [/regular\s*insulin/gi, /\bri\b/gi, /actrapid/gi, /humulin\s*r/gi, /อินซูลิน/gi] },
+    { name: 'Fentanyl', key: 'fentanyl', patterns: [/fentanyl/gi, /เฟนทานิล/gi, /sublimaze/gi] },
+    { name: 'Morphine', key: 'morphine', patterns: [/morphine/gi, /มอร์ฟีน/gi, /mst\b/gi] },
+    { name: 'Pethidine', key: 'pethidine', patterns: [/pethidine/gi, /เพทิดีน/gi, /เปทิดีน/gi, /demerol/gi] },
+    { name: 'Midazolam', key: 'midazolam', patterns: [/midazolam/gi, /ไมด้าโซแลม/gi, /มิดาโซแลม/gi, /dormicum/gi, /ดอร์มิคุม/gi] },
+    { name: 'Ketamine', key: 'ketamine', patterns: [/ketamine/gi, /เคตามีน/gi, /ketalar/gi] },
+    { name: 'Allopurinol', key: 'allopurinol', patterns: [/allopurinol/gi, /อัลโลพูรินอล/gi, /zyloric/gi] }
   ];
 
   // Hospital LASA Master Reference
@@ -330,6 +353,334 @@
       lasaType: 'Sound-alike',
       scope: 'IPD',
       riskLevel: 'High Alert Drug'
+    }
+  ];
+
+  // Sawankhalok Hospital High Alert Drugs (HAD) List — 29 Items Across 3 Categories
+  var HOSPITAL_HAD_LIST = [
+    // --- หมวดที่ 1: ยาที่มีช่วงความปลอดภัยในการรักษาแคบ หรือผลของความคลาดเคลื่อนก่อให้เกิดผลเสียรุนแรงต่อผู้ป่วย (22 รายการ) ---
+    {
+      hadId: 'HAD-01',
+      genericName: 'Adrenaline',
+      key: 'adrenaline',
+      patterns: [/adrenaline|อะดรีนาลีน|\bepinephrine\b|เอพิเนฟริน/i],
+      dosageForm: 'injection',
+      strengths: ['1 mg/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ระวังหัวใจเต้นผิดจังหวะ / ความดันโลหิตสูงวิกฤต'
+    },
+    {
+      hadId: 'HAD-02',
+      genericName: 'Norepinephrine',
+      key: 'norepinephrine',
+      patterns: [/norepinephrine|นอร์เอพิเนฟริน|นอร์อิพิเนฟริน|noradrenaline|เลโวเฟด|levophed/i],
+      dosageForm: 'injection',
+      strengths: ['4 mg/4ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ห้าม IV push เด็ดขาด ต้องให้ผ่าน Infusion pump และระวัง Extravasation'
+    },
+    {
+      hadId: 'HAD-03',
+      genericName: 'Dobutamine',
+      key: 'dobutamine',
+      patterns: [/dobutamine|โดบูทามีน|โดบูตามีน|dobutrex/i],
+      dosageForm: 'injection',
+      strengths: ['250 mg/5ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ติดตาม HR, BP, ECG อย่างใกล้ชิด'
+    },
+    {
+      hadId: 'HAD-04',
+      genericName: 'Dopamine',
+      key: 'dopamine',
+      patterns: [/dopamine|โดพามีน|โดปามีน|inotropin/i],
+      dosageForm: 'injection',
+      strengths: ['250 mg/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ควบคุมผ่าน Infusion pump ระวัง Extravasation'
+    },
+    {
+      hadId: 'HAD-05',
+      genericName: 'Digoxin',
+      key: 'digoxin',
+      patterns: [/digoxin|ไดจอกซิน|ไดก๊อกซิน|lanoxin|ลานอกซิน/i],
+      dosageForm: 'injection, tablet',
+      strengths: ['0.25 mg/ml', '0.25 mg'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ช่วงการรักษาแคบ ตรวจสอบ HR และระดับ K+ ก่อนให้ยา'
+    },
+    {
+      hadId: 'HAD-06',
+      genericName: 'Nicardipine',
+      key: 'nicardipine',
+      patterns: [/nicardipine|นิคาร์ดิปีน|นิคาร์ดิพีน|cardene/i],
+      dosageForm: 'injection',
+      strengths: ['10 mg/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ระวังความดันโลหิตตกอย่างรวดเร็ว ตรวจวัด BP ทุก 5-15 นาที'
+    },
+    {
+      hadId: 'HAD-07',
+      genericName: 'Nitroglycerine',
+      key: 'nitroglycerine',
+      patterns: [/nitroglycerine|nitroglycerin|ไนโตรกลีเซอรีน|ntg/i],
+      dosageForm: 'injection',
+      strengths: ['50 mg/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ใช้สายให้ยา Non-PVC ติดตาม BP อย่างสม่ำเสมอ'
+    },
+    {
+      hadId: 'HAD-08',
+      genericName: 'Adenosine',
+      key: 'adenosine',
+      patterns: [/adenosine|อะดีโนซีน|adenocor/i],
+      dosageForm: 'injection',
+      strengths: ['6 mg/2ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'Rapid IV push ตามด้วย NSS flush ทันที ติดตาม ECG'
+    },
+    {
+      hadId: 'HAD-09',
+      genericName: 'Amiodarone',
+      key: 'amiodarone',
+      patterns: [/amiodarone|อะมิโอดาโรน|อามิโอดาโรน|cordarone|คอร์ดาโรน/i],
+      dosageForm: 'injection',
+      strengths: ['150 mg/3ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ผสมใน D5W เท่านั้น ห้ามผสม NSS ติดตาม BP และ ECG'
+    },
+    {
+      hadId: 'HAD-10',
+      genericName: 'Cisatracurium',
+      key: 'cisatracurium',
+      patterns: [/cisatracurium|ซิสอะทราคูเรียม|ซิสอาทราคูเรียม|nimbex/i],
+      dosageForm: 'injection',
+      strengths: ['10 mg/5ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ยาหย่อนกล้ามเนื้อ ต้องมั่นใจว่าผู้ป่วยใส่ท่อช่วยหายใจแล้วเท่านั้น'
+    },
+    {
+      hadId: 'HAD-11',
+      genericName: 'Oxytocin',
+      key: 'oxytocin',
+      patterns: [/oxytocin|ออกซิโทซิน|ออกซิโตซิน|syntocinon/i],
+      dosageForm: 'injection',
+      strengths: ['10 unit/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ควบคุมผ่าน Infusion pump ระวัง Uterine rupture / Fetal distress'
+    },
+    {
+      hadId: 'HAD-12',
+      genericName: 'Terbutaline',
+      key: 'terbutaline',
+      patterns: [/terbutaline|เทอร์บูทาลีน|bricanyl|บริคานิล/i],
+      dosageForm: 'injection',
+      strengths: ['0.5 mg/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ระวัง Tachycardia, Tremor, Hypokalemia'
+    },
+    {
+      hadId: 'HAD-13',
+      genericName: 'Apixaban',
+      key: 'apixaban',
+      patterns: [/apixaban|อะพิกซาแบน|eliquis|เอลิควิส/i],
+      dosageForm: 'tablet',
+      strengths: ['5 mg', '2.5 mg'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ยากลุ่ม NOAC ระวังภาวะเลือดออกผิดปกติ และปรับขนาดยาตามไต/อายุ/น้ำหนัก'
+    },
+    {
+      hadId: 'HAD-14',
+      genericName: 'Enoxaparin',
+      key: 'enoxaparin',
+      patterns: [/enoxaparin|อีนอกซาพาริน|clexane|คลีเซน/i],
+      dosageForm: 'injection',
+      strengths: ['60 mg/0.6ml', '40 mg/0.4ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ฉีด Subcut บริเวณหน้าท้อง ห้ามไล่ฟองอากาศในเข็มสำเร็จรูป'
+    },
+    {
+      hadId: 'HAD-15',
+      genericName: 'Heparin',
+      key: 'heparin',
+      patterns: [/heparin|เฮพาริน|เฮพารีน/i],
+      dosageForm: 'injection',
+      strengths: ['25000 IU/5ml', '5000 IU/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ติดตาม aPTT สม่ำเสมอ ระวังภาวะเลือดออกและ HIT'
+    },
+    {
+      hadId: 'HAD-16',
+      genericName: 'Streptokinase',
+      key: 'streptokinase',
+      patterns: [/streptokinase|สเตรปโตไคเนส|streptase/i],
+      dosageForm: 'injection',
+      strengths: ['1.5 mIU/Vial'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ยาสลายลิ่มเลือด ระวัง Major bleeding และ Allergic reaction'
+    },
+    {
+      hadId: 'HAD-17',
+      genericName: 'Warfarin',
+      key: 'warfarin',
+      patterns: [/warfarin|วาร์ฟาริน|วาร์ฟารีน|coumadin|orfarin/i],
+      dosageForm: 'tablet',
+      strengths: ['1 mg', '2 mg', '3 mg', '5 mg'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ติดตามค่า INR สม่ำเสมอ ระวัง Drug Interaction สูง'
+    },
+    {
+      hadId: 'HAD-18',
+      genericName: '3% Sodium Chloride',
+      key: '3% sodium chloride',
+      patterns: [/3%\s*sodium\s*chloride|3%\s*nacl|3%\s*โซเดียมคลอไรด์|3\s*เปอร์เซ็นต์\s*nacl/i],
+      dosageForm: 'sterile solution',
+      strengths: ['500 ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'โซเดียมเข้มข้นสูง ระวัง Hypernatremia / ODS ให้ผ่าน Infusion pump'
+    },
+    {
+      hadId: 'HAD-19',
+      genericName: '10% Calcium gluconate',
+      key: '10% calcium gluconate',
+      patterns: [/10%\s*calcium\s*gluconate|calcium\s*gluconate|แคลเซียมกลูโคเนต|10%\s*แคลเซียม/i],
+      dosageForm: 'injection',
+      strengths: ['1 g/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ห้ามฉีดเร็ว อาจเกิด Cardiac arrest หรือ Extravasation necrosis'
+    },
+    {
+      hadId: 'HAD-20',
+      genericName: 'Magnesium Sulfate',
+      key: 'magnesium sulfate',
+      patterns: [/magnesium\s*sulfate|mgso4|แมกนีเซียมซัลเฟต/i],
+      dosageForm: 'injection',
+      strengths: ['1 g/10ml (10%)', '1 g/2ml (50%)'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ติดตาม DTR, RR, Urine output ระวัง Mg toxicity'
+    },
+    {
+      hadId: 'HAD-21',
+      genericName: 'Potassium Chloride',
+      key: 'potassium chloride',
+      patterns: [/potassium\s*chloride|kcl|โพแทสเซียมคลอไรด์/i],
+      dosageForm: 'injection',
+      strengths: ['20 mEq/10ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ห้าม IV push เด็ดขาด ต้องเจือจางและให้ผ่าน Infusion pump เท่านั้น'
+    },
+    {
+      hadId: 'HAD-22',
+      genericName: 'Regular Insulin',
+      key: 'regular insulin',
+      patterns: [/regular\s*insulin|\bri\b|actrapid|humulin\s*r|อินซูลิน/i],
+      dosageForm: 'injection',
+      strengths: ['1000 IU/10ml', '100 IU/ml'],
+      categoryNo: 1,
+      categoryName: 'ยาที่มีช่วงความปลอดภัยแคบ / รุนแรงสูง',
+      alertMessage: 'ระวัง Hypoglycemia ใช้เข็มฉีด Insulin โดยเฉพาะ'
+    },
+
+    // --- หมวดที่ 2: ยาเสพติดให้โทษประเภทที่ 2 และ วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2 (5 รายการ) ---
+    {
+      hadId: 'HAD-23',
+      genericName: 'Fentanyl',
+      key: 'fentanyl',
+      patterns: [/fentanyl|เฟนทานิล|sublimaze/i],
+      dosageForm: 'injection',
+      strengths: ['50 mcg/ml (2ml, 10ml)'],
+      categoryNo: 2,
+      categoryName: 'ยาเสพติดให้โทษประเภทที่ 2',
+      alertMessage: 'กดการหายใจรุนแรง ต้องมี Naloxone พร้อมใช้'
+    },
+    {
+      hadId: 'HAD-24',
+      genericName: 'Morphine',
+      key: 'morphine',
+      patterns: [/morphine|มอร์ฟีน|morphine\s*sulfate|mst/i],
+      dosageForm: 'injection, tablet',
+      strengths: ['10 mg/ml', '10 mg', '30 mg'],
+      categoryNo: 2,
+      categoryName: 'ยาเสพติดให้โทษประเภทที่ 2',
+      alertMessage: 'ติดตามอัตราการหายใจ (RR < 10/min) และระดับความรู้สึกตัว'
+    },
+    {
+      hadId: 'HAD-25',
+      genericName: 'Pethidine',
+      key: 'pethidine',
+      patterns: [/pethidine|เพทิดีน|เปทิดีน|demerol/i],
+      dosageForm: 'injection',
+      strengths: ['50 mg/ml'],
+      categoryNo: 2,
+      categoryName: 'ยาเสพติดให้โทษประเภทที่ 2',
+      alertMessage: 'ระวังพิษสะสม Norpethidine ชักได้ หลีกเลี่ยงในผู้ป่วยไตบกพร่อง'
+    },
+    {
+      hadId: 'HAD-26',
+      genericName: 'Midazolam',
+      key: 'midazolam',
+      patterns: [/midazolam|ไมด้าโซแลม|มิดาโซแลม|dormicum|ดอร์มิคุม/i],
+      dosageForm: 'injection',
+      strengths: ['5 mg/ml (1ml, 3ml)'],
+      categoryNo: 2,
+      categoryName: 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2',
+      alertMessage: 'ระวัง Respiratory depression และ Sedation ลึกเกินไป'
+    },
+    {
+      hadId: 'HAD-27',
+      genericName: 'Ketamine',
+      key: 'ketamine',
+      patterns: [/ketamine|เคตามีน|ketalar/i],
+      dosageForm: 'injection',
+      strengths: ['500 mg/10ml'],
+      categoryNo: 2,
+      categoryName: 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2',
+      alertMessage: 'เฝ้าระวังความดันโลหิต ชีพจร และ Hallucination ขณะฟื้นตัว'
+    },
+
+    // --- หมวดที่ 3: ยาที่เกิดอุบัติการณ์ความคลาดเคลื่อนทางยาในระดับรุนแรง (2 รายการ) ---
+    {
+      hadId: 'HAD-28',
+      genericName: 'Allopurinol',
+      key: 'allopurinol',
+      patterns: [/allopurinol|อัลโลพูรินอล|zyloric/i],
+      dosageForm: 'tablet',
+      strengths: ['100 mg', '300 mg'],
+      categoryNo: 3,
+      categoryName: 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง',
+      alertMessage: 'เสี่ยงแพ้ยารุนแรง SCARs/SJS/TEN ต้องตรวจยีน HLA-B*5801 และปรับตามไต'
+    },
+    {
+      hadId: 'HAD-29',
+      genericName: 'Phenytoin',
+      key: 'phenytoin',
+      patterns: [/phenytoin|ฟีนิโทอิน|dilantin|ไดแลนติน/i],
+      dosageForm: 'oral, injection',
+      strengths: ['oral 50 mg, 100 mg', 'inj 50mg/ml'],
+      categoryNo: 3,
+      categoryName: 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง',
+      alertMessage: 'ช่วงการรักษาแคบ ระวัง Purple glove syndrome, Arrythmia, Nystagmus, Ataxia'
     }
   ];
 
@@ -749,6 +1100,76 @@
     };
   }
 
+  function detectHadInfo(text, entities) {
+    var lower = text.toLowerCase();
+    var bestHad = null;
+    var earliestPos = Infinity;
+
+    for (var i = 0; i < HOSPITAL_HAD_LIST.length; i++) {
+      var had = HOSPITAL_HAD_LIST[i];
+      var matched = false;
+      var pos = -1;
+
+      // 1. Direct key search
+      pos = lower.indexOf(had.key);
+      if (pos !== -1) {
+        matched = true;
+      }
+
+      // 2. Pattern search
+      if (!matched && had.patterns && had.patterns.length > 0) {
+        for (var p = 0; p < had.patterns.length; p++) {
+          var m = had.patterns[p].exec(lower);
+          if (m) {
+            matched = true;
+            pos = m.index;
+            break;
+          }
+        }
+      }
+
+      // 3. Extracted entity matching
+      if (!matched && entities && entities.drugs && entities.drugs.length > 0) {
+        for (var d = 0; d < entities.drugs.length; d++) {
+          var drug = entities.drugs[d].toLowerCase();
+          if (drug === had.key || drug.indexOf(had.key) !== -1 || had.key.indexOf(drug) !== -1) {
+            matched = true;
+            pos = lower.indexOf(drug);
+            if (pos === -1) pos = 0;
+            break;
+          }
+        }
+      }
+
+      if (matched && pos !== -1 && pos < earliestPos) {
+        earliestPos = pos;
+        bestHad = had;
+      }
+    }
+
+    if (bestHad) {
+      return {
+        isHad: true,
+        hadId: bestHad.hadId,
+        genericName: bestHad.genericName,
+        categoryNo: bestHad.categoryNo,
+        categoryName: bestHad.categoryName,
+        alertMessage: bestHad.alertMessage,
+        strengths: bestHad.strengths
+      };
+    }
+
+    return {
+      isHad: false,
+      hadId: '',
+      genericName: '',
+      categoryNo: 0,
+      categoryName: '',
+      alertMessage: '',
+      strengths: []
+    };
+  }
+
   function extractEntities(text) {
     var lower = text.toLowerCase();
     var drugsFound = [];
@@ -834,6 +1255,7 @@
     }
 
     var lasaInfo = detectLasaInfo(normalized, entities, parseResult, currentMode);
+    var hadInfo = detectHadInfo(normalized, entities);
 
     return {
       parserVersion: PARSER_VERSION,
@@ -859,6 +1281,10 @@
       lasaDispensed: lasaInfo.lasaDispensed,
       lasaPairKey: lasaInfo.lasaPairKey,
       lasaMatchedMaster: lasaInfo.matchedMaster,
+      isHad: hadInfo.isHad,
+      hadCategory: hadInfo.categoryName || '',
+      hadDrug: hadInfo.genericName || '',
+      hadDetails: hadInfo.isHad ? hadInfo : null,
       tradeName: '',
       extractedEntities: {
         drugs: entities.drugs,
@@ -1461,6 +1887,8 @@
     parseMedicationError: parseMedicationError,
     detectLasaInfo: detectLasaInfo,
     HOSPITAL_LASA_PAIRS: HOSPITAL_LASA_PAIRS,
+    detectHadInfo: detectHadInfo,
+    HOSPITAL_HAD_LIST: HOSPITAL_HAD_LIST,
     DETECTED_STAGES: DETECTED_STAGES
   };
 });

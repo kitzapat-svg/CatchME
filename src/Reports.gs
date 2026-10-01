@@ -89,7 +89,12 @@ function saveQuickReport(reportData) {
       reportData.lasaPrescribed || '',
       reportData.lasaDispensed || '',
       reportData.lasaPairKey || '',
-      reportData.tradeName || ''
+      reportData.tradeName || '',
+      (reportData.isHad === true || reportData.isHad === 'Yes') ? 'Yes' : 'No',
+      reportData.hadCategory || (reportData.hadDetails ? reportData.hadDetails.categoryName || reportData.hadDetails.category : ''),
+      reportData.hadDrug || (reportData.hadDetails ? reportData.hadDetails.genericName : ''),
+      '',      // void_reason
+      ''       // updated_at
     ];
 
     meLogSheet.appendRow(newRow);
@@ -109,7 +114,9 @@ function saveQuickReport(reportData) {
         JSON.stringify({
           legacyCode: reportData.legacyCode,
           errorType: reportData.errorType,
-          mode: mode
+          mode: mode,
+          isLasa: reportData.isLasa,
+          isHad: reportData.isHad
         }),
         'QuickReporter'
       ];
@@ -136,12 +143,12 @@ function saveQuickReport(reportData) {
  * Privacy-first: Does NOT expose hospital-wide reports.
  *
  * @param {string} deviceSessionId
- * @param {number} [limit=5]
+ * @param {number} [limit=10]
  * @returns {Array<Object>}
  */
 function getRecentReports(deviceSessionId, limit) {
   if (!deviceSessionId) return [];
-  var maxItems = limit || 5;
+  var maxItems = limit || 10;
 
   try {
     var ss = getDatabaseSpreadsheet();
@@ -152,7 +159,8 @@ function getRecentReports(deviceSessionId, limit) {
     // Read the recent 100 rows to find device session matches
     var startRow = Math.max(2, lastRow - 100);
     var numRows = lastRow - startRow + 1;
-    var data = meLogSheet.getRange(startRow, 1, numRows, 32).getValues();
+    var lastCol = Math.max(meLogSheet.getLastColumn(), 43);
+    var data = meLogSheet.getRange(startRow, 1, numRows, lastCol).getValues();
 
     var results = [];
     // Iterate from newest to oldest
@@ -165,13 +173,29 @@ function getRecentReports(deviceSessionId, limit) {
           createdAt: row[1],
           mode: row[2],
           reporterAlias: row[3],
+          rawTranscript: row[5],
           legacyCode: row[15],
           errorType: row[14],
           process: row[11],
           drugName: row[18],
+          strength: row[19],
           actual: row[20],
           expected: row[21],
-          status: row[27]
+          hn: row[22],
+          an: row[23],
+          wardClinic: row[24],
+          status: row[27] || 'Confirmed',
+          isLasa: (row[32] === 'Yes' || row[32] === true),
+          lasaType: row[33] || '',
+          lasaPairKey: row[36] || '',
+          isHad: (row[38] === 'Yes' || row[38] === true),
+          hadCategory: row[39] || '',
+          hadDrug: row[40] || '',
+          voidReason: row[41] || '',
+          updatedAt: row[42] || '',
+          reviewRequired: row[29] === 'Yes',
+          reviewedAt: row[30] || '',
+          reviewedBy: row[31] || ''
         });
         if (results.length >= maxItems) break;
       }
@@ -464,4 +488,465 @@ function promoteEmergingToLasaMaster(pairData) {
     lock.releaseLock();
   }
 }
+
+/**
+ * Retrieves active Sawankhalok Hospital High Alert Drugs from HAD_Master sheet.
+ * @returns {Array<Object>}
+ */
+function getHadMasterList() {
+  try {
+    var ss = getDatabaseSpreadsheet();
+    var sheet = ss.getSheetByName(DB_CONFIG.SHEETS.HAD_MASTER);
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return [];
+    }
+    var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 10).getValues();
+    var list = [];
+    for (var i = 0; i < data.length; i++) {
+      var row = data[i];
+      if (row[8] === true || String(row[8]).toLowerCase() === 'true') { // active
+        list.push({
+          hadId: row[0],
+          genericName: row[1],
+          tradeNames: row[2],
+          dosageForm: row[3],
+          strengths: row[4],
+          categoryNo: row[5],
+          categoryName: row[6],
+          alertMessage: row[7]
+        });
+      }
+    }
+    return list;
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * Retrieves full details for a single medication error report by recordId.
+ * @param {string} recordId
+ * @returns {Object|null}
+ */
+function getReportDetail(recordId) {
+  if (!recordId) return null;
+  try {
+    var ss = getDatabaseSpreadsheet();
+    var meLogSheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_LOG);
+    if (!meLogSheet || meLogSheet.getLastRow() <= 1) return null;
+
+    var data = meLogSheet.getDataRange().getValues();
+    var report = null;
+    var rowIndex = -1;
+
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(recordId)) {
+        var r = data[i];
+        rowIndex = i + 1;
+        report = {
+          recordId: r[0],
+          createdAt: r[1],
+          mode: r[2],
+          reporterAlias: r[3],
+          deviceSessionId: r[4],
+          rawTranscript: r[5],
+          normalizedTranscript: r[6],
+          parserVersion: r[7],
+          confidence: r[8],
+          neededClarification: r[9] === 'Yes',
+          clarificationId: r[10],
+          process: r[11],
+          processStage: r[12],
+          standardErrorCode: r[13],
+          errorType: r[14],
+          legacyCode: r[15],
+          legacyEvent: r[16],
+          detectedStage: r[17],
+          drugName: r[18],
+          strength: r[19],
+          actual: r[20],
+          expected: r[21],
+          hn: r[22],
+          an: r[23],
+          wardClinic: r[24],
+          severity: r[25],
+          patientReached: r[26],
+          status: r[27] || 'Confirmed',
+          confirmedAt: r[28],
+          reviewRequired: r[29] === 'Yes',
+          reviewedAt: r[30],
+          reviewedBy: r[31],
+          isLasa: (r[32] === 'Yes' || r[32] === true),
+          lasaType: r[33],
+          lasaPrescribed: r[34],
+          lasaDispensed: r[35],
+          lasaPairKey: r[36],
+          tradeName: r[37],
+          isHad: (r[38] === 'Yes' || r[38] === true),
+          hadCategory: r[39],
+          hadDrug: r[40],
+          voidReason: r[41] || '',
+          updatedAt: r[42] || ''
+        };
+        break;
+      }
+    }
+
+    if (!report) return null;
+
+    // Check if ME_Review has a review for this record
+    var reviewSheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_REVIEW);
+    if (reviewSheet && reviewSheet.getLastRow() > 1) {
+      var rData = reviewSheet.getDataRange().getValues();
+      for (var j = 1; j < rData.length; j++) {
+        if (String(rData[j][1]) === String(recordId)) {
+          var rv = rData[j];
+          report.review = {
+            reviewId: rv[0],
+            reviewedAt: rv[2],
+            reviewedBy: rv[3],
+            lasa: rv[4],
+            lasaPair: rv[5],
+            had: rv[6],
+            hadDrug: rv[7],
+            contributingFactors: rv[8],
+            rootCauseNote: rv[9],
+            immediateAction: rv[10],
+            correctiveAction: rv[11],
+            followUpRequired: rv[12],
+            followUpDue: rv[13],
+            reviewStatus: rv[14],
+            reviewNote: rv[15]
+          };
+          break;
+        }
+      }
+    }
+
+    return report;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Updates editable fields of a report (HN, AN, Ward/Clinic, Drug Name, Strength, Notes).
+ * Enforces same device session scoping unless authorized.
+ *
+ * @param {string} recordId
+ * @param {Object} updateData
+ * @param {string} deviceSessionId
+ * @param {string} reporterAlias
+ * @returns {Object}
+ */
+function updateReport(recordId, updateData, deviceSessionId, reporterAlias) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+  } catch (e) {
+    return { success: false, error: 'ระบบไม่สามารถเข้าถึงฐานข้อมูลได้ชั่วคราว (Lock timeout)' };
+  }
+
+  try {
+    if (!recordId || !updateData) {
+      throw new Error('ไม่พบข้อมูลสำหรับอัปเดต');
+    }
+
+    var ss = getDatabaseSpreadsheet();
+    var meLogSheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_LOG);
+    var auditSheet = ss.getSheetByName(DB_CONFIG.SHEETS.AUDIT_LOG);
+
+    if (!meLogSheet || meLogSheet.getLastRow() <= 1) {
+      throw new Error('ไม่พบรายการข้อมูลในฐานข้อมูล');
+    }
+
+    var data = meLogSheet.getDataRange().getValues();
+    var targetRowIndex = -1;
+    var originalRow = null;
+
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(recordId)) {
+        targetRowIndex = i + 1; // 1-indexed
+        originalRow = data[i];
+        break;
+      }
+    }
+
+    if (targetRowIndex === -1) {
+      throw new Error('ไม่พบรายงาน ID: ' + recordId);
+    }
+
+    // Device session scoping check
+    var existingDeviceSession = String(originalRow[4] || '');
+    if (deviceSessionId && existingDeviceSession && existingDeviceSession !== deviceSessionId) {
+      throw new Error('ท่านไม่มีสิทธิ์แก้ไขรายงานที่สร้างจากอุปกรณ์เครื่องอื่น');
+    }
+
+    // Check if report is already VOID
+    if (originalRow[27] === 'VOID') {
+      throw new Error('รายงานนี้ถูกยกเลิก (VOID) แล้ว ไม่สามารถแก้ไขได้');
+    }
+
+    var nowIso = Utilities.formatDate(new Date(), 'Asia/Bangkok', "yyyy-MM-dd'T'HH:mm:ssXXX");
+
+    // Update allowable fields:
+    // col 19: drug_name, col 20: strength, col 21: actual, col 22: expected
+    // col 23: hn, col 24: an, col 25: ward_clinic
+    // col 43: updated_at
+    if (updateData.drugName !== undefined) meLogSheet.getRange(targetRowIndex, 19).setValue(updateData.drugName);
+    if (updateData.strength !== undefined) meLogSheet.getRange(targetRowIndex, 20).setValue(updateData.strength);
+    if (updateData.actual !== undefined) meLogSheet.getRange(targetRowIndex, 21).setValue(updateData.actual);
+    if (updateData.expected !== undefined) meLogSheet.getRange(targetRowIndex, 22).setValue(updateData.expected);
+    if (updateData.hn !== undefined) meLogSheet.getRange(targetRowIndex, 23).setValue(updateData.hn);
+    if (updateData.an !== undefined) meLogSheet.getRange(targetRowIndex, 24).setValue(updateData.an);
+    if (updateData.wardClinic !== undefined) meLogSheet.getRange(targetRowIndex, 25).setValue(updateData.wardClinic);
+    meLogSheet.getRange(targetRowIndex, 43).setValue(nowIso);
+
+    // Audit log entry
+    if (auditSheet) {
+      auditSheet.appendRow([
+        Utilities.getUuid(),
+        nowIso,
+        recordId,
+        reporterAlias || originalRow[3],
+        deviceSessionId || existingDeviceSession,
+        'UPDATE_REPORT',
+        'MULTI_FIELDS',
+        JSON.stringify({
+          hn: originalRow[22],
+          an: originalRow[23],
+          wardClinic: originalRow[24],
+          drugName: originalRow[18]
+        }),
+        JSON.stringify(updateData),
+        'QuickReporter_Edit'
+      ]);
+    }
+
+    return {
+      success: true,
+      recordId: recordId,
+      updatedAt: nowIso,
+      message: 'บันทึกการแก้ไขข้อมูลเรียบร้อยแล้ว'
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err.message || String(err)
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Marks a medication error report as VOID (cancelled).
+ * Preserves audit trail — does NOT delete database row.
+ *
+ * @param {string} recordId
+ * @param {string} reason
+ * @param {string} deviceSessionId
+ * @param {string} reporterAlias
+ * @returns {Object}
+ */
+function voidReport(recordId, reason, deviceSessionId, reporterAlias) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+  } catch (e) {
+    return { success: false, error: 'ระบบไม่สามารถเข้าถึงฐานข้อมูลได้ชั่วคราว (Lock timeout)' };
+  }
+
+  try {
+    if (!recordId) {
+      throw new Error('ไม่พบรหัสรายงาน');
+    }
+    if (!reason || !String(reason).trim()) {
+      throw new Error('กรุณาระบุเหตุผลในการยกเลิกรายงาน (VOID)');
+    }
+
+    var ss = getDatabaseSpreadsheet();
+    var meLogSheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_LOG);
+    var auditSheet = ss.getSheetByName(DB_CONFIG.SHEETS.AUDIT_LOG);
+
+    if (!meLogSheet || meLogSheet.getLastRow() <= 1) {
+      throw new Error('ไม่พบรายการข้อมูลในฐานข้อมูล');
+    }
+
+    var data = meLogSheet.getDataRange().getValues();
+    var targetRowIndex = -1;
+    var originalRow = null;
+
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(recordId)) {
+        targetRowIndex = i + 1;
+        originalRow = data[i];
+        break;
+      }
+    }
+
+    if (targetRowIndex === -1) {
+      throw new Error('ไม่พบรายงาน ID: ' + recordId);
+    }
+
+    var existingDeviceSession = String(originalRow[4] || '');
+    if (deviceSessionId && existingDeviceSession && existingDeviceSession !== deviceSessionId) {
+      throw new Error('ท่านไม่มีสิทธิ์ยกเลิกรายงานที่สร้างจากอุปกรณ์เครื่องอื่น');
+    }
+
+    if (originalRow[27] === 'VOID') {
+      return { success: true, message: 'รายงานนี้ถูกยกเลิกแล้วก่อนหน้านี้' };
+    }
+
+    var nowIso = Utilities.formatDate(new Date(), 'Asia/Bangkok', "yyyy-MM-dd'T'HH:mm:ssXXX");
+
+    // Col 28: status -> 'VOID'
+    // Col 42: void_reason -> reason
+    // Col 43: updated_at -> nowIso
+    meLogSheet.getRange(targetRowIndex, 28).setValue('VOID');
+    meLogSheet.getRange(targetRowIndex, 42).setValue(String(reason).trim());
+    meLogSheet.getRange(targetRowIndex, 43).setValue(nowIso);
+
+    // Audit log entry
+    if (auditSheet) {
+      auditSheet.appendRow([
+        Utilities.getUuid(),
+        nowIso,
+        recordId,
+        reporterAlias || originalRow[3],
+        deviceSessionId || existingDeviceSession,
+        'VOID_REPORT',
+        'status',
+        originalRow[27],
+        'VOID (เหตุผล: ' + String(reason).trim() + ')',
+        'QuickReporter_Void'
+      ]);
+    }
+
+    return {
+      success: true,
+      recordId: recordId,
+      status: 'VOID',
+      message: 'ยกเลิกรายงาน (VOID) เรียบร้อยแล้ว'
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err.message || String(err)
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * Saves a Medication Safety Review from Pharmacist Reviewer into ME_Review sheet
+ * and updates ME_Log review columns.
+ *
+ * @param {Object} reviewData
+ * @returns {Object}
+ */
+function saveMedicationReview(reviewData) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+  } catch (e) {
+    return { success: false, error: 'ระบบไม่สามารถเข้าถึงฐานข้อมูลได้ชั่วคราว (Lock timeout)' };
+  }
+
+  try {
+    if (!reviewData || !reviewData.recordId) {
+      throw new Error('ไม่พบข้อมูลเคสสำหรับบันทึกการทบทวน');
+    }
+
+    var ss = getDatabaseSpreadsheet();
+    var reviewSheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_REVIEW);
+    var meLogSheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_LOG);
+    var auditSheet = ss.getSheetByName(DB_CONFIG.SHEETS.AUDIT_LOG);
+
+    if (!reviewSheet) {
+      setupDatabase();
+      reviewSheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_REVIEW);
+    }
+
+    var reviewId = 'rv-' + Utilities.getUuid().substring(0, 8);
+    var nowIso = Utilities.formatDate(new Date(), 'Asia/Bangkok', "yyyy-MM-dd'T'HH:mm:ssXXX");
+    var reviewer = String(reviewData.reviewedBy || 'Pharmacist Reviewer').trim();
+
+    var newReviewRow = [
+      reviewId,
+      reviewData.recordId,
+      nowIso,
+      reviewer,
+      reviewData.lasa === true || reviewData.lasa === 'Yes',
+      reviewData.lasaPair || '',
+      reviewData.had === true || reviewData.had === 'Yes',
+      reviewData.hadDrug || '',
+      Array.isArray(reviewData.contributingFactors) ? reviewData.contributingFactors.join('; ') : (reviewData.contributingFactors || ''),
+      reviewData.rootCauseNote || '',
+      reviewData.immediateAction || '',
+      reviewData.correctiveAction || '',
+      reviewData.followUpRequired === true || reviewData.followUpRequired === 'Yes',
+      reviewData.followUpDue || '',
+      reviewData.reviewStatus || 'CLOSED',
+      reviewData.reviewNote || ''
+    ];
+
+    reviewSheet.appendRow(newReviewRow);
+
+    // Update ME_Log row
+    if (meLogSheet && meLogSheet.getLastRow() > 1) {
+      var data = meLogSheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        if (String(data[i][0]) === String(reviewData.recordId)) {
+          var targetRow = i + 1;
+          meLogSheet.getRange(targetRow, 30).setValue('No'); // review_required satisfied
+          meLogSheet.getRange(targetRow, 31).setValue(nowIso); // reviewed_at
+          meLogSheet.getRange(targetRow, 32).setValue(reviewer); // reviewed_by
+          if (reviewData.reviewStatus === 'CLOSED') {
+            meLogSheet.getRange(targetRow, 28).setValue('Reviewed'); // status
+          }
+          meLogSheet.getRange(targetRow, 43).setValue(nowIso); // updated_at
+          break;
+        }
+      }
+    }
+
+    // Audit log entry
+    if (auditSheet) {
+      auditSheet.appendRow([
+        Utilities.getUuid(),
+        nowIso,
+        reviewData.recordId,
+        reviewer,
+        '',
+        'SAVE_REVIEW',
+        'ME_Review',
+        '',
+        JSON.stringify({
+          reviewId: reviewId,
+          reviewStatus: reviewData.reviewStatus,
+          had: reviewData.had,
+          lasa: reviewData.lasa
+        }),
+        'MedicationSafetyReviewer'
+      ]);
+    }
+
+    return {
+      success: true,
+      reviewId: reviewId,
+      reviewedAt: nowIso,
+      message: 'บันทึกผลการทบทวนความปลอดภัยทางยาเรียบร้อยแล้ว'
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err.message || String(err)
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 

@@ -5,6 +5,30 @@ All notable changes to the CatchME project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-01
+### Added
+- **Sawankhalok Hospital High Alert Drugs (HAD) Surveillance**:
+  - Integrated full 29-item High Alert Drug catalog across 3 official categories from กลุ่มงานเภสัชกรรมและคุ้มครองผู้บริโภค โรงพยาบาลสวรรคโลก:
+    - **Category 1 (22 items):** Narrow therapeutic index / high fatality risk (Adrenaline, Norepinephrine, Dobutamine, Dopamine, Digoxin, Nicardipine, Nitroglycerine, Adenosine, Amiodarone, Cisatracurium, Oxytocin, Terbutaline, Apixaban, Enoxaparin, Heparin, Streptokinase, Warfarin, 3% NaCl, 10% Calcium gluconate, MgSO4, KCl, Regular Insulin).
+    - **Category 2 (5 items):** Narcotics & Psychotropics (Fentanyl, Morphine, Pethidine, Midazolam, Ketamine).
+    - **Category 3 (2 items):** Serious Adverse Drug Reactions & SCARs (Allopurinol, Phenytoin).
+  - Position-aware regex parser detection (`detectHadInfo`) with boundary enforcement.
+  - High-visibility HAD alert cards with emergency red gradient, category badge, and warning indicator on Confirmation Card.
+  - Interactive HAD Reference Dictionary modal displaying all 29 hospital items with categories, forms, and clinical notes.
+  - Dedicated `HAD_MASTER` sheet in Google Sheets schema with automatic initial data population.
+- **Report Management & Audit Trail**:
+  - Report Detail drawer with complete incident information, timeline, and error classification.
+  - Quick Edit capability allowing reporters from the same device to modify details (actual/expected drug, notes) within the recent report window.
+  - VOID report marking with mandatory reason logging and audit trail preservation in `Audit_Log`.
+- **Medication Safety Review Module (Pharmacist Reviewer)**:
+  - Safety Review modal for in-depth pharmacist evaluation: Root Cause analysis, Contributing Factors (Environment, Patient, Human factors, System), Preventive Actions, and Severity Level.
+  - Structured storage in `ME_Review` sheet linked by `report_id`.
+- **Backend & API Expansion**:
+  - Database schema expansion in `src/Database.gs` for `HAD_MASTER` and `ME_REVIEW`, plus HAD and VOID columns in `ME_Log`.
+  - New GAS endpoints in `src/Code.gs` and `src/Reports.gs`: `apiGetReportDetail`, `apiUpdateReport`, `apiVoidReport`, `apiSaveMedicationReview`, and `apiGetHadMasterList`.
+- **Test Suite Expansion**:
+  - Added 13 HAD test cases covering Cat 1, 2, and 3 drugs in `tests/parser-tests.js`. Total test suite expanded to 64 tests with 100% pass rate.
+
 ## [0.3.0] - 2026-09-07
 ### Added
 - Web Speech API integration in `src/Scripts.html` supporting Thai (`th-TH`) voice recording.

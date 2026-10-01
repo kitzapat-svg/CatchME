@@ -803,11 +803,41 @@ const CatchME = (function() {
     // Render Smart LASA Card
     renderLasaCard(parsed);
 
+    // Render High Alert Drug (HAD) Card
+    renderHadCard(parsed);
+
     // Reset save button state
     const saveBtn = document.getElementById('btn-save-report');
     if (saveBtn) {
       saveBtn.disabled = false;
       saveBtn.innerHTML = '<span>บันทึก (Save)</span><span>✓</span>';
+    }
+  }
+
+  /**
+   * Renders the High Alert Drug (HAD) Card on confirmation screen.
+   */
+  function renderHadCard(parsed) {
+    const hadCard = document.getElementById('confirm-had-card');
+    if (!hadCard) return;
+
+    if (parsed && parsed.isHad) {
+      hadCard.classList.remove('hidden');
+      const drugNameEl = document.getElementById('confirm-had-drug-name');
+      const alertMsgEl = document.getElementById('confirm-had-alert-msg');
+      const catBadgeEl = document.getElementById('confirm-had-cat-badge');
+      const catNameEl = document.getElementById('confirm-had-cat-name');
+
+      const hadDetails = parsed.hadDetails || {};
+      const genericName = hadDetails.genericName || parsed.hadDrug || 'High Alert Drug';
+      const strengths = (hadDetails.strengths && hadDetails.strengths.length > 0) ? ' (' + hadDetails.strengths.join(', ') + ')' : '';
+
+      if (drugNameEl) drugNameEl.innerText = genericName + strengths;
+      if (alertMsgEl) alertMsgEl.innerText = hadDetails.alertMessage || 'ยาความเสี่ยงสูงของ รพ.สวรรคโลก ระวังผลกระทบรุนแรง';
+      if (catBadgeEl) catBadgeEl.innerText = 'หมวด ' + (hadDetails.categoryNo || 1);
+      if (catNameEl) catNameEl.innerText = hadDetails.categoryName || 'ยาเสี่ยงสูง รพ.สวรรคโลก';
+    } else {
+      hadCard.classList.add('hidden');
     }
   }
 
@@ -1132,7 +1162,10 @@ const CatchME = (function() {
       lasaPrescribed: state.currentParsed.lasaPrescribed || (state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.expected : ''),
       lasaDispensed: state.currentParsed.lasaDispensed || (state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.actual : ''),
       lasaPairKey: state.currentParsed.lasaPairKey || '',
-      tradeName: state.currentTradeName || state.currentParsed.tradeName || ''
+      tradeName: state.currentTradeName || state.currentParsed.tradeName || '',
+      isHad: (state.currentParsed && state.currentParsed.isHad) ? 'Yes' : 'No',
+      hadCategory: (state.currentParsed && (state.currentParsed.hadCategory || (state.currentParsed.hadDetails ? state.currentParsed.hadDetails.categoryName : ''))) || '',
+      hadDrug: (state.currentParsed && (state.currentParsed.hadDrug || (state.currentParsed.hadDetails ? state.currentParsed.hadDetails.genericName : ''))) || ''
     };
 
     const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxcYrhDehjEu0lngU7o64v4ldrhYuXmfnJJnRyTt0x7d7GhK2SEb9G8z1SAWcKLVsGfCA/exec';
@@ -1196,9 +1229,23 @@ const CatchME = (function() {
     addRecentReport({
       recordId: recordId,
       time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+      createdAt: new Date().toISOString(),
+      mode: payload.mode || state.mode || 'OPD',
       legacyCode: payload.legacyCode || 'Cat B',
       errorType: payload.errorType,
-      drugName: payload.drugName
+      drugName: payload.drugName,
+      actual: payload.actual,
+      expected: payload.expected,
+      isLasa: payload.isLasa === 'Yes',
+      lasaType: payload.lasaType,
+      isHad: payload.isHad === 'Yes',
+      hadCategory: payload.hadCategory,
+      hadDrug: payload.hadDrug,
+      rawTranscript: payload.rawTranscript,
+      process: payload.process,
+      processStage: payload.processStage,
+      detectedStage: payload.detectedStage,
+      status: 'Confirmed'
     });
 
     state.currentParsed = null;
@@ -1237,19 +1284,41 @@ const CatchME = (function() {
     }
 
     list.innerHTML = '';
-    recent.slice(0, 5).forEach(function(item) {
+    recent.slice(0, 6).forEach(function(item) {
       const itemEl = document.createElement('div');
-      itemEl.style.cssText = 'background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;';
+      const isVoid = item.status === 'VOID';
+      itemEl.style.cssText = 'background: ' + (isVoid ? '#F1F5F9' : '#FFFFFF') + '; border: 1.5px solid ' + (isVoid ? '#CBD5E1' : '#FFE5EC') + '; border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);';
+      
+      let badgesHtml = '';
+      if (isVoid) {
+        badgesHtml += '<span class="badge-status-void">VOID</span>';
+      } else if (item.status === 'Reviewed') {
+        badgesHtml += '<span class="badge-status-reviewed">Reviewed</span>';
+      }
+
+      if (item.isHad) {
+        badgesHtml += '<span style="font-size: 10px; font-weight: 800; background: #DC2626; color: white; padding: 1px 6px; border-radius: 4px;">⚠️ HAD</span>';
+      }
+      if (item.isLasa) {
+        badgesHtml += '<span style="font-size: 10px; font-weight: 800; background: #C9184A; color: white; padding: 1px 6px; border-radius: 4px;">🏷️ LASA</span>';
+      }
+
       itemEl.innerHTML = `
-        <div>
-          <div style="font-size: 14px; font-weight: 700; color: var(--color-text-primary);">${item.errorType || item.legacyCode}</div>
-          <div style="font-size: 12px; color: var(--color-text-secondary);">${item.drugName || '-'}</div>
+        <div style="flex: 1; min-width: 0; padding-right: 8px;">
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span style="font-size: 14px; font-weight: 700; color: ` + (isVoid ? '#64748B' : 'var(--color-text-primary)') + `; text-decoration: ` + (isVoid ? 'line-through' : 'none') + `;">${item.errorType || item.legacyCode}</span>
+            ${badgesHtml}
+          </div>
+          <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; text-decoration: ` + (isVoid ? 'line-through' : 'none') + `;">${item.drugName || '-'}</div>
         </div>
-        <div style="text-align: right;">
-          <span style="font-size: 13px; font-weight: 800; color: var(--color-primary-dark);">${item.legacyCode}</span>
+        <div style="text-align: right; flex-shrink: 0;">
+          <span style="font-size: 13px; font-weight: 800; color: ` + (isVoid ? '#94A3B8' : 'var(--color-primary-dark)') + `;">${item.legacyCode}</span>
           <div style="font-size: 11px; color: var(--color-text-muted);">${item.time || ''}</div>
         </div>
       `;
+      itemEl.onclick = function() {
+        openReportDetail(item.recordId);
+      };
       list.appendChild(itemEl);
     });
   }
@@ -2155,6 +2224,470 @@ const CatchME = (function() {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Phase 2: Report Detail, Edit, VOID & Medication Safety Review
+  // ---------------------------------------------------------------------------
+
+  const HOSPITAL_HAD_DATA = [
+    { id: 'HAD-01', name: 'Adrenaline', form: 'injection', strength: '1 mg/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ระวังหัวใจเต้นผิดจังหวะ / ความดันโลหิตสูงวิกฤต' },
+    { id: 'HAD-02', name: 'Norepinephrine (Levophed)', form: 'injection', strength: '4 mg/4ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ห้าม IV push เด็ดขาด ต้องให้ผ่าน Infusion pump และระวัง Extravasation' },
+    { id: 'HAD-03', name: 'Dobutamine (Dobutrex)', form: 'injection', strength: '250 mg/5ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ติดตาม HR, BP, ECG อย่างใกล้ชิด' },
+    { id: 'HAD-04', name: 'Dopamine (Inotropin)', form: 'injection', strength: '250 mg/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ควบคุมผ่าน Infusion pump ระวัง Extravasation' },
+    { id: 'HAD-05', name: 'Digoxin (Lanoxin)', form: 'injection, tablet', strength: '0.25 mg/ml, 0.25 mg', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ช่วงการรักษาแคบ ตรวจสอบ HR และระดับ K+ ก่อนให้ยา' },
+    { id: 'HAD-06', name: 'Nicardipine (Cardene)', form: 'injection', strength: '10 mg/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ระวังความดันโลหิตตกอย่างรวดเร็ว ตรวจวัด BP ทุก 5-15 นาที' },
+    { id: 'HAD-07', name: 'Nitroglycerine (NTG)', form: 'injection', strength: '50 mg/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ใช้สายให้ยา Non-PVC ติดตาม BP อย่างสม่ำเสมอ' },
+    { id: 'HAD-08', name: 'Adenosine (Adenocor)', form: 'injection', strength: '6 mg/2ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'Rapid IV push ตามด้วย NSS flush ทันที ติดตาม ECG' },
+    { id: 'HAD-09', name: 'Amiodarone (Cordarone)', form: 'injection', strength: '150 mg/3ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ผสมใน D5W เท่านั้น ห้ามผสม NSS ติดตาม BP และ ECG' },
+    { id: 'HAD-10', name: 'Cisatracurium (Nimbex)', form: 'injection', strength: '10 mg/5ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ยาหย่อนกล้ามเนื้อ ต้องมั่นใจว่าผู้ป่วยใส่ท่อช่วยหายใจแล้วเท่านั้น' },
+    { id: 'HAD-11', name: 'Oxytocin (Syntocinon)', form: 'injection', strength: '10 unit/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ควบคุมผ่าน Infusion pump ระวัง Uterine rupture / Fetal distress' },
+    { id: 'HAD-12', name: 'Terbutaline (Bricanyl)', form: 'injection', strength: '0.5 mg/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ระวัง Tachycardia, Tremor, Hypokalemia' },
+    { id: 'HAD-13', name: 'Apixaban (Eliquis)', form: 'tablet', strength: '5 mg, 2.5 mg', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ยากลุ่ม NOAC ระวังภาวะเลือดออกผิดปกติ และปรับขนาดยาตามไต/อายุ/น้ำหนัก' },
+    { id: 'HAD-14', name: 'Enoxaparin (Clexane)', form: 'injection', strength: '60 mg/0.6ml, 40 mg/0.4ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ฉีด Subcut บริเวณหน้าท้อง ห้ามไล่ฟองอากาศในเข็มสำเร็จรูป' },
+    { id: 'HAD-15', name: 'Heparin', form: 'injection', strength: '25000 IU/5ml, 5000 IU/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ติดตาม aPTT สม่ำเสมอ ระวังภาวะเลือดออกและ HIT' },
+    { id: 'HAD-16', name: 'Streptokinase (Streptase)', form: 'injection', strength: '1.5 mIU/Vial', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ยาสลายลิ่มเลือด ระวัง Major bleeding และ Allergic reaction' },
+    { id: 'HAD-17', name: 'Warfarin (Coumadin/Orfarin)', form: 'tablet', strength: '1 mg, 2 mg, 3 mg, 5 mg', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ติดตามค่า INR สม่ำเสมอ ระวัง Drug Interaction สูง' },
+    { id: 'HAD-18', name: '3% Sodium Chloride', form: 'sterile solution', strength: '500 ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'โซเดียมเข้มข้นสูง ระวัง Hypernatremia / ODS ให้ผ่าน Infusion pump' },
+    { id: 'HAD-19', name: '10% Calcium gluconate', form: 'injection', strength: '1 g/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ห้ามฉีดเร็ว อาจเกิด Cardiac arrest หรือ Extravasation necrosis' },
+    { id: 'HAD-20', name: 'Magnesium Sulfate (MgSO4)', form: 'injection', strength: '1 g/10ml (10%), 1 g/2ml (50%)', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ติดตาม DTR, RR, Urine output ระวัง Mg toxicity' },
+    { id: 'HAD-21', name: 'Potassium Chloride (KCl)', form: 'injection', strength: '20 mEq/10ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ห้าม IV push เด็ดขาด ต้องเจือจางและให้ผ่าน Infusion pump เท่านั้น' },
+    { id: 'HAD-22', name: 'Regular Insulin (RI / Actrapid)', form: 'injection', strength: '1000 IU/10ml, 100 IU/ml', cat: 1, catName: 'ยาช่วงความปลอดภัยแคบ / รุนแรงสูง', msg: 'ระวัง Hypoglycemia ใช้เข็มฉีด Insulin โดยเฉพาะ' },
+    { id: 'HAD-23', name: 'Fentanyl (Sublimaze)', form: 'injection', strength: '50 mcg/ml (2ml, 10ml)', cat: 2, catName: 'ยาเสพติดให้โทษประเภทที่ 2', msg: 'กดการหายใจรุนแรง ต้องมี Naloxone พร้อมใช้' },
+    { id: 'HAD-24', name: 'Morphine', form: 'injection, tablet', strength: '10 mg/ml, 10 mg, 30 mg', cat: 2, catName: 'ยาเสพติดให้โทษประเภทที่ 2', msg: 'ติดตามอัตราการหายใจ (RR < 10/min) และระดับความรู้สึกตัว' },
+    { id: 'HAD-25', name: 'Pethidine (Demerol)', form: 'injection', strength: '50 mg/ml', cat: 2, catName: 'ยาเสพติดให้โทษประเภทที่ 2', msg: 'ระวังพิษสะสม Norpethidine ชักได้ หลีกเลี่ยงในผู้ป่วยไตบกพร่อง' },
+    { id: 'HAD-26', name: 'Midazolam (Dormicum)', form: 'injection', strength: '5 mg/ml (1ml, 3ml)', cat: 2, catName: 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2', msg: 'ระวัง Respiratory depression และ Sedation ลึกเกินไป' },
+    { id: 'HAD-27', name: 'Ketamine (Ketalar)', form: 'injection', strength: '500 mg/10ml', cat: 2, catName: 'วัตถุออกฤทธิ์ต่อจิตประสาทประเภท 2', msg: 'เฝ้าระวังความดันโลหิต ชีพจร และ Hallucination ขณะฟื้นตัว' },
+    { id: 'HAD-28', name: 'Allopurinol (Zyloric)', form: 'tablet', strength: '100 mg, 300 mg', cat: 3, catName: 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง', msg: 'เสี่ยงแพ้ยารุนแรง SCARs/SJS/TEN ต้องตรวจยีน HLA-B*5801 และปรับตามไต' },
+    { id: 'HAD-29', name: 'Phenytoin (Dilantin)', form: 'oral, injection', strength: 'oral 50 mg, 100 mg, inj 50mg/ml', cat: 3, catName: 'ยาที่เกิดอุบัติการณ์ระดับรุนแรง', msg: 'ช่วงการรักษาแคบ ระวัง Purple glove syndrome, Arrythmia, Nystagmus, Ataxia' }
+  ];
+
+  function openReportDetail(recordId) {
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]'); } catch (e) {}
+    let item = recent.find(function(r) { return r.recordId === recordId; }) || { recordId: recordId };
+
+    state.currentDetailRecordId = recordId;
+    state.currentDetailReport = item;
+
+    populateDetailModal(item);
+    openModal('modal-report-detail');
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(serverReport) {
+          if (serverReport) {
+            state.currentDetailReport = serverReport;
+            populateDetailModal(serverReport);
+          }
+        })
+        .apiGetReportDetail(recordId);
+    }
+  }
+
+  function populateDetailModal(r) {
+    if (!r) return;
+
+    // Status Badge
+    const statusBadge = document.getElementById('detail-status-badge');
+    const isVoid = r.status === 'VOID';
+    if (statusBadge) {
+      statusBadge.innerText = r.status || 'Confirmed';
+      statusBadge.className = isVoid ? 'badge-status-void' : (r.status === 'Reviewed' ? 'badge-status-reviewed' : 'badge-status-normal');
+    }
+
+    // Header info
+    const modeBadge = document.getElementById('detail-mode-badge');
+    if (modeBadge) modeBadge.innerText = r.mode || state.mode || 'OPD';
+    const createdAtEl = document.getElementById('detail-created-at');
+    if (createdAtEl) createdAtEl.innerText = r.createdAt ? new Date(r.createdAt).toLocaleString('th-TH') : (r.time || '-');
+    const aliasEl = document.getElementById('detail-reporter-alias');
+    if (aliasEl) aliasEl.innerText = r.reporterAlias || state.alias || 'Anon';
+
+    // Transcript
+    const rawTranscriptEl = document.getElementById('detail-raw-transcript');
+    if (rawTranscriptEl) rawTranscriptEl.innerText = '"' + (r.rawTranscript || r.normalizedTranscript || '-') + '"';
+
+    // Risk Code & Error Type
+    const codeEl = document.getElementById('detail-legacy-code');
+    if (codeEl) codeEl.innerText = r.legacyCode || '-';
+    const errorEl = document.getElementById('detail-error-type');
+    if (errorEl) errorEl.innerText = r.errorType || '-';
+    const procEl = document.getElementById('detail-process-stage');
+    if (procEl) procEl.innerText = (r.process || '-') + (r.processStage ? ' (' + r.processStage + ')' : '');
+    const stageEl = document.getElementById('detail-detected-stage');
+    if (stageEl) stageEl.innerText = r.detectedStage || '-';
+
+    // Drug and comparison
+    const drugEl = document.getElementById('detail-drug-name');
+    if (drugEl) drugEl.innerText = r.drugName || '-';
+    const actEl = document.getElementById('detail-actual');
+    if (actEl) actEl.innerText = 'จัดจริง/สั่งจริง: ' + (r.actual || '-');
+    const expEl = document.getElementById('detail-expected');
+    if (expEl) expEl.innerText = 'ควรเป็น: ' + (r.expected || '-');
+
+    const hnEl = document.getElementById('detail-hn');
+    if (hnEl) hnEl.innerText = r.hn || '-';
+    const anEl = document.getElementById('detail-an');
+    if (anEl) anEl.innerText = r.an || '-';
+    const wardEl = document.getElementById('detail-ward');
+    if (wardEl) wardEl.innerText = r.wardClinic || '-';
+
+    // Safety Banners
+    const lasaBanner = document.getElementById('detail-lasa-banner');
+    const lasaPairEl = document.getElementById('detail-lasa-pair');
+    if (lasaBanner) {
+      if (r.isLasa) {
+        lasaBanner.classList.remove('hidden');
+        if (lasaPairEl) lasaPairEl.innerText = (r.lasaPairKey || r.drugName || 'Look-alike/Sound-alike') + (r.lasaType ? ' (' + r.lasaType + ')' : '');
+      } else {
+        lasaBanner.classList.add('hidden');
+      }
+    }
+
+    const hadBanner = document.getElementById('detail-had-banner');
+    const hadDrugEl = document.getElementById('detail-had-drug');
+    const hadCatEl = document.getElementById('detail-had-cat');
+    if (hadBanner) {
+      if (r.isHad) {
+        hadBanner.classList.remove('hidden');
+        if (hadDrugEl) hadDrugEl.innerText = r.hadDrug || r.drugName || 'High Alert Drug';
+        if (hadCatEl) hadCatEl.innerText = r.hadCategory || 'HAD รพ.สวรรคโลก';
+      } else {
+        hadBanner.classList.add('hidden');
+      }
+    }
+
+    const voidBanner = document.getElementById('detail-void-banner');
+    const voidReasonEl = document.getElementById('detail-void-reason');
+    if (voidBanner) {
+      if (isVoid) {
+        voidBanner.classList.remove('hidden');
+        if (voidReasonEl) voidReasonEl.innerText = r.voidReason || 'ไม่มีการระบุเหตุผล';
+      } else {
+        voidBanner.classList.add('hidden');
+      }
+    }
+
+    // Review section
+    const reviewSec = document.getElementById('detail-review-section');
+    if (reviewSec) {
+      if (r.review || r.status === 'Reviewed') {
+        reviewSec.classList.remove('hidden');
+        const rv = r.review || {};
+        document.getElementById('detail-review-status').innerText = rv.reviewStatus || 'CLOSED';
+        document.getElementById('detail-reviewed-by').innerText = rv.reviewedBy || r.reviewedBy || '-';
+        document.getElementById('detail-reviewed-at').innerText = rv.reviewedAt ? new Date(rv.reviewedAt).toLocaleDateString('th-TH') : (r.reviewedAt || '-');
+        document.getElementById('detail-contributing-factors').innerText = rv.contributingFactors || '-';
+        document.getElementById('detail-actions').innerText = (rv.immediateAction ? 'เฉพาะหน้า: ' + rv.immediateAction : '') + (rv.correctiveAction ? ' | ป้องกัน: ' + rv.correctiveAction : '-');
+      } else {
+        reviewSec.classList.add('hidden');
+      }
+    }
+
+    // Action button states if void
+    const editBtn = document.getElementById('btn-detail-edit');
+    const voidBtn = document.getElementById('btn-detail-void');
+    if (editBtn) editBtn.disabled = isVoid;
+    if (voidBtn) voidBtn.disabled = isVoid;
+  }
+
+  function openQuickEditCurrent() {
+    const r = state.currentDetailReport;
+    if (!r) return;
+    document.getElementById('edit-field-drug').value = r.drugName || '';
+    document.getElementById('edit-field-strength').value = r.strength || '';
+    document.getElementById('edit-field-actual').value = r.actual || '';
+    document.getElementById('edit-field-expected').value = r.expected || '';
+    document.getElementById('edit-field-hn').value = r.hn || '';
+    document.getElementById('edit-field-ward').value = r.wardClinic || '';
+    openModal('modal-quick-edit');
+  }
+
+  function submitQuickEdit() {
+    const recordId = state.currentDetailRecordId;
+    if (!recordId) return;
+
+    const updateData = {
+      drugName: document.getElementById('edit-field-drug').value.trim(),
+      strength: document.getElementById('edit-field-strength').value.trim(),
+      actual: document.getElementById('edit-field-actual').value.trim(),
+      expected: document.getElementById('edit-field-expected').value.trim(),
+      hn: document.getElementById('edit-field-hn').value.trim(),
+      wardClinic: document.getElementById('edit-field-ward').value.trim()
+    };
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            alert('✓ บันทึกการแก้ไขข้อมูลเรียบร้อยแล้ว');
+            closeModal('modal-quick-edit');
+            syncRecentReportEdit(recordId, updateData);
+            openReportDetail(recordId);
+          } else {
+            alert('ไม่สามารถแก้ไขได้: ' + (res ? res.error : 'Unknown error'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .apiUpdateReport(recordId, updateData, state.deviceId, state.alias);
+    } else {
+      syncRecentReportEdit(recordId, updateData);
+      closeModal('modal-quick-edit');
+      openReportDetail(recordId);
+      alert('✓ บันทึกการแก้ไขข้อมูล (Local Preview) เรียบร้อยแล้ว');
+    }
+  }
+
+  function syncRecentReportEdit(recordId, updateData) {
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]'); } catch (e) {}
+    for (let i = 0; i < recent.length; i++) {
+      if (recent[i].recordId === recordId) {
+        if (updateData.drugName) recent[i].drugName = updateData.drugName;
+        if (updateData.actual) recent[i].actual = updateData.actual;
+        if (updateData.expected) recent[i].expected = updateData.expected;
+        if (updateData.hn) recent[i].hn = updateData.hn;
+        if (updateData.wardClinic) recent[i].wardClinic = updateData.wardClinic;
+        break;
+      }
+    }
+    localStorage.setItem(STORAGE_KEYS.RECENT_REPORTS, JSON.stringify(recent));
+    renderRecentReports();
+    if (state.currentDetailReport && state.currentDetailReport.recordId === recordId) {
+      Object.assign(state.currentDetailReport, updateData);
+    }
+  }
+
+  function openVoidCurrent() {
+    document.getElementById('void-reason-input').value = '';
+    openModal('modal-void-report');
+  }
+
+  function submitVoidReport() {
+    const recordId = state.currentDetailRecordId;
+    const reason = document.getElementById('void-reason-input').value.trim();
+    if (!recordId) return;
+    if (!reason) {
+      alert('กรุณาระบุเหตุผลในการยกเลิกรายงาน (VOID)');
+      return;
+    }
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            alert('✓ ยกเลิกรายงาน (VOID) เรียบร้อยแล้ว');
+            closeModal('modal-void-report');
+            syncRecentReportVoid(recordId, reason);
+            openReportDetail(recordId);
+          } else {
+            alert('ไม่สามารถยกเลิกได้: ' + (res ? res.error : 'Unknown error'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .apiVoidReport(recordId, reason, state.deviceId, state.alias);
+    } else {
+      syncRecentReportVoid(recordId, reason);
+      closeModal('modal-void-report');
+      openReportDetail(recordId);
+      alert('✓ ยกเลิกรายงาน (VOID Local Preview) เรียบร้อยแล้ว');
+    }
+  }
+
+  function syncRecentReportVoid(recordId, reason) {
+    let recent = [];
+    try { recent = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]'); } catch (e) {}
+    for (let i = 0; i < recent.length; i++) {
+      if (recent[i].recordId === recordId) {
+        recent[i].status = 'VOID';
+        recent[i].voidReason = reason;
+        break;
+      }
+    }
+    localStorage.setItem(STORAGE_KEYS.RECENT_REPORTS, JSON.stringify(recent));
+    renderRecentReports();
+    if (state.currentDetailReport && state.currentDetailReport.recordId === recordId) {
+      state.currentDetailReport.status = 'VOID';
+      state.currentDetailReport.voidReason = reason;
+    }
+  }
+
+  function openSafetyReviewCurrent() {
+    const r = state.currentDetailReport;
+    if (!r) return;
+
+    document.getElementById('review-field-reviewer').value = state.alias || 'Pharmacist Reviewer';
+    document.getElementById('review-field-status').value = 'CLOSED';
+    document.getElementById('review-check-lasa').checked = !!r.isLasa;
+    document.getElementById('review-check-had').checked = !!r.isHad;
+
+    // Reset factor chips
+    const chips = document.querySelectorAll('#contributing-factors-chips .factor-chip');
+    chips.forEach(function(c) { c.classList.remove('active'); });
+
+    document.getElementById('review-field-immediate').value = '';
+    document.getElementById('review-field-corrective').value = '';
+    document.getElementById('review-check-followup').checked = false;
+    document.getElementById('review-field-due').value = '';
+    document.getElementById('review-field-due').disabled = true;
+    document.getElementById('review-field-notes').value = '';
+
+    openModal('modal-safety-review');
+  }
+
+  function toggleFactorChip(el) {
+    if (!el) return;
+    el.classList.toggle('active');
+  }
+
+  function toggleFollowUpDue(checked) {
+    const dueInput = document.getElementById('review-field-due');
+    if (dueInput) {
+      dueInput.disabled = !checked;
+      if (!checked) dueInput.value = '';
+    }
+  }
+
+  function submitSafetyReview() {
+    const recordId = state.currentDetailRecordId;
+    if (!recordId) return;
+
+    const reviewer = document.getElementById('review-field-reviewer').value.trim() || state.alias || 'Pharmacist Reviewer';
+    const status = document.getElementById('review-field-status').value;
+    const isLasa = document.getElementById('review-check-lasa').checked;
+    const isHad = document.getElementById('review-check-had').checked;
+
+    const selectedChips = document.querySelectorAll('#contributing-factors-chips .factor-chip.active');
+    const factors = [];
+    selectedChips.forEach(function(c) { factors.push(c.innerText.trim()); });
+
+    const immediate = document.getElementById('review-field-immediate').value.trim();
+    const corrective = document.getElementById('review-field-corrective').value.trim();
+    const followUp = document.getElementById('review-check-followup').checked;
+    const due = followUp ? document.getElementById('review-field-due').value : '';
+    const notes = document.getElementById('review-field-notes').value.trim();
+
+    const reviewPayload = {
+      recordId: recordId,
+      reviewedBy: reviewer,
+      reviewStatus: status,
+      lasa: isLasa,
+      had: isHad,
+      hadDrug: state.currentDetailReport ? (state.currentDetailReport.hadDrug || state.currentDetailReport.drugName) : '',
+      contributingFactors: factors,
+      immediateAction: immediate,
+      correctiveAction: corrective,
+      followUpRequired: followUp,
+      followUpDue: due,
+      reviewNote: notes
+    };
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            alert('✓ บันทึกผลการทบทวนความปลอดภัยทางยา (ME Review) เรียบร้อยแล้ว');
+            closeModal('modal-safety-review');
+            if (state.currentDetailReport) {
+              state.currentDetailReport.review = reviewPayload;
+              state.currentDetailReport.status = 'Reviewed';
+            }
+            openReportDetail(recordId);
+          } else {
+            alert('ไม่สามารถบันทึกการทบทวนได้: ' + (res ? res.error : 'Unknown error'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .apiSaveMedicationReview(reviewPayload);
+    } else {
+      closeModal('modal-safety-review');
+      if (state.currentDetailReport) {
+        state.currentDetailReport.review = reviewPayload;
+        state.currentDetailReport.status = 'Reviewed';
+      }
+      openReportDetail(recordId);
+      alert('✓ บันทึกผลการทบทวน (Local Preview) เรียบร้อยแล้ว');
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Sawankhalok High Alert Drugs (HAD) Dictionary
+  // ---------------------------------------------------------------------------
+
+  let currentHadFilterCat = 0;
+  let currentHadSearchQuery = '';
+
+  function openHadDictionary() {
+    currentHadFilterCat = 0;
+    currentHadSearchQuery = '';
+    const searchInput = document.getElementById('had-search-input');
+    if (searchInput) searchInput.value = '';
+    updateHadTabsUI();
+    renderHadDictionaryList();
+    openModal('modal-had-dictionary');
+  }
+
+  function filterHadCategory(catNo) {
+    currentHadFilterCat = catNo;
+    updateHadTabsUI();
+    renderHadDictionaryList();
+  }
+
+  function updateHadTabsUI() {
+    ['tab-had-all', 'tab-had-cat1', 'tab-had-cat2', 'tab-had-cat3'].forEach(function(id, idx) {
+      const btn = document.getElementById(id);
+      if (btn) btn.classList.toggle('active', currentHadFilterCat === idx);
+    });
+  }
+
+  function searchHadList(val) {
+    currentHadSearchQuery = (val || '').trim().toLowerCase();
+    renderHadDictionaryList();
+  }
+
+  function renderHadDictionaryList() {
+    const listEl = document.getElementById('had-dictionary-list');
+    if (!listEl) return;
+
+    let filtered = HOSPITAL_HAD_DATA.filter(function(item) {
+      const matchCat = (currentHadFilterCat === 0 || item.cat === currentHadFilterCat);
+      const matchQuery = !currentHadSearchQuery || 
+        item.name.toLowerCase().indexOf(currentHadSearchQuery) !== -1 ||
+        item.strength.toLowerCase().indexOf(currentHadSearchQuery) !== -1 ||
+        item.msg.toLowerCase().indexOf(currentHadSearchQuery) !== -1;
+      return matchCat && matchQuery;
+    });
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div style="text-align: center; color: var(--color-text-muted); padding: 20px 0; font-size: 13px;">ไม่พบรายการยาที่ตรงกับเงื่อนไข</div>';
+      return;
+    }
+
+    let html = '';
+    filtered.forEach(function(item) {
+      const catBadgeColor = item.cat === 1 ? '#DC2626' : (item.cat === 2 ? '#B45309' : '#4338CA');
+      html += `
+        <div class="had-item-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <span style="font-size: 14px; font-weight: 800; color: #1E293B;">${item.name}</span>
+              <span style="font-size: 11px; color: #64748B; margin-left: 4px;">(${item.strength})</span>
+            </div>
+            <span style="font-size: 10px; font-weight: 800; background: ${catBadgeColor}; color: white; padding: 2px 7px; border-radius: 9999px;">หมวด ${item.cat}</span>
+          </div>
+          <div style="font-size: 11px; color: #B91C1C; font-weight: 600; line-height: 1.3;">⚠️ ${item.msg}</div>
+          <div style="font-size: 11px; color: #64748B;">รูปแบบ: <strong>${item.form}</strong> • ${item.catName}</div>
+        </div>
+      `;
+    });
+    listEl.innerHTML = html;
+  }
+
   return {
     init: init,
     toggleMode: toggleMode,
@@ -2203,7 +2736,19 @@ const CatchME = (function() {
     openEmergingLasaModal: openEmergingLasaModal,
     setEmergingFilter: setEmergingFilter,
     promoteEmergingItem: promoteEmergingItem,
-    promoteCurrentEmergingPair: promoteCurrentEmergingPair
+    promoteCurrentEmergingPair: promoteCurrentEmergingPair,
+    openReportDetail: openReportDetail,
+    openQuickEditCurrent: openQuickEditCurrent,
+    submitQuickEdit: submitQuickEdit,
+    openVoidCurrent: openVoidCurrent,
+    submitVoidReport: submitVoidReport,
+    openSafetyReviewCurrent: openSafetyReviewCurrent,
+    toggleFactorChip: toggleFactorChip,
+    toggleFollowUpDue: toggleFollowUpDue,
+    submitSafetyReview: submitSafetyReview,
+    openHadDictionary: openHadDictionary,
+    filterHadCategory: filterHadCategory,
+    searchHadList: searchHadList
   };
 })();
 

@@ -1,4 +1,4 @@
-﻿# CatchME — Medication Error Cat B Quick Reporter
+# CatchME — Medication Error Cat B Quick Reporter
 
 > **"Catch ME before it reaches the patient."**  
 > พบ Error → เปิด CatchME → กดไมค์ → พูด → ตรวจ → บันทึก (10–20 วินาที)
@@ -68,12 +68,14 @@ powershell -ExecutionPolicy Bypass -File scripts/setup-machine.ps1
 ## การตั้งค่าฐานข้อมูล (setupDatabase)
 
 เมื่อเชื่อมต่อกับ Apps Script เรียบร้อย สามารถสั่งรันฟังก์ชัน `setupDatabase()` จาก Apps Script Editor เพื่อสร้างชีตและคอลัมน์เริ่มต้น ได้แก่:
-1. `ME_Log` — บันทึกเหตุการณ์ Category B
+1. `ME_Log` — บันทึกเหตุการณ์ Category B พร้อมการตรวจจับ HAD และสถานะ VOID
 2. `App_Settings` — ค่าคอนฟิกเริ่มต้นของระบบ
-3. `Audit_Log` — บันทึกประวัติการสร้าง/แก้ไข/ยกเลิก
+3. `Audit_Log` — บันทึกประวัติการสร้าง/แก้ไข/ยกเลิก (Audit Trail)
 4. `Drug_Master` — ฐานข้อมูลบัญชียาเบื้องต้น
+5. `HAD_MASTER` — บัญชียาที่มีความเสี่ยงสูง (High Alert Drugs: 29 รายการ ตามมาตรฐาน รพ.สวรรคโลก)
+6. `ME_Review` — การทบทวนความปลอดภัยทางยาโดยเภสัชกร (Root Cause & Preventive Actions)
 
-*ฟังก์ชันนี้เป็น idempotent สามารถรันซ้ำได้โดยไม่ลบหรือเปลี่ยนแปลงข้อมูลเดิม*
+*ฟังก์ชันนี้เป็น idempotent สามารถรันซ้ำได้โดยไม่ลบหรือเปลี่ยนแปลงข้อมูลเดิม และจะโหลดบัญชียา HAD อัตโนมัติหากชีตยังว่างอยู่*
 
 ---
 

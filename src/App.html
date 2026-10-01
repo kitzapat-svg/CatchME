@@ -278,6 +278,30 @@
             </div>
           </div>
 
+          <!-- High Alert Drug (HAD) Safety Card -->
+          <div id="confirm-had-card" class="had-smart-card hidden">
+            <div class="had-card-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">⚠️</span>
+                <span style="font-size: 13px; font-weight: 800; color: #991B1B;">ยาความเสี่ยงสูง (High Alert Drug: HAD)</span>
+              </div>
+              <span id="confirm-had-cat-badge" class="badge-had-cat">หมวด 1</span>
+            </div>
+            <div class="had-card-body">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; font-weight: 800; color: #7F1D1D;" id="confirm-had-drug-name">-</div>
+                <button type="button" onclick="CatchME.openHadDictionary()" style="background: none; border: none; font-size: 11px; font-weight: 700; color: #B91C1C; cursor: pointer; text-decoration: underline;">
+                  บัญชี HAD รพ.สวรรคโลก ⓘ
+                </button>
+              </div>
+              <div style="font-size: 11px; color: #991B1B; margin-top: 3px; line-height: 1.3;" id="confirm-had-alert-msg">-</div>
+              <div style="font-size: 11px; color: #78350F; background: #FEF3C7; border-radius: 6px; padding: 4px 8px; margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+                <span>📋</span>
+                <span id="confirm-had-cat-name">-</span>
+              </div>
+            </div>
+          </div>
+
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">จุดที่ตรวจพบ (DETECTED STAGE)</span>
@@ -708,6 +732,359 @@
 
       <div style="display: flex; justify-content: flex-end;">
         <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-emerging-lasa')" style="width: auto; padding: 7px 18px; font-size: 13px;">
+          <span>ปิดหน้าต่าง</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Report Detail Modal / Drawer -->
+  <div id="modal-report-detail" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">📄</span>
+            <h2 style="font-size: 17px; font-weight: 800; color: var(--color-primary-dark); margin: 0;">
+              รายละเอียดเหตุการณ์
+            </h2>
+            <span id="detail-status-badge" class="badge-status-normal">Confirmed</span>
+          </div>
+          <div style="font-size: 11px; color: var(--color-text-secondary); margin-top: 4px;">
+            <span id="detail-mode-badge" style="font-weight: 700; color: var(--color-primary-dark);">OPD</span> • 
+            <span id="detail-created-at">-</span> • 
+            บันทึกโดย: <span id="detail-reporter-alias" style="font-weight: 600;">-</span>
+          </div>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-report-detail')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Transcript Card -->
+      <div style="background: #FFF5F7; border-left: 3px solid var(--color-primary); padding: 8px 12px; border-radius: 6px; margin-bottom: 12px;">
+        <span style="font-size: 10px; font-weight: 700; color: var(--color-primary-dark); text-transform: uppercase;">ข้อความเสียงต้นฉบับ:</span>
+        <div id="detail-raw-transcript" style="font-size: 13px; color: var(--color-text-primary); font-style: italic; margin-top: 2px;">"-"</div>
+      </div>
+
+      <!-- Detail Grid -->
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px;">
+        <div style="background: #F8FAFC; border-radius: 8px; padding: 10px; border: 1px solid #E2E8F0;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary);">ความคลาดเคลื่อน / รหัสความเสี่ยง</span>
+            <span id="detail-legacy-code" style="font-size: 12px; font-weight: 800; background: var(--color-primary); color: white; padding: 2px 8px; border-radius: 6px;">-</span>
+          </div>
+          <div id="detail-error-type" style="font-size: 14px; font-weight: 700; color: var(--color-text-primary); margin-top: 4px;">-</div>
+          <div style="font-size: 11px; color: var(--color-text-muted); margin-top: 2px;">
+            ขั้นตอน: <span id="detail-process-stage" style="color: var(--color-text-secondary); font-weight: 600;">-</span> | 
+            ตรวจพบที่: <span id="detail-detected-stage" style="color: #1E4F8A; font-weight: 600;">-</span>
+          </div>
+        </div>
+
+        <!-- Drug & Values -->
+        <div style="background: #F8FAFC; border-radius: 8px; padding: 10px; border: 1px solid #E2E8F0;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary);">ยาที่เกี่ยวข้อง</span>
+            <span id="detail-drug-name" style="font-size: 13px; font-weight: 700; color: var(--color-primary-dark);">-</span>
+          </div>
+          <div class="comparison-row" style="margin-top: 6px;">
+            <span id="detail-actual" class="val-actual">จัดจริง: -</span>
+            <span id="detail-expected" class="val-expected">ควรเป็น: -</span>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--color-text-secondary);">
+            <span>HN: <strong id="detail-hn">-</strong></span>
+            <span>AN: <strong id="detail-an">-</strong></span>
+            <span>Ward/จุดเกิด: <strong id="detail-ward">-</strong></span>
+          </div>
+        </div>
+
+        <!-- Safety Flags Section -->
+        <div id="detail-safety-section" style="display: flex; flex-direction: column; gap: 6px;">
+          <div id="detail-lasa-banner" class="hidden" style="background: #FDF2F8; border: 1px solid #FBCFE8; border-radius: 6px; padding: 8px 10px; font-size: 12px;">
+            <span style="color: #9D174D; font-weight: 700;">🏷️ คู่ยา LASA:</span> 
+            <span id="detail-lasa-pair" style="font-weight: 600; color: #831843;">-</span>
+          </div>
+          <div id="detail-had-banner" class="hidden" style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 6px; padding: 8px 10px; font-size: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="color: #991B1B; font-weight: 800;">⚠️ High Alert Drug (HAD):</span>
+              <span id="detail-had-cat" style="font-size: 10px; background: #B91C1C; color: white; padding: 1px 6px; border-radius: 4px;">-</span>
+            </div>
+            <div id="detail-had-drug" style="font-weight: 700; color: #7F1D1D; margin-top: 2px;">-</div>
+          </div>
+          <div id="detail-void-banner" class="hidden" style="background: #F1F5F9; border: 1px dashed #94A3B8; border-radius: 6px; padding: 8px 10px; font-size: 12px; color: #475569;">
+            <strong style="color: #DC2626;">🚫 รายการนี้ถูกยกเลิก (VOID):</strong>
+            <div id="detail-void-reason" style="margin-top: 2px; font-style: italic;">-</div>
+          </div>
+        </div>
+
+        <!-- Review Summary (If Reviewed) -->
+        <div id="detail-review-section" class="hidden" style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 11px; font-weight: 800; color: #1E40AF;">🩺 ผลการทบทวนความปลอดภัย (ME Review)</span>
+            <span id="detail-review-status" style="font-size: 10px; font-weight: 700; background: #2563EB; color: white; padding: 1px 6px; border-radius: 4px;">CLOSED</span>
+          </div>
+          <div style="font-size: 11px; color: #1E3A8A; margin-top: 4px;">
+            ผู้ทบทวน: <strong id="detail-reviewed-by">-</strong> • <span id="detail-reviewed-at">-</span>
+          </div>
+          <div style="font-size: 11px; color: #1E3A8A; margin-top: 4px;" id="detail-contributing-factors-row">
+            <strong>ปัจจัยเชิงระบบ:</strong> <span id="detail-contributing-factors">-</span>
+          </div>
+          <div style="font-size: 11px; color: #1E3A8A; margin-top: 2px;" id="detail-actions-row">
+            <strong>มาตรการแก้ไข:</strong> <span id="detail-actions">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button type="button" id="btn-detail-edit" class="btn-secondary" onclick="CatchME.openQuickEditCurrent()" style="flex: 1; padding: 8px; font-size: 12px;">
+          <span>✏️ แก้ไขข้อมูล</span>
+        </button>
+        <button type="button" id="btn-detail-void" class="btn-secondary" onclick="CatchME.openVoidCurrent()" style="flex: 1; padding: 8px; font-size: 12px; color: #DC2626; border-color: #FECACA;">
+          <span>🚫 ยกเลิกเคส</span>
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.openSafetyReviewCurrent()" style="flex: 1.2; padding: 8px; font-size: 12px; background: linear-gradient(135deg, #1E4F8A 0%, #0F3260 100%);">
+          <span>🩺 ทบทวน (Review)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Quick Edit Form Modal -->
+  <div id="modal-quick-edit" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 420px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <h2 style="font-size: 16px; font-weight: 800; color: var(--color-primary-dark); margin: 0;">
+            ✏️ แก้ไขข้อมูลรายงาน
+          </h2>
+          <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+            แก้ไขรายละเอียดเคสที่บันทึกจากเครื่องนี้
+          </p>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-quick-edit')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="edit-field-drug">ชื่อยา (Medication Name)</label>
+          <input type="text" id="edit-field-drug" class="input-field" placeholder="เช่น Warfarin 3mg">
+        </div>
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="edit-field-strength">ความแรง (Strength)</label>
+          <input type="text" id="edit-field-strength" class="input-field" placeholder="เช่น 3 mg, 10 mg/ml">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="edit-field-actual">จัดจริง / สั่งจริง</label>
+            <input type="text" id="edit-field-actual" class="input-field" placeholder="เช่น 5 mg">
+          </div>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="edit-field-expected">ควรเป็น</label>
+            <input type="text" id="edit-field-expected" class="input-field" placeholder="เช่น 3 mg">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="edit-field-hn">HN (ถ้ามี)</label>
+            <input type="text" id="edit-field-hn" class="input-field" placeholder="เช่น 66012345">
+          </div>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="edit-field-ward">Ward / จุดเกิดเหตุ</label>
+            <input type="text" id="edit-field-ward" class="input-field" placeholder="เช่น หอผู้ป่วยชาย, ห้องยา">
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-quick-edit')" style="width: auto; padding: 7px 16px; font-size: 13px;">
+          ยกเลิก
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.submitQuickEdit()" style="width: auto; padding: 7px 20px; font-size: 13px;">
+          <span>✓ บันทึกแก้ไข</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: VOID Confirmation Modal -->
+  <div id="modal-void-report" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 400px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 22px;">🚫</span>
+        <h2 style="font-size: 16px; font-weight: 800; color: #DC2626; margin: 0;">
+          ยืนยันการยกเลิกรายงาน (VOID)
+        </h2>
+      </div>
+      <p style="font-size: 12px; color: var(--color-text-secondary); margin-bottom: 12px; line-height: 1.4;">
+        ข้อมูลจะไม่ถูกลบออกจากฐานข้อมูล แต่จะถูกทำเครื่องหมายเป็น <strong>VOID</strong> พร้อมบันทึกเหตุผลในระบบ Audit Log เพื่อความโปร่งใส
+      </p>
+
+      <div class="input-group">
+        <label class="input-label" for="void-reason-input" style="color: #991B1B;">เหตุผลในการยกเลิก (ระบุจำเป็น)</label>
+        <textarea id="void-reason-input" class="input-field" rows="3" placeholder="เช่น รายงานซ้ำซ้อน, กรอกข้อมูลทดสอบระบบ, ผู้ป่วยถูกยกเลิกคำสั่งยา"></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-void-report')" style="width: auto; padding: 7px 16px; font-size: 13px;">
+          ย้อนกลับ
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.submitVoidReport()" style="width: auto; padding: 7px 20px; font-size: 13px; background: #DC2626;">
+          <span>🚫 ยืนยันยกเลิกเคส</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Medication Safety Review Drawer / Modal -->
+  <div id="modal-safety-review" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 480px; max-height: 92vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 20px;">🩺</span>
+            <h2 style="font-size: 17px; font-weight: 800; color: #1E4F8A; margin: 0;">
+              Medication Safety Review
+            </h2>
+          </div>
+          <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+            แบบทบทวนความปลอดภัยทางยาและวิเคราะห์ปัจจัยเชิงระบบ (Pharmacist Reviewer)
+          </p>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-safety-review')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Reviewer & Status -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 8px;">
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="review-field-reviewer">เภสัชกรผู้ทบทวน</label>
+            <input type="text" id="review-field-reviewer" class="input-field" placeholder="ชื่อ/รหัสเภสัชกร">
+          </div>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="review-field-status">สถานะการทบทวน</label>
+            <select id="review-field-status" class="input-field" style="font-size: 12px;">
+              <option value="CLOSED">CLOSED (เสร็จสิ้น)</option>
+              <option value="OPEN">OPEN (ติดตามต่อ)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Risk Characteristics Verification -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 10px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">คุณลักษณะความเสี่ยง (Risk Characteristics)</span>
+          <div style="display: flex; gap: 16px; margin-top: 6px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-text-primary); cursor: pointer;">
+              <input type="checkbox" id="review-check-lasa">
+              <span>🏷️ เป็นคู่ยา LASA</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-text-primary); cursor: pointer;">
+              <input type="checkbox" id="review-check-had">
+              <span>⚠️ เป็นยาเสี่ยงสูง (HAD)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Contributing Factors (Systemic Checklist) -->
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase;">ปัจจัยเชิงระบบที่ส่งผล (Contributing Factors)</span>
+          <p style="font-size: 11px; color: var(--color-text-muted); margin-top: 1px; margin-bottom: 6px;">แตะเลือกปัจจัยที่ตรวจพบได้มากกว่าหนึ่งข้อ:</p>
+          <div id="contributing-factors-chips" class="factor-grid">
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Look-alike packaging')">📦 เม็ดยา/บรรจุภัณฑ์คล้าย</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Sound-alike name')">🔊 ชื่อยาพ้องรูป/พ้องเสียง</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Storage proximity')">🗄️ จัดเก็บวางใกล้เคียงกัน</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'High workload / Rush')">⏳ ภาระงานหนาแน่น/เร่งรีบ</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Interruption / Distraction')">🔔 ถูกขัดจังหวะ/สิ่งรบกวน</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'Illegible handwriting')">📝 ลายมือแพทย์อ่านยาก</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'New staff / Inexperienced')">👤 เจ้าหน้าที่ใหม่/ขาดทักษะ</button>
+            <button type="button" class="factor-chip" onclick="CatchME.toggleFactorChip(this, 'System / Display glitch')">💻 ระบบคอมพิวเตอร์/จอแสดงผล</button>
+          </div>
+        </div>
+
+        <!-- Immediate & Corrective Action -->
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="review-field-immediate">การแก้ไขจัดการทันที (Immediate Action)</label>
+          <input type="text" id="review-field-immediate" class="input-field" placeholder="เช่น เปลี่ยนยาให้ถูกต้องก่อนจ่าย, แจ้งแพทย์ปรับแก้ไข">
+        </div>
+
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="review-field-corrective">แนวทางป้องกันเชิงระบบ (Corrective / Preventive Action)</label>
+          <input type="text" id="review-field-corrective" class="input-field" placeholder="เช่น ติดป้ายเตือน LASA, ย้ายตำแหน่งจัดเก็บ, เพิ่ม Alert ในระบบ">
+        </div>
+
+        <!-- Follow-up & Notes -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--color-text-primary); cursor: pointer; margin-top: 18px;">
+            <input type="checkbox" id="review-check-followup" onchange="CatchME.toggleFollowUpDue(this.checked)">
+            <span>ต้องติดตามผล (Follow-up)</span>
+          </label>
+          <div class="input-group" style="margin-bottom: 0;">
+            <label class="input-label" for="review-field-due">กำหนดวันที่ติดตาม</label>
+            <input type="date" id="review-field-due" class="input-field" disabled>
+          </div>
+        </div>
+
+        <div class="input-group" style="margin-bottom: 0;">
+          <label class="input-label" for="review-field-notes">บันทึกข้อเสนอแนะเพิ่มเติม (Review Notes)</label>
+          <textarea id="review-field-notes" class="input-field" rows="2" placeholder="ความคิดเห็นเพิ่มเติมของเภสัชกรผู้ทบทวน"></textarea>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;">
+        <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-safety-review')" style="width: auto; padding: 7px 16px; font-size: 13px;">
+          ยกเลิก
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.submitSafetyReview()" style="width: auto; padding: 7px 22px; font-size: 13px; background: linear-gradient(135deg, #1E4F8A 0%, #0F3260 100%);">
+          <span>✓ บันทึกผลการทบทวน</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Sawankhalok Hospital High Alert Drugs (HAD) Dictionary Modal -->
+  <div id="modal-had-dictionary" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 480px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 20px;">📋</span>
+            <h2 style="font-size: 17px; font-weight: 800; color: #991B1B; margin: 0;">
+              บัญชียาความเสี่ยงสูง (High Alert Drugs)
+            </h2>
+          </div>
+          <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 2px;">
+            กลุ่มงานเภสัชกรรมและคุ้มครองผู้บริโภค โรงพยาบาลสวรรคโลก (29 รายการ 3 หมวดหมู่)
+          </p>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-had-dictionary')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div style="display: flex; gap: 4px; margin-bottom: 12px;">
+        <button type="button" id="tab-had-all" class="btn-secondary active" onclick="CatchME.filterHadCategory(0)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+          ทั้งหมด (29)
+        </button>
+        <button type="button" id="tab-had-cat1" class="btn-secondary" onclick="CatchME.filterHadCategory(1)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+          หมวด 1 (22)
+        </button>
+        <button type="button" id="tab-had-cat2" class="btn-secondary" onclick="CatchME.filterHadCategory(2)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+          หมวด 2 (5)
+        </button>
+        <button type="button" id="tab-had-cat3" class="btn-secondary" onclick="CatchME.filterHadCategory(3)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+          หมวด 3 (2)
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="input-group" style="margin-bottom: 10px;">
+        <input type="text" id="had-search-input" class="input-field" placeholder="🔍 ค้นหายา HAD (เช่น Warfarin, Insulin, 10%)..." oninput="CatchME.searchHadList(this.value)">
+      </div>
+
+      <!-- HAD List Container -->
+      <div id="had-dictionary-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto; padding-right: 2px;">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+        <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-had-dictionary')" style="width: auto; padding: 7px 18px; font-size: 13px;">
           <span>ปิดหน้าต่าง</span>
         </button>
       </div>

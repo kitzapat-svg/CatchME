@@ -572,6 +572,119 @@ const LASA_TEST_CASES = [
   }
 ];
 
+// Sawankhalok Hospital High Alert Drugs (HAD) Test Cases — 3 Categories
+const HAD_TEST_CASES = [
+  // หมวด 1: ยาช่วงความปลอดภัยแคบ / รุนแรงสูง
+  {
+    id: 'HAD-CAT1-01',
+    setting: 'OPD',
+    phrase: 'หมอสั่ง warfarin 3 mg แต่ห้องยาคีย์ 5 mg เภสัชกรทบทวนเจอ',
+    expectedHad: true,
+    expectedDrug: 'Warfarin',
+    expectedCategoryNo: 1
+  },
+  {
+    id: 'HAD-CAT1-02',
+    setting: 'IPD',
+    phrase: 'หมอสั่ง levophed 4 mg แต่คีย์ 8 mg เภสัชทวนเจอ',
+    expectedHad: true,
+    expectedDrug: 'Norepinephrine',
+    expectedCategoryNo: 1
+  },
+  {
+    id: 'HAD-CAT1-03',
+    setting: 'IPD',
+    phrase: 'คนจัดหยิบ potassium chloride สลับกับ calcium gluconate',
+    expectedHad: true,
+    expectedDrug: 'Potassium Chloride',
+    expectedCategoryNo: 1
+  },
+  {
+    id: 'HAD-CAT1-04',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ 3% nacl แทน 0.9% nacl เภสัชเช็คเจอ',
+    expectedHad: true,
+    expectedDrug: '3% Sodium Chloride',
+    expectedCategoryNo: 1
+  },
+  {
+    id: 'HAD-CAT1-05',
+    setting: 'IPD',
+    phrase: 'หมอสั่ง regular insulin 10 unit แต่คีย์ตกหล่น',
+    expectedHad: true,
+    expectedDrug: 'Regular Insulin',
+    expectedCategoryNo: 1
+  },
+  {
+    id: 'HAD-CAT1-06',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ digoxin 0.25 mg ผิดความแรง',
+    expectedHad: true,
+    expectedDrug: 'Digoxin',
+    expectedCategoryNo: 1
+  },
+  {
+    id: 'HAD-CAT1-07',
+    setting: 'IPD',
+    phrase: 'หมอสั่ง clexane 60 mg แต่พยาบาลรับคำสั่งเป็น 40 mg',
+    expectedHad: true,
+    expectedDrug: 'Enoxaparin',
+    expectedCategoryNo: 1
+  },
+  {
+    id: 'HAD-CAT1-08',
+    setting: 'IPD',
+    phrase: 'คนจัดหยิบ nicardipine 10 mg ผิดรายการ',
+    expectedHad: true,
+    expectedDrug: 'Nicardipine',
+    expectedCategoryNo: 1
+  },
+
+  // หมวด 2: ยาเสพติดให้โทษประเภท 2 และ วัตถุออกฤทธิ์ประเภท 2
+  {
+    id: 'HAD-CAT2-01',
+    setting: 'IPD',
+    phrase: 'หมอสั่ง fentanyl 50 mcg แต่คีย์ 100 mcg เภสัชทวนเจอ',
+    expectedHad: true,
+    expectedDrug: 'Fentanyl',
+    expectedCategoryNo: 2
+  },
+  {
+    id: 'HAD-CAT2-02',
+    setting: 'IPD',
+    phrase: 'คนจัดหยิบ morphine 10 mg แทน pethidine 50 mg',
+    expectedHad: true,
+    expectedDrug: 'Morphine',
+    expectedCategoryNo: 2
+  },
+  {
+    id: 'HAD-CAT2-03',
+    setting: 'IPD',
+    phrase: 'หมอสั่ง dormicum 5 mg แต่พยาบาลรับเป็น 15 mg',
+    expectedHad: true,
+    expectedDrug: 'Midazolam',
+    expectedCategoryNo: 2
+  },
+
+  // หมวด 3: ยาอุบัติการณ์ความคลาดเคลื่อนระดับรุนแรง
+  {
+    id: 'HAD-CAT3-01',
+    setting: 'OPD',
+    phrase: 'หมอสั่ง allopurinol 100 mg แต่คนไข้มีประวัติแพ้ยา เภสัชทวนเจอ',
+    expectedHad: true,
+    expectedDrug: 'Allopurinol',
+    expectedCategoryNo: 3
+  },
+  {
+    id: 'HAD-CAT3-02',
+    setting: 'IPD',
+    phrase: 'คนจัดหยิบ phenytoin 50 mg แทน 100 mg เภสัชเช็คเจอ',
+    expectedHad: true,
+    expectedDrug: 'Phenytoin',
+    expectedCategoryNo: 3
+  }
+];
+
 // -----------------------------------------------------------------------------
 // 4. Test Execution & Reporting
 // -----------------------------------------------------------------------------
@@ -646,6 +759,26 @@ LASA_TEST_CASES.forEach((tc) => {
     if (!passLasa) console.log(`   - isLasa:      expected ${tc.expectedLasa}, got ${result.isLasa}`);
     if (!passKey) console.log(`   - Pair Key:    expected "${tc.expectedPairKey}", got "${result.lasaPairKey}"`);
     if (!passType) console.log(`   - Type:        expected "${tc.expectedType}", got "${result.lasaType}"`);
+  }
+});
+
+console.log('\n--- RUNNING SAWANKHALOK HOSPITAL HIGH ALERT DRUGS (HAD) TEST CASES ---\n');
+
+HAD_TEST_CASES.forEach((tc) => {
+  const result = parseMedicationError(tc.phrase, tc.setting);
+  const passHad = result.isHad === tc.expectedHad;
+  const passDrug = !tc.expectedDrug || (result.hadDetails && result.hadDetails.genericName === tc.expectedDrug);
+  const passCatNo = !tc.expectedCategoryNo || (result.hadDetails && result.hadDetails.categoryNo === tc.expectedCategoryNo);
+
+  if (passHad && passDrug && passCatNo) {
+    totalPassed++;
+    console.log(`\x1b[32m[PASS]\x1b[0m ${tc.id} (${tc.setting}) -> HAD: ${result.isHad} | Drug: ${result.hadDetails.genericName} | Cat: ${result.hadDetails.categoryNo} (${result.hadDetails.categoryName})`);
+  } else {
+    totalFailed++;
+    console.log(`\x1b[31m[FAIL]\x1b[0m ${tc.id} (${tc.setting}) "${tc.phrase}"`);
+    if (!passHad) console.log(`   - isHad:       expected ${tc.expectedHad}, got ${result.isHad}`);
+    if (!passDrug) console.log(`   - Drug:        expected "${tc.expectedDrug}", got "${result.hadDetails ? result.hadDetails.genericName : 'null'}"`);
+    if (!passCatNo) console.log(`   - CategoryNo:  expected ${tc.expectedCategoryNo}, got ${result.hadDetails ? result.hadDetails.categoryNo : 'null'}`);
   }
 });
 
