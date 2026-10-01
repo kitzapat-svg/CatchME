@@ -9,19 +9,19 @@
     </div>
     <div class="header-actions">
       <!-- Emerging LASA Surveillance Button -->
-      <button type="button" onclick="CatchME.openEmergingLasaModal()" style="background: none; border: 1px solid rgba(255, 143, 171, 0.4); border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="ตรวจจับคู่ยาเสี่ยงใหม่ (Emerging LASA Surveillance)">
-        <span>⚡</span>
-        <span>LASA เฝ้าระวัง</span>
+      <button type="button" class="header-btn" onclick="CatchME.openEmergingLasaModal()" title="ระบบเฝ้าระวังคู่ยาเสี่ยง LASA">
+        <span class="header-btn-icon">⚡</span>
+        <span>LASA</span>
       </button>
       <!-- Code Dictionary Help Button -->
-      <button type="button" onclick="CatchME.openCodeDictionary()" style="background: none; border: 1px solid rgba(255, 143, 171, 0.4); border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="ดูคู่มือความหมายรหัส DS และ Risk Code">
-        <span>📖</span>
-        <span>รหัสคืออะไร?</span>
+      <button type="button" class="header-btn" onclick="CatchME.openCodeDictionary()" title="คู่มือความหมายรหัส DS และ Risk Code">
+        <span class="header-btn-icon">📖</span>
+        <span>คู่มือรหัส</span>
       </button>
       <!-- Mode Badge Pill -->
       <div id="header-mode-badge" class="mode-badge opd" onclick="CatchME.toggleMode()" title="แตะเพื่อสลับ OPD / IPD">
         <span id="mode-text">OPD</span>
-        <span style="font-size: 11px;">⇄</span>
+        <span class="mode-badge-arrow">⇄</span>
       </div>
       <!-- Reporter Alias Badge -->
       <div id="header-alias-badge" class="alias-badge" onclick="CatchME.openSettings()" title="แตะเพื่อแก้ไขรหัสผู้บันทึก">

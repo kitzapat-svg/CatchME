@@ -59,7 +59,9 @@ try {
 
 # 5. Create immutable version
 Write-Host "[4/5] Creating immutable Apps Script version..."
-$versionDesc = "Deploy CatchME v0.1.0 - " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+$pkgJson = Get-Content "package.json" -Raw | ConvertFrom-Json
+$appVersion = if ($pkgJson.version) { $pkgJson.version } else { "0.4.0" }
+$versionDesc = "Deploy CatchME v$appVersion - " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 $verOut = npx clasp create-version "$versionDesc" 2>&1
 Write-Host "$verOut"
 
@@ -72,11 +74,34 @@ if ($verOut -match "Created version (\d+)") {
 }
 
 # 6. Check / update deployment
-Write-Host "[5/5] Checking deployments..."
+Write-Host "[5/5] Updating production deployments..."
+$anonDeployId = "AKfycbxcYrhDehjEu0lngU7o64v4ldrhYuXmfnJJnRyTt0x7d7GhK2SEb9G8z1SAWcKLVsGfCA"
+$prodDeployId = "AKfycbxQXL_SsHe-Fqg3DYEJf-6j_MB-lh-sWO5qcQ9K6AVyLE-WhHmCZhWNwlnx5eXENdWIvw"
+
+if ($newVer -gt 0) {
+    try {
+        Write-Host "Updating ANYONE_ANONYMOUS deployment ($anonDeployId) to version #$newVer..."
+        $depOut1 = npx clasp deploy -i $anonDeployId -V $newVer -d "$versionDesc" 2>&1
+        Write-Host "$depOut1"
+    } catch {
+        Write-Host "Notice: Could not update $anonDeployId: $_" -ForegroundColor Yellow
+    }
+
+    try {
+        Write-Host "Updating Production deployment ($prodDeployId) to version #$newVer..."
+        $depOut2 = npx clasp deploy -i $prodDeployId -V $newVer -d "$versionDesc" 2>&1
+        Write-Host "$depOut2"
+    } catch {
+        Write-Host "Notice: Could not update $prodDeployId: $_" -ForegroundColor Yellow
+    }
+}
+
 $deployments = npx clasp list-deployments 2>&1
 Write-Host "$deployments"
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host "Deployment completed successfully!" -ForegroundColor Green
+Write-Host "Production Web App URL (No-Login ANYONE):" -ForegroundColor Cyan
+Write-Host "https://script.google.com/macros/s/$anonDeployId/exec" -ForegroundColor Yellow
 Write-Host "================================================" -ForegroundColor Cyan
