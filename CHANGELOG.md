@@ -5,6 +5,20 @@ All notable changes to the CatchME project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-01
+### Added
+- **Centralized Google Gemini AI Assistant Management**:
+  - Secure server-side Gemini API Key storage in `App_Settings` sheet on Google Sheets (or Script Properties).
+  - Frontline pharmacy staff can use AI features immediately with zero setup and no prompt for API keys.
+  - Admin Settings section (`modal-admin-settings`) for configuring Gemini API Key, Model selection (`gemini-2.5-flash`, `gemini-1.5-flash`, `gemini-1.5-pro`), Enable/Disable toggle, and "Test Connection (Ping)" button.
+- **Smart Natural Language Analysis for Text Fallback (`submitTextFallbackAI`)**:
+  - Added "✨ ใช้ Gemini AI ช่วยวิเคราะห์" button in Text Input Fallback Modal with sparkling Berry gradient design.
+  - Server-side endpoint `apiParseWithGemini` with structured clinical hospital Category B taxonomy prompt.
+  - Automatic cross-referencing with Sawankhalok HAD catalog (29 items) and LASA drug pair surveillance.
+- **Hybrid Parsing Architecture & Web Speech API Prioritization**:
+  - Voice recording prioritizes native browser Web Speech API for fast, zero-delay, local Thai transcription.
+  - Rule-based parser acts as first responder (10-50ms), with Gemini AI providing intelligent fallback when confidence is low or complex sentences are typed.
+
 ## [0.5.1] - 2026-10-01
 ### Changed
 - **Header UI Polish**:

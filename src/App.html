@@ -631,10 +631,12 @@
         </div>
       </div>
 
-      <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
-        <button type="button" class="btn-primary" onclick="CatchME.submitTextFallback()">
-          <span>วิเคราะห์ข้อความ</span>
-          <span>→</span>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+        <button type="button" class="btn-primary" onclick="CatchME.submitTextFallback()" style="display: flex; justify-content: center; align-items: center; gap: 6px;">
+          <span>⚡ วิเคราะห์ด่วน (Rule-Based)</span>
+        </button>
+        <button type="button" class="btn-primary" onclick="CatchME.submitTextFallbackAI()" style="background: linear-gradient(135deg, #FF758C 0%, #FF7EB3 50%, #818CF8 100%); display: flex; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(255, 117, 140, 0.35);">
+          <span>✨ ใช้ Gemini AI ช่วยวิเคราะห์</span>
         </button>
         <button type="button" class="btn-secondary" onclick="CatchME.closeModal('modal-text-fallback')">
           <span>ยกเลิก</span>
@@ -1344,6 +1346,50 @@
 
           <button type="button" class="btn-secondary" onclick="CatchME.testTelegramPing()" style="font-size: 12px; padding: 6px 12px; width: 100%;">
             <span>🔔 ทดสอบส่งข้อความ (Test Ping)</span>
+          </button>
+        </div>
+
+        <!-- Gemini AI Assistant Settings Card -->
+        <div class="settings-box" style="margin-top: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 18px;">🤖</span>
+              <strong style="font-size: 13px; color: var(--color-text-primary);">Google Gemini AI Assistant</strong>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="setting-gemini-enabled" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div style="font-size: 11px; color: var(--color-text-secondary); margin-bottom: 10px; line-height: 1.4;">
+            วิเคราะห์ภาษาธรรมชาติเมื่อพิมพ์แทน หรือช่วยจับคู่หมวดหมู่ (Key เก็บที่เซิร์ฟเวอร์ หน้างานไม่ต้องกรอก Key)
+          </div>
+
+          <div class="input-group" style="margin-bottom: 8px;">
+            <label class="input-label" for="setting-gemini-model" style="font-size: 11px;">โมเดล AI (Model)</label>
+            <select id="setting-gemini-model" class="input-field" style="font-size: 12px; padding: 6px 10px;">
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash (แนะนำ - เร็วและฉลาดสุด)</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+            </select>
+          </div>
+
+          <div class="input-group" style="margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <label class="input-label" for="setting-gemini-key" style="font-size: 11px; margin: 0;">Gemini API Key</label>
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="font-size: 10px; color: var(--color-primary-dark); text-decoration: underline;">รับ Key ฟรี</a>
+            </div>
+            <div style="display: flex; gap: 6px; margin-top: 4px;">
+              <input type="password" id="setting-gemini-key" class="input-field" placeholder="วาง API Key (AIzaSy...)" style="font-size: 12px; font-family: monospace; flex: 1;">
+              <button type="button" class="btn-secondary" onclick="CatchME.toggleGeminiKeyVisibility()" style="width: auto; padding: 6px 10px; font-size: 12px;" title="แสดง/ซ่อน Key">
+                <span id="gemini-key-vis-icon">👁️</span>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" class="btn-secondary" onclick="CatchME.testGeminiConnection()" style="font-size: 12px; padding: 6px 12px; width: 100%;">
+            <span>⚡ ทดสอบเชื่อมต่อ Gemini API (Test Ping)</span>
           </button>
         </div>
 

@@ -1381,6 +1381,14 @@ function getAppSettings(pin) {
   var auth = verifyAdminPin(pin);
   if (!auth.success) return { success: false, error: auth.error };
 
+  var rawGeminiKey = getAppSettingValue('gemini_api_key', '');
+  var maskedGeminiKey = '';
+  if (rawGeminiKey) {
+    maskedGeminiKey = rawGeminiKey.length > 8
+      ? rawGeminiKey.slice(0, 4) + '••••••••' + rawGeminiKey.slice(-4)
+      : '••••••••';
+  }
+
   return {
     success: true,
     settings: {
@@ -1388,6 +1396,10 @@ function getAppSettings(pin) {
       alertHadOnly: getAppSettingValue('alert_had_only', 'true') === 'true',
       telegramBotToken: getAppSettingValue('telegram_bot_token', ''),
       telegramChatId: getAppSettingValue('telegram_chat_id', ''),
+      geminiApiKey: maskedGeminiKey,
+      hasGeminiKey: !!rawGeminiKey,
+      geminiModel: getAppSettingValue('gemini_model', 'gemini-2.5-flash'),
+      geminiEnabled: getAppSettingValue('gemini_enabled', 'true') === 'true',
       adminPin: getAppSettingValue('admin_pin', '8888')
     }
   };
@@ -1434,6 +1446,18 @@ function updateAppSettings(settingsObj, pin) {
     if (settingsObj.telegramChatId !== undefined) {
       setKey('telegram_chat_id', settingsObj.telegramChatId.trim(), 'Telegram Group or Channel Chat ID');
     }
+    if (settingsObj.geminiApiKey !== undefined && settingsObj.geminiApiKey.trim() !== '') {
+      var gKey = settingsObj.geminiApiKey.trim();
+      if (gKey.indexOf('••••') === -1) {
+        setKey('gemini_api_key', gKey, 'Google Gemini API Key for intelligent fallback parsing');
+      }
+    }
+    if (settingsObj.geminiModel !== undefined && settingsObj.geminiModel.trim() !== '') {
+      setKey('gemini_model', settingsObj.geminiModel.trim(), 'Gemini AI Model identifier');
+    }
+    if (settingsObj.geminiEnabled !== undefined) {
+      setKey('gemini_enabled', settingsObj.geminiEnabled ? 'true' : 'false', 'Enable Gemini AI for smart parsing and fallback');
+    }
     if (settingsObj.newAdminPin !== undefined && settingsObj.newAdminPin.trim().length >= 4) {
       setKey('admin_pin', settingsObj.newAdminPin.trim(), 'Admin & Analytics 4-digit PIN protection');
     }
@@ -1441,6 +1465,241 @@ function updateAppSettings(settingsObj, pin) {
     return { success: true, message: 'บันทึกการตั้งค่าเรียบร้อยแล้ว' };
   } catch (err) {
     return { success: false, error: err.message || String(err) };
+  }
+}
+
+/**
+ * Executes a call to Google Gemini API using UrlFetchApp.
+ * @param {string} prompt
+ * @param {string} apiKey
+ * @param {string} modelName
+ * @returns {Object} Parsed JSON response
+ */
+function callGeminiGenerate(prompt, apiKey, modelName) {
+  var model = modelName || 'gemini-2.5-flash';
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(apiKey);
+
+  var payload = {
+    contents: [
+      {
+        parts: [
+          { text: prompt }
+        ]
+      }
+    ],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: 0.1
+    }
+  };
+
+  var options = {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+
+  var response = UrlFetchApp.fetch(url, options);
+  var statusCode = response.getResponseCode();
+  var responseText = response.getContentText();
+
+  if (statusCode !== 200) {
+    var errObj = {};
+    try { errObj = JSON.parse(responseText); } catch (e) {}
+    var msg = (errObj.error && errObj.error.message) || ('HTTP ' + statusCode + ': ' + responseText);
+    throw new Error(msg);
+  }
+
+  var data = JSON.parse(responseText);
+  var candidateText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text;
+  if (!candidateText) {
+    throw new Error('ไม่ได้รับข้อมูลคำตอบจาก Gemini API');
+  }
+
+  candidateText = candidateText.replace(/^```json/im, '').replace(/^```/im, '').replace(/```$/im, '').trim();
+  return JSON.parse(candidateText);
+}
+
+/**
+ * Tests Gemini API Key connectivity.
+ * @param {string} apiKey
+ * @param {string} model
+ * @param {string} pin
+ * @returns {Object}
+ */
+function testGeminiApiKey(apiKey, model, pin) {
+  var auth = verifyAdminPin(pin);
+  if (!auth.success) return { success: false, error: auth.error };
+
+  var keyToTest = (apiKey || '').trim();
+  if (!keyToTest || keyToTest.indexOf('••••') !== -1) {
+    keyToTest = getAppSettingValue('gemini_api_key', '');
+  }
+  if (!keyToTest) {
+    return { success: false, error: 'กรุณาระบุ Gemini API Key ก่อนทดสอบ' };
+  }
+
+  var modelToTest = model || getAppSettingValue('gemini_model', 'gemini-2.5-flash');
+
+  try {
+    var prompt = 'Respond with JSON: {"status": "ok", "message": "Gemini connection successful", "model": "' + modelToTest + '"}';
+    var res = callGeminiGenerate(prompt, keyToTest, modelToTest);
+    if (res && res.status === 'ok') {
+      return { success: true, message: 'เชื่อมต่อ Gemini API สำเร็จ! (' + modelToTest + ')' };
+    }
+    return { success: true, message: 'เชื่อมต่อสำเร็จ ได้รับผลลัพธ์จาก ' + modelToTest };
+  } catch (err) {
+    return { success: false, error: 'ทดสอบไม่สำเร็จ: ' + (err.message || String(err)) };
+  }
+}
+
+/**
+ * Server-side endpoint: Parses medication error transcript using Gemini AI.
+ * Uses the centrally configured Gemini API Key from App_Settings.
+ * @param {string} transcript
+ * @param {string} mode 'OPD' or 'IPD'
+ * @returns {Object}
+ */
+function parseMedicationErrorWithGemini(transcript, mode) {
+  if (!transcript || !transcript.trim()) {
+    return { success: false, error: 'ข้อความว่างเปล่า' };
+  }
+
+  var text = transcript.trim();
+  var appMode = (mode || 'OPD').toUpperCase();
+
+  // Retrieve central API key
+  var apiKey = getAppSettingValue('gemini_api_key', '');
+  if (!apiKey) {
+    try {
+      apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY') || '';
+    } catch (e) {}
+  }
+  if (!apiKey) {
+    return {
+      success: false,
+      error: 'ยังไม่ได้ตั้งค่า Gemini API Key ในระบบ Admin Settings (กรุณาให้แอดมินใส่ Key ในหน้าตั้งค่าระบบ)',
+      needSetup: true
+    };
+  }
+
+  var isEnabled = getAppSettingValue('gemini_enabled', 'true') === 'true';
+  if (!isEnabled) {
+    return {
+      success: false,
+      error: 'ระบบ Gemini AI ถูกปิดใช้งานอยู่ในการตั้งค่า'
+    };
+  }
+
+  var model = getAppSettingValue('gemini_model', 'gemini-2.5-flash');
+
+  var clinicalPrompt = 'You are CatchME AI, an expert hospital pharmacy clinical assistant for Medication Error Category B (Near Miss: detected and intercepted before reaching patient).\n'
+    + 'Mode: ' + appMode + '\n'
+    + 'Hospital Cat B Taxonomies:\n'
+    + '- Prescribing (PS01): A01 (Allergy), A05 (Wrong strength), A07 (Wrong dose), A08 (Interaction), A10 (Wrong qty), A11 (Duplicate), A15 (Incomplete/unclear), A16 (Omission), A17 (Wrong visit)\n'
+    + '- Transcribing (PS02): E05 (Scan error), E06 (Wrong patient label), E08 (Communication/transcription)\n'
+    + '- Pre-dispensing Entry (PS03): B03 (Wrong drug), B06 (Wrong instruction), B09 (Wrong duration), B16 (Wrong strength), B18 (Omission), B21 (Wrong order cont/one-day), B22 (STAT omission), B23 (Not stopped)\n'
+    + '- Pre-dispensing Picking (PS04): B25 (Wrong patient bag), B26 (Wrong drug picking), B28 (Wrong strength picking), B29 (Wrong quantity picking), B30 (Omission picking), B31 (Extra drug), B32 (Expired), B34 (Mixed patient item in bag), B35 (Packaging)\n'
+    + '- Interception Stages: DS01 (Pharmacist order review), DS02 (Data entry/label check), DS03 (Picking/preparation), DS04 (Pharmacist final check), DS05 (Before sending to ward), DS06 (Ward check before patient)\n\n'
+    + 'Safety Gate Hard Stop:\n'
+    + 'If the medication has REACHED the patient (e.g. จ่ายยาไปแล้ว, คนไข้กินแล้ว, ได้รับยาแล้ว, พยาบาลให้แล้ว):\n'
+    + 'Set "patientReached": "Yes", "catBEligible": false, "safetyStopReason": "ยาถึงตัวผู้ป่วยแล้ว ไม่ใช่ Category B"\n\n'
+    + 'Output strictly valid JSON with this schema:\n'
+    + '{\n'
+    + '  "catBEligible": true,\n'
+    + '  "patientReached": "No",\n'
+    + '  "safetyStopReason": "",\n'
+    + '  "process": "Prescribing" | "Transcribing" | "Pre-dispensing",\n'
+    + '  "processStage": "PS01" | "PS02" | "PS03" | "PS04",\n'
+    + '  "legacyCode": "B29",\n'
+    + '  "errorType": "ผิดจำนวน/ปริมาณ",\n'
+    + '  "detectedStage": "DS04",\n'
+    + '  "confidence": "High" | "Medium" | "Low",\n'
+    + '  "requiresClarification": false,\n'
+    + '  "clarification": null,\n'
+    + '  "drugName": "Amlodipine",\n'
+    + '  "actualValue": "30 เม็ด",\n'
+    + '  "expectedValue": "60 เม็ด",\n'
+    + '  "notes": "สรุปสั้นๆ"\n'
+    + '}\n\n'
+    + 'Report Text: ' + text;
+
+  try {
+    var aiResult = callGeminiGenerate(clinicalPrompt, apiKey, model);
+
+    // Hard Stop Check
+    if (aiResult.patientReached === 'Yes' || aiResult.catBEligible === false) {
+      return {
+        success: true,
+        parsed: {
+          rawTranscript: text,
+          normalizedTranscript: text,
+          mode: appMode,
+          parserVersion: 'Gemini-' + model,
+          catBEligible: false,
+          patientReached: 'Yes',
+          safetyStopReason: aiResult.safetyStopReason || 'พบสัญญาณว่ายาอาจถึงตัวผู้ป่วยแล้ว ไม่ใช่ Category B'
+        }
+      };
+    }
+
+    var drugName = String(aiResult.drugName || '').trim();
+    var actual = String(aiResult.actualValue || '').trim();
+    var expected = String(aiResult.expectedValue || '').trim();
+
+    // Check HAD surveillance
+    var hadInfo = { isHad: false, hadDrug: null, hadCategory: null, alertMessage: null };
+    if (typeof detectHadInfo === 'function') {
+      hadInfo = detectHadInfo(text);
+      if (!hadInfo.isHad && drugName) {
+        hadInfo = detectHadInfo(drugName + ' ' + text);
+      }
+    }
+
+    // Check LASA surveillance
+    var lasaInfo = { isLasa: false, pairKey: null, pairName: null, lasaType: null, drugA: null, drugB: null };
+    if (typeof detectLasaInfo === 'function') {
+      lasaInfo = detectLasaInfo(actual, expected, text);
+    }
+
+    var parsedObj = {
+      rawTranscript: text,
+      normalizedTranscript: text,
+      mode: appMode,
+      parserVersion: 'Gemini-' + model,
+      catBEligible: true,
+      patientReached: 'No',
+      confidence: aiResult.confidence || 'High',
+      needsConfirmation: true,
+      requiresClarification: aiResult.requiresClarification === true,
+      clarification: aiResult.clarification || null,
+      ruleId: 'GEMINI-' + (aiResult.legacyCode || 'AI'),
+      process: aiResult.process || 'Pre-dispensing',
+      processStage: aiResult.processStage || 'PS04',
+      errorType: aiResult.errorType || 'ความคลาดเคลื่อนทางยา',
+      legacyCode: aiResult.legacyCode || 'B29',
+      detectedStage: aiResult.detectedStage || 'DS04',
+      extractedEntities: {
+        drugs: drugName ? [drugName] : [],
+        actual: actual,
+        expected: expected,
+        notes: aiResult.notes || ''
+      },
+      hadInfo: hadInfo,
+      lasaInfo: lasaInfo,
+      source: 'Gemini AI (' + model + ')'
+    };
+
+    return {
+      success: true,
+      parsed: parsedObj
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: 'เกิดข้อผิดพลาดในการเรียก Gemini AI: ' + (err.message || String(err))
+    };
   }
 }
 

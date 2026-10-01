@@ -507,33 +507,39 @@ const CatchME = (function() {
   }
 
   /**
-   * Starts high-fidelity audio recording for Google Gemini Flash AI.
+   * Starts voice recording: prioritizes Web Speech API for zero-config, instant Thai recognition.
    */
   async function startSpeechCapture() {
-    let apiKey = GEMINI_CONFIG.getApiKey();
-    if (!apiKey) {
-      const inputKey = prompt('🔑 เพื่อเปิดใช้งาน Google Gemini Flash AI\nกรุณาวาง Gemini API Key ของคุณที่นี่ (ตั้งค่าครั้งเดียว):', '');
-      if (!inputKey || !inputKey.trim()) {
-        openTextFallback();
-        return;
+    // 1. Native Web Speech API (Instant, Free, No API Key needed for frontline)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      if (state.recognition) {
+        try { state.recognition.abort(); } catch (e) {}
       }
-      GEMINI_CONFIG.setApiKey(inputKey.trim());
-      apiKey = inputKey.trim();
+      state.recognition = createSpeechRecognition();
+      if (state.recognition) {
+        try {
+          state.recognition.start();
+          return;
+        } catch (err) {
+          console.warn('SpeechRecognition start failed, checking fallback:', err);
+        }
+      }
     }
 
+    // 2. If inside GAS iframe and SpeechRecognition unavailable, open text fallback directly
     const isInIframe = window.self !== window.top;
     if (isInIframe) {
-      alert('ไมโครโฟนถูกจำกัดใน iframe ของ Google Apps Script\n\nกรุณาเปิดผ่านลิงก์ GitHub Pages เพื่อใช้งาน Gemini Flash ได้เต็มรูปแบบครับ:\nhttps://kitzapat-svg.github.io/CatchME/');
       openTextFallback();
       return;
     }
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('เบราว์เซอร์นี้ไม่รองรับการเข้าถึงไมโครโฟน (MediaDevices)\nกำลังเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
       openTextFallback();
       return;
     }
 
+    // 3. Fallback to MediaRecorder audio capture
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       state.audioStream = stream;
@@ -581,23 +587,24 @@ const CatchME = (function() {
         showScreen('screen-processing');
         const procTitle = document.getElementById('processing-title');
         const procSub = document.getElementById('processing-subtext');
-        if (procTitle) procTitle.innerText = '⚡ Google Gemini Flash กำลังประมวลผล...';
-        if (procSub) procSub.innerText = 'ฟังเสียง ถอดความชื่อยาภาษาอังกฤษ และวิเคราะห์รหัสความเสี่ยง';
+        if (procTitle) procTitle.innerText = '⚡ กำลังประมวลผลเสียง...';
+        if (procSub) procSub.innerText = 'วิเคราะห์เสียงและสกัดรหัสความเสี่ยง';
 
         try {
-          const { base64, mimeType } = await blobToWavBase64(audioBlob);
-          const geminiData = await sendAudioToGemini(base64, mimeType);
-          if (geminiData && (geminiData.transcript || geminiData.legacyCode)) {
-            state.capturedTranscript = geminiData.transcript || '';
-            const parsed = convertGeminiToParsed(geminiData, state.capturedTranscript);
-            handleParsedResult(parsed);
-          } else {
-            alert('ไม่สามารถประมวลผลเสียงได้ กรุณาลองใหม่อีกครั้งครับ');
-            showScreen('screen-quick-report');
+          const apiKey = GEMINI_CONFIG.getApiKey();
+          if (apiKey) {
+            const { base64, mimeType } = await blobToWavBase64(audioBlob);
+            const geminiData = await sendAudioToGemini(base64, mimeType);
+            if (geminiData && (geminiData.transcript || geminiData.legacyCode)) {
+              state.capturedTranscript = geminiData.transcript || '';
+              const parsed = convertGeminiToParsed(geminiData, state.capturedTranscript);
+              handleParsedResult(parsed);
+              return;
+            }
           }
+          openTextFallback();
         } catch (err) {
-          console.error('Gemini Audio error:', err);
-          alert('Gemini AI Error: ' + err.message + '\n\nระบบจะเปิดกล่องพิมพ์ข้อความแทนให้ครับ');
+          console.error('Audio processing fallback:', err);
           openTextFallback();
         }
       };
@@ -606,27 +613,19 @@ const CatchME = (function() {
 
     } catch (err) {
       console.warn('Microphone capture error:', err);
-      state.isRecording = false;
-      if (state.audioStream) {
-        state.audioStream.getTracks().forEach(function(track) { track.stop(); });
-        state.audioStream = null;
-      }
-
-      if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        alert('ไม่พบอุปกรณ์ไมโครโฟนในเครื่องนี้:\nกรุณาเสียบหูฟัง Smalltalk, ไมค์ USB หรือตรวจสอบการตั้งค่า Microphone ใน Windows');
-      } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        alert('ไมโครโฟนยังไม่ได้รับอนุญาต:\n1. คลิกไอคอนแม่กุญแจ 🔒 ที่แถบ URL ด้านบน\n2. ไปที่ "สิทธิ์" (Permissions) > เลือก "อนุญาตไมโครโฟน" (Allow Microphone)');
-      } else {
-        alert('ไม่สามารถเปิดไมโครโฟนได้ (' + err.name + ': ' + err.message + ')');
-      }
       openTextFallback();
     }
   }
 
   /**
-   * Stops recording manually and triggers Google Gemini Flash transcription.
+   * Stops recording manually.
    */
   function stopSpeechCapture() {
+    if (state.recognition && state.isRecording) {
+      try {
+        state.recognition.stop();
+      } catch (e) {}
+    }
     if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
       try {
         state.mediaRecorder.stop();
@@ -642,6 +641,11 @@ const CatchME = (function() {
   function cancelSpeechCapture() {
     state.capturedTranscript = '';
     state.isRecording = false;
+    if (state.recognition) {
+      try {
+        state.recognition.abort();
+      } catch (e) {}
+    }
     if (state.mediaRecorder && state.mediaRecorder.state !== 'inactive') {
       try {
         state.mediaRecorder.onstop = null;
@@ -659,7 +663,7 @@ const CatchME = (function() {
   }
 
   /**
-   * Processes the transcript using Google Gemini Flash (with Regex Parser fallback).
+   * Processes the transcript using Hybrid Engine: Fast Rule Parser First, Gemini AI as Fallback.
    */
   async function processTranscript(text) {
     if (!text || !text.trim()) {
@@ -670,34 +674,44 @@ const CatchME = (function() {
     showScreen('screen-processing');
     const procTitle = document.getElementById('processing-title');
     const procSub = document.getElementById('processing-subtext');
-    if (procTitle) procTitle.innerText = '⚡ Google Gemini Flash กำลังวิเคราะห์...';
-    if (procSub) procSub.innerText = 'วิเคราะห์ชื่อยาภาษาอังกฤษและจำแนกรหัสความเสี่ยงอย่างแม่นยำ';
+    if (procTitle) procTitle.innerText = '⚡ กำลังวิเคราะห์เหตุการณ์...';
+    if (procSub) procSub.innerText = 'ตรวจจับรหัสความเสี่ยงและขั้นตอนเกิดเหตุ';
 
-    // 1. Primary: Google Gemini Flash AI (Clinical Understanding)
-    try {
-      const geminiData = await sendTextToGemini(text.trim());
-      if (geminiData && (geminiData.legacyCode || geminiData.drug)) {
-        state.capturedTranscript = geminiData.transcript || text.trim();
-        const parsed = convertGeminiToParsed(geminiData, text.trim());
-        handleParsedResult(parsed);
-        return;
-      }
-    } catch (err) {
-      console.warn('Gemini text analysis error, falling back to local regex parser:', err);
-    }
-
-    // 2. Secondary Fallback: Client-side Regex Parser (Offline capable)
+    // 1. Primary: Fast Rule-Based Parser (Local, 10-50ms, Free)
     if (typeof parseMedicationError === 'function') {
       try {
         const parsed = parseMedicationError(text, state.mode);
+        // If confident and not ambiguous, route immediately!
+        if (parsed && parsed.confidence === 'High' && parsed.legacyCode && !parsed.requiresClarification) {
+          handleParsedResult(parsed);
+          return;
+        }
+
+        // If uncertain (Low confidence / requires clarification), enhance with Server-side Gemini if available
+        if (window.google && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(function(res) {
+              if (res && res.success && res.parsed && res.parsed.legacyCode) {
+                handleParsedResult(res.parsed);
+              } else {
+                handleParsedResult(parsed);
+              }
+            })
+            .withFailureHandler(function() {
+              handleParsedResult(parsed);
+            })
+            .apiParseWithGemini(text, state.mode);
+          return;
+        }
+
         handleParsedResult(parsed);
         return;
       } catch (e) {
-        console.warn('Client parser error, attempting server fallback:', e);
+        console.warn('Local parser error:', e);
       }
     }
 
-    // 3. Tertiary Fallback: Server-side via google.script.run
+    // 2. Server Fallback via google.script.run
     if (window.google && google.script && google.script.run) {
       google.script.run
         .withSuccessHandler(function(parsed) {
@@ -1364,6 +1378,76 @@ const CatchME = (function() {
     setTimeout(function() {
       processTranscript(text);
     }, 200);
+  }
+
+  /**
+   * Submits typed text directly to Google Gemini AI for smart clinical classification.
+   */
+  function submitTextFallbackAI() {
+    const text = document.getElementById('fallback-text-input').value.trim();
+    if (!text) {
+      alert('กรุณากรอกข้อความก่อนให้ AI วิเคราะห์');
+      return;
+    }
+    closeModal('modal-text-fallback');
+    showScreen('screen-processing');
+    const procTitle = document.getElementById('processing-title');
+    const procSub = document.getElementById('processing-subtext');
+    if (procTitle) procTitle.innerText = '🤖 Google Gemini กำลังวิเคราะห์...';
+    if (procSub) procSub.innerText = 'วิเคราะห์ภาษาธรรมชาติและสกัดรหัสความเสี่ยง';
+
+    // 1. Google Apps Script server endpoint (uses central key)
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success && res.parsed) {
+            handleParsedResult(res.parsed);
+          } else {
+            console.warn('Gemini server result failed, falling back to local rule parser:', res ? res.error : 'Unknown');
+            if (res && res.needSetup) {
+              alert('⚠️ ' + res.error + '\n\nระบบจะใช้ Rule Parser แทนให้อัตโนมัติครับ');
+            }
+            const parsed = parseMedicationError(text, state.mode);
+            handleParsedResult(parsed);
+          }
+        })
+        .withFailureHandler(function(err) {
+          console.warn('Gemini request failed, falling back to local rule parser:', err);
+          const parsed = parseMedicationError(text, state.mode);
+          handleParsedResult(parsed);
+        })
+        .apiParseWithGemini(text, state.mode);
+      return;
+    }
+
+    // 2. Standalone / External frontend (e.g. GitHub Pages)
+    const gasUrl = window.GAS_WEBAPP_URL || '';
+    if (gasUrl) {
+      fetch(gasUrl, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'parseWithGemini', transcript: text, mode: state.mode })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res && res.success && res.parsed) {
+          handleParsedResult(res.parsed);
+        } else {
+          console.warn('Remote Gemini failed, falling back:', res ? res.error : 'Unknown');
+          const parsed = parseMedicationError(text, state.mode);
+          handleParsedResult(parsed);
+        }
+      })
+      .catch(function(e) {
+        console.warn('Fetch to GAS failed, falling back:', e);
+        const parsed = parseMedicationError(text, state.mode);
+        handleParsedResult(parsed);
+      });
+      return;
+    }
+
+    // 3. Fallback to local rule parser
+    const parsed = parseMedicationError(text, state.mode);
+    handleParsedResult(parsed);
   }
 
   /**
@@ -3140,11 +3224,17 @@ const CatchME = (function() {
             const chkHadOnly = document.getElementById('setting-alert-had-only');
             const txtToken = document.getElementById('setting-telegram-token');
             const txtChatId = document.getElementById('setting-telegram-chatid');
+            const chkGeminiEnabled = document.getElementById('setting-gemini-enabled');
+            const selGeminiModel = document.getElementById('setting-gemini-model');
+            const txtGeminiKey = document.getElementById('setting-gemini-key');
 
             if (chkEnabled) chkEnabled.checked = s.alertEnabled;
             if (chkHadOnly) chkHadOnly.checked = s.alertHadOnly;
             if (txtToken) txtToken.value = s.telegramBotToken || '';
             if (txtChatId) txtChatId.value = s.telegramChatId || '';
+            if (chkGeminiEnabled) chkGeminiEnabled.checked = s.geminiEnabled !== false;
+            if (selGeminiModel && s.geminiModel) selGeminiModel.value = s.geminiModel;
+            if (txtGeminiKey) txtGeminiKey.value = s.geminiApiKey || '';
           }
         })
         .apiGetAppSettings(pin);
@@ -3155,11 +3245,17 @@ const CatchME = (function() {
       const chkHadOnly = document.getElementById('setting-alert-had-only');
       const txtToken = document.getElementById('setting-telegram-token');
       const txtChatId = document.getElementById('setting-telegram-chatid');
+      const chkGeminiEnabled = document.getElementById('setting-gemini-enabled');
+      const selGeminiModel = document.getElementById('setting-gemini-model');
+      const txtGeminiKey = document.getElementById('setting-gemini-key');
 
       if (chkEnabled) chkEnabled.checked = saved.alertEnabled || false;
       if (chkHadOnly) chkHadOnly.checked = saved.alertHadOnly !== undefined ? saved.alertHadOnly : true;
       if (txtToken) txtToken.value = saved.telegramBotToken || '';
       if (txtChatId) txtChatId.value = saved.telegramChatId || '';
+      if (chkGeminiEnabled) chkGeminiEnabled.checked = saved.geminiEnabled !== false;
+      if (selGeminiModel && saved.geminiModel) selGeminiModel.value = saved.geminiModel;
+      if (txtGeminiKey) txtGeminiKey.value = saved.geminiApiKey || '';
     }
   }
 
@@ -3173,12 +3269,18 @@ const CatchME = (function() {
     const txtToken = document.getElementById('setting-telegram-token');
     const txtChatId = document.getElementById('setting-telegram-chatid');
     const txtNewPin = document.getElementById('setting-new-pin');
+    const chkGeminiEnabled = document.getElementById('setting-gemini-enabled');
+    const selGeminiModel = document.getElementById('setting-gemini-model');
+    const txtGeminiKey = document.getElementById('setting-gemini-key');
 
     const settingsObj = {
       alertEnabled: chkEnabled ? chkEnabled.checked : false,
       alertHadOnly: chkHadOnly ? chkHadOnly.checked : true,
       telegramBotToken: txtToken ? txtToken.value.trim() : '',
-      telegramChatId: txtChatId ? txtChatId.value.trim() : ''
+      telegramChatId: txtChatId ? txtChatId.value.trim() : '',
+      geminiEnabled: chkGeminiEnabled ? chkGeminiEnabled.checked : true,
+      geminiModel: selGeminiModel ? selGeminiModel.value : 'gemini-2.5-flash',
+      geminiApiKey: txtGeminiKey ? txtGeminiKey.value.trim() : ''
     };
 
     if (txtNewPin && txtNewPin.value.trim().length >= 4) {
@@ -3211,6 +3313,70 @@ const CatchME = (function() {
       }
       alert('บันทึกการตั้งค่าเรียบร้อยแล้ว (Mock Mode)');
       closeModal('modal-admin-settings');
+    }
+  }
+
+  /**
+   * Toggles visibility of the Gemini API key in admin settings.
+   */
+  function toggleGeminiKeyVisibility() {
+    const input = document.getElementById('setting-gemini-key');
+    const icon = document.getElementById('gemini-key-vis-icon');
+    if (!input) return;
+    if (input.type === 'password') {
+      input.type = 'text';
+      if (icon) icon.innerText = '🙈';
+    } else {
+      input.type = 'password';
+      if (icon) icon.innerText = '👁️';
+    }
+  }
+
+  /**
+   * Tests Gemini API Key connectivity via server endpoint.
+   */
+  function testGeminiConnection() {
+    const pin = getAdminPinSession();
+    const keyInput = document.getElementById('setting-gemini-key');
+    const modelSelect = document.getElementById('setting-gemini-model');
+    const key = keyInput ? keyInput.value.trim() : '';
+    const model = modelSelect ? modelSelect.value : 'gemini-2.5-flash';
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            alert('✅ ' + res.message);
+          } else {
+            alert('❌ ' + (res.error || 'ทดสอบเชื่อมต่อไม่สำเร็จ'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('❌ เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .apiTestGeminiConnection(key, model, pin);
+    } else {
+      // Standalone / external frontend
+      const gasUrl = window.GAS_WEBAPP_URL || '';
+      if (gasUrl) {
+        fetch(gasUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'testGemini', apiKey: key, model: model, pin: pin })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(res) {
+          if (res && res.success) {
+            alert('✅ ' + res.message);
+          } else {
+            alert('❌ ' + (res.error || 'ทดสอบเชื่อมต่อไม่สำเร็จ'));
+          }
+        })
+        .catch(function(err) {
+          alert('❌ ข้อผิดพลาดเครือข่าย: ' + (err.message || err));
+        });
+      } else {
+        alert('⚡ [Mock Preview] ทดสอบเชื่อมต่อ ' + model + ' สำเร็จ');
+      }
     }
   }
 
@@ -3319,7 +3485,11 @@ const CatchME = (function() {
     exportQualityCsv: exportQualityCsv,
     openAdminSettings: openAdminSettings,
     saveAdminSettings: saveAdminSettings,
-    testTelegramPing: testTelegramPing
+    testTelegramPing: testTelegramPing,
+    // Gemini AI Assistants
+    submitTextFallbackAI: submitTextFallbackAI,
+    toggleGeminiKeyVisibility: toggleGeminiKeyVisibility,
+    testGeminiConnection: testGeminiConnection
   };
 })();
 

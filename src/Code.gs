@@ -3,7 +3,7 @@
  * Main Entry Point (Web App)
  */
 
-const APP_VERSION = '0.5.1';
+const APP_VERSION = '0.6.0';
 
 /**
  * Serves the HTML web app for the CatchME user interface.
@@ -166,13 +166,42 @@ function apiTestTelegramAlert(token, chatId) {
 }
 
 /**
+ * Client-callable endpoint to parse transcript using Gemini AI.
+ */
+function apiParseWithGemini(transcript, mode) {
+  return parseMedicationErrorWithGemini(transcript, mode);
+}
+
+/**
+ * Client-callable endpoint to test Gemini API connectivity.
+ */
+function apiTestGeminiConnection(apiKey, model, pin) {
+  return testGeminiApiKey(apiKey, model, pin);
+}
+
+/**
  * Handles incoming HTTP POST requests from external frontends (e.g. GitHub Pages).
  */
 function doPost(e) {
   try {
     var rawData = e && e.postData ? e.postData.contents : '{}';
-    var reportData = JSON.parse(rawData);
-    var result = saveQuickReport(reportData);
+    var payload = JSON.parse(rawData);
+
+    // Support action routing
+    if (payload.action === 'parseWithGemini') {
+      var parseResult = parseMedicationErrorWithGemini(payload.transcript, payload.mode);
+      return ContentService.createTextOutput(JSON.stringify(parseResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (payload.action === 'testGemini') {
+      var testResult = testGeminiApiKey(payload.apiKey, payload.model, payload.pin);
+      return ContentService.createTextOutput(JSON.stringify(testResult))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Default: Save quick report
+    var result = saveQuickReport(payload);
     return ContentService.createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {

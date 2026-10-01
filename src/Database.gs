@@ -177,7 +177,10 @@ function populateDefaultSettingsIfEmpty(sheet, timestamp) {
     ['alert_enabled', 'false', 'Real-time Telegram safety alerts enabled', timestamp],
     ['alert_had_only', 'true', 'Trigger alerts only for High Alert Drugs (HAD)', timestamp],
     ['telegram_bot_token', '', 'Telegram Bot Token from @BotFather', timestamp],
-    ['telegram_chat_id', '', 'Telegram Group or Channel Chat ID', timestamp]
+    ['telegram_chat_id', '', 'Telegram Group or Channel Chat ID', timestamp],
+    ['gemini_api_key', '', 'Google Gemini API Key for intelligent fallback parsing', timestamp],
+    ['gemini_model', 'gemini-2.5-flash', 'Gemini AI Model identifier (e.g. gemini-2.5-flash)', timestamp],
+    ['gemini_enabled', 'true', 'Enable Gemini AI for smart parsing and fallback', timestamp]
   ];
 
   if (sheet.getLastRow() <= 1) {
