@@ -646,17 +646,30 @@
     margin-top: 2px;
   }
 
-  /* Cat B Hard Stop Modal */
+  /* Modal Overlays & Cards */
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(18, 28, 44, 0.45);
-    backdrop-filter: blur(6px);
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 100;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
+  }
+
+  /* Universal Modal Card Component */
+  .modal-card {
+    background: #FFFFFF !important;
+    border-radius: 24px;
+    padding: 24px 20px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 24px 60px -8px rgba(15, 23, 42, 0.45), 0 0 0 1px rgba(226, 232, 240, 0.8);
+    position: relative;
+    animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .hard-stop-card {
