@@ -5,6 +5,14 @@ All notable changes to the CatchME project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-10-01
+### Changed
+- **Header UI Polish**:
+  - Replaced text "📊 สถิติ" in top navigation bar with clean, minimal icon-only button (`📊`), saving header width and eliminating wrapping on mobile viewports.
+- **Dedicated Full-Page Analytics Experience**:
+  - Converted the safety analytics dashboard from a cramped overlay popup into a dedicated full-page screen (`screen-analytics`).
+  - Seamless integration with native application screen router (`showScreen`), enabling full-screen responsiveness, smooth animations, and header back button navigation (`←`).
+
 ## [0.5.0] - 2026-10-01
 ### Added
 - **Safety Analytics Dashboard (`modal-safety-analytics`)**:

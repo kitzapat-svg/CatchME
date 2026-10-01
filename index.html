@@ -159,6 +159,12 @@
     line-height: 1;
   }
 
+  .header-btn-icon-only {
+    padding: 5px 8px;
+    min-width: 32px;
+    justify-content: center;
+  }
+
   /* Mode Badge Pill */
   .mode-badge {
     display: inline-flex;
@@ -1676,10 +1682,9 @@
         <span class="header-btn-icon">📖</span>
         <span>คู่มือรหัส</span>
       </button>
-      <!-- Safety Analytics Dashboard Button -->
-      <button type="button" class="header-btn" onclick="CatchME.openAnalytics()" title="แดชบอร์ดสถิติความปลอดภัยทางยา (ต้องใส่ PIN)">
+      <!-- Safety Analytics Dashboard Button (Icon Only) -->
+      <button type="button" class="header-btn header-btn-icon-only" onclick="CatchME.openAnalytics()" title="สถิติความปลอดภัยทางยา (ต้องใส่ PIN)">
         <span class="header-btn-icon">📊</span>
-        <span>สถิติ</span>
       </button>
       <!-- Mode Badge Pill -->
       <div id="header-mode-badge" class="mode-badge opd" onclick="CatchME.toggleMode()" title="แตะเพื่อสลับ OPD / IPD">
@@ -2034,6 +2039,164 @@
         <button type="button" class="btn-primary" onclick="CatchME.goHome()">
           <span>+ รายงานรายการถัดไป</span>
         </button>
+      </div>
+    </section>
+
+    <!-- Screen 8: Safety Analytics Dashboard Screen (Dedicated Full Page) -->
+    <section id="screen-analytics" class="hidden">
+      <div class="catchme-card" style="padding: 18px 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(255, 143, 171, 0.25);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">📊</span>
+            <div>
+              <h1 class="title-md" style="margin: 0; font-size: 18px; color: var(--color-primary-dark);">
+                สถิติความปลอดภัยทางยา
+              </h1>
+              <p style="font-size: 11px; color: var(--color-text-secondary); margin: 0;">
+                Medication Safety & Near Miss (Cat B) Analytics
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button type="button" onclick="CatchME.openAdminSettings()" class="header-btn" title="ตั้งค่าระบบ & Telegram Alert">
+              <span>⚙️ ตั้งค่า</span>
+            </button>
+            <button type="button" onclick="CatchME.lockAdminSession()" class="header-btn" title="ล็อกการเข้าถึง">
+              <span>🔒 ล็อก</span>
+            </button>
+            <button type="button" onclick="CatchME.goHome()" class="header-btn" title="กลับหน้าหลัก">
+              <span>✕ ปิด</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Time & Mode Filter Pills -->
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 8px 10px; background: rgba(255, 245, 247, 0.7); border-radius: var(--radius-sm); border: 1px solid rgba(255, 143, 171, 0.2);">
+          <div style="display: flex; gap: 4px;">
+            <button type="button" id="analytics-filter-7d" class="filter-pill active" onclick="CatchME.setAnalyticsTimeRange('7d')">7 วัน</button>
+            <button type="button" id="analytics-filter-30d" class="filter-pill" onclick="CatchME.setAnalyticsTimeRange('30d')">30 วัน</button>
+            <button type="button" id="analytics-filter-month" class="filter-pill" onclick="CatchME.setAnalyticsTimeRange('month')">เดือนนี้</button>
+            <button type="button" id="analytics-filter-all" class="filter-pill" onclick="CatchME.setAnalyticsTimeRange('all')">ทั้งหมด</button>
+          </div>
+          <div style="display: flex; gap: 4px;">
+            <button type="button" id="analytics-mode-all" class="filter-pill active" onclick="CatchME.setAnalyticsMode('ALL')">รวม</button>
+            <button type="button" id="analytics-mode-opd" class="filter-pill" onclick="CatchME.setAnalyticsMode('OPD')">OPD</button>
+            <button type="button" id="analytics-mode-ipd" class="filter-pill" onclick="CatchME.setAnalyticsMode('IPD')">IPD</button>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="analytics-loading" style="text-align: center; padding: 40px 10px;">
+          <div class="spinner" style="margin: 0 auto 12px auto; width: 34px; height: 34px; border: 3px solid rgba(255,143,171,0.2); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+          <span style="font-size: 13px; color: var(--color-text-secondary);">กำลังรวบรวมข้อมูลสถิติความปลอดภัย...</span>
+        </div>
+
+        <!-- Dashboard Content Body -->
+        <div id="analytics-content" class="hidden">
+          <!-- KPI Cards Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <span class="kpi-icon">🛡️</span>
+              <span class="kpi-value" id="kpi-total">0</span>
+              <span class="kpi-label">ดักจับ Near Miss ทั้งหมด</span>
+            </div>
+            <div class="kpi-card kpi-card-had">
+              <span class="kpi-icon">🚨</span>
+              <span class="kpi-value" id="kpi-had">0</span>
+              <span class="kpi-label">ยาความเสี่ยงสูง (HAD)</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-icon">⚡</span>
+              <span class="kpi-value" id="kpi-lasa">0</span>
+              <span class="kpi-label">คู่ยาเสี่ยง LASA</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-icon">📍</span>
+              <span class="kpi-value-sm" id="kpi-top-stage">-</span>
+              <span class="kpi-label">ขั้นตอนที่พบมากที่สุด</span>
+            </div>
+          </div>
+
+          <!-- Section: Stage Distribution Progress Meters -->
+          <div class="analytics-section">
+            <h3 class="analytics-section-title">สัดส่วนตามขั้นตอนเกิดเหตุ</h3>
+            <div class="stage-bar-group">
+              <div class="stage-bar-item">
+                <div class="stage-bar-header">
+                  <span>📝 สั่งยา (Prescribing - A01-A17)</span>
+                  <span id="stage-prescribing-text">0 เคส (0%)</span>
+                </div>
+                <div class="stage-progress-bg">
+                  <div id="stage-prescribing-bar" class="stage-progress-fill stage-fill-prescribing" style="width: 0%;"></div>
+                </div>
+              </div>
+              <div class="stage-bar-item">
+                <div class="stage-bar-header">
+                  <span>📋 คัดลอก/รับคำสั่ง (Transcribing - E01-E11)</span>
+                  <span id="stage-transcribing-text">0 เคส (0%)</span>
+                </div>
+                <div class="stage-progress-bg">
+                  <div id="stage-transcribing-bar" class="stage-progress-fill stage-fill-transcribing" style="width: 0%;"></div>
+                </div>
+              </div>
+              <div class="stage-bar-item">
+                <div class="stage-bar-header">
+                  <span>📦 จัดยา/เตรียมยา (Pre-dispensing - B01-B36)</span>
+                  <span id="stage-dispensing-text">0 เคส (0%)</span>
+                </div>
+                <div class="stage-progress-bg">
+                  <div id="stage-dispensing-bar" class="stage-progress-fill stage-fill-dispensing" style="width: 0%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Top 5 Error Types -->
+          <div class="analytics-section">
+            <h3 class="analytics-section-title">Top 5 ความคลาดเคลื่อนที่พบบ่อย</h3>
+            <div id="analytics-top-errors-list" class="top-list">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- Section: High Alert Drugs Breakdown -->
+          <div class="analytics-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h3 class="analytics-section-title" style="margin: 0;">การเฝ้าระวังยาความเสี่ยงสูง (HAD)</h3>
+              <button type="button" class="btn-text-action" onclick="CatchME.openHadDictionary()" style="font-size: 11px; background: none; border: none; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline;">
+                ดูบัญชี 29 รายการ
+              </button>
+            </div>
+            <div class="had-cat-summary-grid">
+              <div class="had-cat-box">
+                <span class="had-cat-box-num" id="had-box-cat1">0</span>
+                <span class="had-cat-box-lbl">หมวด 1 (แคบ/รุนแรง)</span>
+              </div>
+              <div class="had-cat-box">
+                <span class="had-cat-box-num" id="had-box-cat2">0</span>
+                <span class="had-cat-box-lbl">หมวด 2 (เสพติด/จิต)</span>
+              </div>
+              <div class="had-cat-box">
+                <span class="had-cat-box-num" id="had-box-cat3">0</span>
+                <span class="had-cat-box-lbl">หมวด 3 (SCARs/รุนแรง)</span>
+              </div>
+            </div>
+            <div id="analytics-top-had-list" class="top-list" style="margin-top: 8px;">
+              <!-- Dynamically rendered top HAD drugs -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Footer -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255, 143, 171, 0.2);">
+          <button type="button" class="btn-secondary" onclick="CatchME.exportQualityCsv()" style="font-size: 12px; padding: 8px 14px; gap: 6px; display: inline-flex; align-items: center;">
+            <span>📥</span>
+            <span>ส่งออกรายงาน (CSV)</span>
+          </button>
+          <button type="button" class="btn-primary" onclick="CatchME.goHome()" style="width: auto; padding: 8px 20px; font-size: 13px;">
+            <span>← กลับหน้าหลัก</span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -2797,162 +2960,6 @@
 
       <div style="margin-top: 14px; text-align: center;">
         <span style="font-size: 11px; color: var(--color-text-muted);">ค่าเริ่มต้น: 8888 (กำหนดได้ในชีต App_Settings)</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Safety Analytics Dashboard Drawer -->
-  <div id="modal-safety-analytics" class="modal-overlay hidden" onclick="if(event.target===this) CatchME.closeModal('modal-safety-analytics')">
-    <div class="modal-card analytics-drawer-card" onclick="event.stopPropagation()">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 22px;">📊</span>
-          <div>
-            <h2 class="title-md" style="margin: 0; font-size: 17px; color: var(--color-primary-dark);">
-              สถิติความปลอดภัยทางยา
-            </h2>
-            <p style="font-size: 11px; color: var(--color-text-secondary); margin: 0;">
-              Medication Safety & Near Miss (Cat B) Dashboard
-            </p>
-          </div>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <button type="button" onclick="CatchME.openAdminSettings()" class="header-btn" title="ตั้งค่าระบบ & Telegram Alert">
-            <span>⚙️ ตั้งค่า</span>
-          </button>
-          <button type="button" onclick="CatchME.lockAdminSession()" class="header-btn" title="ล็อกการเข้าถึง">
-            <span>🔒</span>
-          </button>
-          <button type="button" onclick="CatchME.closeModal('modal-safety-analytics')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
-        </div>
-      </div>
-
-      <!-- Time & Mode Filter Pills -->
-      <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 8px 10px; background: rgba(255, 245, 247, 0.7); border-radius: var(--radius-sm); border: 1px solid rgba(255, 143, 171, 0.2);">
-        <div style="display: flex; gap: 4px;">
-          <button type="button" id="analytics-filter-7d" class="filter-pill active" onclick="CatchME.setAnalyticsTimeRange('7d')">7 วัน</button>
-          <button type="button" id="analytics-filter-30d" class="filter-pill" onclick="CatchME.setAnalyticsTimeRange('30d')">30 วัน</button>
-          <button type="button" id="analytics-filter-month" class="filter-pill" onclick="CatchME.setAnalyticsTimeRange('month')">เดือนนี้</button>
-          <button type="button" id="analytics-filter-all" class="filter-pill" onclick="CatchME.setAnalyticsTimeRange('all')">ทั้งหมด</button>
-        </div>
-        <div style="display: flex; gap: 4px;">
-          <button type="button" id="analytics-mode-all" class="filter-pill active" onclick="CatchME.setAnalyticsMode('ALL')">รวม</button>
-          <button type="button" id="analytics-mode-opd" class="filter-pill" onclick="CatchME.setAnalyticsMode('OPD')">OPD</button>
-          <button type="button" id="analytics-mode-ipd" class="filter-pill" onclick="CatchME.setAnalyticsMode('IPD')">IPD</button>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div id="analytics-loading" style="text-align: center; padding: 30px 10px;">
-        <div class="spinner" style="margin: 0 auto 10px auto; width: 32px; height: 32px; border: 3px solid rgba(255,143,171,0.2); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
-        <span style="font-size: 13px; color: var(--color-text-secondary);">กำลังรวบรวมข้อมูลสถิติความปลอดภัย...</span>
-      </div>
-
-      <!-- Dashboard Content Body -->
-      <div id="analytics-content" class="hidden" style="max-height: 64vh; overflow-y: auto; padding-right: 2px;">
-        <!-- KPI Cards Grid -->
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <span class="kpi-icon">🛡️</span>
-            <span class="kpi-value" id="kpi-total">0</span>
-            <span class="kpi-label">ดักจับ Near Miss ทั้งหมด</span>
-          </div>
-          <div class="kpi-card kpi-card-had">
-            <span class="kpi-icon">🚨</span>
-            <span class="kpi-value" id="kpi-had">0</span>
-            <span class="kpi-label">ยาความเสี่ยงสูง (HAD)</span>
-          </div>
-          <div class="kpi-card">
-            <span class="kpi-icon">⚡</span>
-            <span class="kpi-value" id="kpi-lasa">0</span>
-            <span class="kpi-label">คู่ยาเสี่ยง LASA</span>
-          </div>
-          <div class="kpi-card">
-            <span class="kpi-icon">📍</span>
-            <span class="kpi-value-sm" id="kpi-top-stage">-</span>
-            <span class="kpi-label">ขั้นตอนที่พบมากที่สุด</span>
-          </div>
-        </div>
-
-        <!-- Section: Stage Distribution Progress Meters -->
-        <div class="analytics-section">
-          <h3 class="analytics-section-title">สัดส่วนตามขั้นตอนเกิดเหตุ</h3>
-          <div class="stage-bar-group">
-            <div class="stage-bar-item">
-              <div class="stage-bar-header">
-                <span>📝 สั่งยา (Prescribing - A01-A17)</span>
-                <span id="stage-prescribing-text">0 เคส (0%)</span>
-              </div>
-              <div class="stage-progress-bg">
-                <div id="stage-prescribing-bar" class="stage-progress-fill stage-fill-prescribing" style="width: 0%;"></div>
-              </div>
-            </div>
-            <div class="stage-bar-item">
-              <div class="stage-bar-header">
-                <span>📋 คัดลอก/รับคำสั่ง (Transcribing - E01-E11)</span>
-                <span id="stage-transcribing-text">0 เคส (0%)</span>
-              </div>
-              <div class="stage-progress-bg">
-                <div id="stage-transcribing-bar" class="stage-progress-fill stage-fill-transcribing" style="width: 0%;"></div>
-              </div>
-            </div>
-            <div class="stage-bar-item">
-              <div class="stage-bar-header">
-                <span>📦 จัดยา/เตรียมยา (Pre-dispensing - B01-B36)</span>
-                <span id="stage-dispensing-text">0 เคส (0%)</span>
-              </div>
-              <div class="stage-progress-bg">
-                <div id="stage-dispensing-bar" class="stage-progress-fill stage-fill-dispensing" style="width: 0%;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section: Top 5 Error Types -->
-        <div class="analytics-section">
-          <h3 class="analytics-section-title">Top 5 ความคลาดเคลื่อนที่พบบ่อย</h3>
-          <div id="analytics-top-errors-list" class="top-list">
-            <!-- Dynamically rendered -->
-          </div>
-        </div>
-
-        <!-- Section: High Alert Drugs Breakdown -->
-        <div class="analytics-section">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <h3 class="analytics-section-title" style="margin: 0;">การเฝ้าระวังยาความเสี่ยงสูง (HAD)</h3>
-            <button type="button" class="btn-text-action" onclick="CatchME.openHadDictionary()" style="font-size: 11px; background: none; border: none; color: var(--color-primary-dark); cursor: pointer; text-decoration: underline;">
-              ดูบัญชี 29 รายการ
-            </button>
-          </div>
-          <div class="had-cat-summary-grid">
-            <div class="had-cat-box">
-              <span class="had-cat-box-num" id="had-box-cat1">0</span>
-              <span class="had-cat-box-lbl">หมวด 1 (แคบ/รุนแรง)</span>
-            </div>
-            <div class="had-cat-box">
-              <span class="had-cat-box-num" id="had-box-cat2">0</span>
-              <span class="had-cat-box-lbl">หมวด 2 (เสพติด/จิต)</span>
-            </div>
-            <div class="had-cat-box">
-              <span class="had-cat-box-num" id="had-box-cat3">0</span>
-              <span class="had-cat-box-lbl">หมวด 3 (SCARs/รุนแรง)</span>
-            </div>
-          </div>
-          <div id="analytics-top-had-list" class="top-list" style="margin-top: 8px;">
-            <!-- Dynamically rendered top HAD drugs -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Action Footer -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255, 143, 171, 0.2);">
-        <button type="button" class="btn-secondary" onclick="CatchME.exportQualityCsv()" style="font-size: 12px; padding: 7px 12px; gap: 4px; display: inline-flex; align-items: center;">
-          <span>📥</span>
-          <span>ส่งออกรายงาน (CSV)</span>
-        </button>
-        <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-safety-analytics')" style="width: auto; padding: 7px 18px; font-size: 13px;">
-          <span>ปิด</span>
-        </button>
       </div>
     </div>
   </div>
@@ -6329,7 +6336,8 @@ const CatchME = (function() {
       'screen-processing',
       'screen-confirmation',
       'screen-clarification',
-      'screen-success'
+      'screen-success',
+      'screen-analytics'
     ];
 
     screens.forEach(function(id) {
@@ -6345,7 +6353,7 @@ const CatchME = (function() {
 
     const backBtn = document.getElementById('header-back-btn');
     if (backBtn) {
-      if (screenId === 'screen-confirmation' || screenId === 'screen-clarification') {
+      if (screenId === 'screen-confirmation' || screenId === 'screen-clarification' || screenId === 'screen-analytics') {
         backBtn.classList.remove('hidden');
       } else {
         backBtn.classList.add('hidden');
@@ -7652,7 +7660,7 @@ const CatchME = (function() {
    */
   function lockAdminSession() {
     sessionStorage.removeItem(ADMIN_PIN_SESSION_KEY);
-    closeModal('modal-safety-analytics');
+    showScreen('screen-quick-report');
     closeModal('modal-admin-settings');
     alert('ล็อกเซสชันความปลอดภัยเรียบร้อยแล้ว');
   }
@@ -7780,7 +7788,7 @@ const CatchME = (function() {
       return;
     }
 
-    openModal('modal-safety-analytics');
+    showScreen('screen-analytics');
     loadSafetyAnalytics();
   }
 

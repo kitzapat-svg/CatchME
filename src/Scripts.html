@@ -1394,7 +1394,8 @@ const CatchME = (function() {
       'screen-processing',
       'screen-confirmation',
       'screen-clarification',
-      'screen-success'
+      'screen-success',
+      'screen-analytics'
     ];
 
     screens.forEach(function(id) {
@@ -1410,7 +1411,7 @@ const CatchME = (function() {
 
     const backBtn = document.getElementById('header-back-btn');
     if (backBtn) {
-      if (screenId === 'screen-confirmation' || screenId === 'screen-clarification') {
+      if (screenId === 'screen-confirmation' || screenId === 'screen-clarification' || screenId === 'screen-analytics') {
         backBtn.classList.remove('hidden');
       } else {
         backBtn.classList.add('hidden');
@@ -2717,7 +2718,7 @@ const CatchME = (function() {
    */
   function lockAdminSession() {
     sessionStorage.removeItem(ADMIN_PIN_SESSION_KEY);
-    closeModal('modal-safety-analytics');
+    showScreen('screen-quick-report');
     closeModal('modal-admin-settings');
     alert('ล็อกเซสชันความปลอดภัยเรียบร้อยแล้ว');
   }
@@ -2845,7 +2846,7 @@ const CatchME = (function() {
       return;
     }
 
-    openModal('modal-safety-analytics');
+    showScreen('screen-analytics');
     loadSafetyAnalytics();
   }
 
