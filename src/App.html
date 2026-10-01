@@ -8,6 +8,11 @@
       <span class="brand-title">CatchME</span>
     </div>
     <div class="header-actions">
+      <!-- Emerging LASA Surveillance Button -->
+      <button type="button" onclick="CatchME.openEmergingLasaModal()" style="background: none; border: 1px solid rgba(255, 143, 171, 0.4); border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="ตรวจจับคู่ยาเสี่ยงใหม่ (Emerging LASA Surveillance)">
+        <span>⚡</span>
+        <span>LASA เฝ้าระวัง</span>
+      </button>
       <!-- Code Dictionary Help Button -->
       <button type="button" onclick="CatchME.openCodeDictionary()" style="background: none; border: 1px solid rgba(255, 143, 171, 0.4); border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="ดูคู่มือความหมายรหัส DS และ Risk Code">
         <span>📖</span>
@@ -210,6 +215,65 @@
               <div class="comparison-row">
                 <span id="confirm-actual" class="val-actual">จัดจริง: -</span>
                 <span id="confirm-expected" class="val-expected">ควรเป็น: -</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Emerging LASA Alert Banner (shown when pair is frequent in ME_Log but not yet in LASA Master) -->
+          <div id="confirm-emerging-lasa-banner" class="emerging-lasa-banner hidden">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">⚠️</span>
+                <span style="font-size: 12px; font-weight: 800; color: #9B1138;">ตรวจพบคู่ยาจัดผิดซ้ำ (Emerging LASA Risk)!</span>
+              </div>
+              <span id="confirm-emerging-count-badge" class="badge-emerging-count">เกิดซ้ำ 2 ครั้ง</span>
+            </div>
+            <div id="confirm-emerging-desc" style="font-size: 11px; color: #7A092B; margin-top: 4px;">
+              คู่ยานี้มีสถิติเกิดข้อผิดพลาดซ้ำ แต่ยังไม่ได้ขึ้นทะเบียนใน Master ของ รพ.
+            </div>
+            <button type="button" class="btn-emerging-promote" onclick="CatchME.promoteCurrentEmergingPair()">
+              <span>+ บรรจุเป็นคู่ยา LASA Master ทันที</span>
+            </button>
+          </div>
+
+          <!-- Smart LASA Card -->
+          <div id="confirm-lasa-card" class="lasa-smart-card hidden">
+            <div class="lasa-card-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">🏷️</span>
+                <span style="font-size: 13px; font-weight: 700; color: #9B1138;">คู่ยา LASA (Look-alike Sound-alike)</span>
+              </div>
+              <label class="lasa-toggle-switch" title="เปิด/ปิด การจัดเก็บว่าเป็นคู่ยา LASA">
+                <input type="checkbox" id="confirm-lasa-toggle" onchange="CatchME.toggleLasaActive(this.checked)">
+                <span class="lasa-slider"></span>
+              </label>
+            </div>
+            
+            <div id="confirm-lasa-body" class="lasa-card-body">
+              <div id="confirm-lasa-master-pill" class="lasa-master-badge hidden">
+                <span style="font-size: 11px;">⚡ บัญชีคู่ยาเฝ้าระวัง รพ.</span>
+                <strong id="confirm-lasa-pair-display">-</strong>
+              </div>
+
+              <div style="margin-top: 8px;">
+                <span style="font-size: 11px; font-weight: 600; color: var(--color-text-secondary);">ประเภทความคล้ายคลึง:</span>
+                <div class="lasa-pill-group" style="margin-top: 4px;">
+                  <button type="button" id="btn-lasa-sound" class="lasa-pill" onclick="CatchME.selectLasaType('Sound-alike')">
+                    <span>🔊</span> <span>ชื่อคล้าย</span>
+                  </button>
+                  <button type="button" id="btn-lasa-look" class="lasa-pill" onclick="CatchME.selectLasaType('Look-alike')">
+                    <span>👁️</span> <span>รูปคล้าย</span>
+                  </button>
+                  <button type="button" id="btn-lasa-both" class="lasa-pill" onclick="CatchME.selectLasaType('Both')">
+                    <span>🔄</span> <span>ทั้งคู่</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Trade / Brand Name Optional Input -->
+              <div class="input-group" style="margin-top: 8px; margin-bottom: 0;">
+                <label class="input-label" for="confirm-trade-name" style="font-size: 11px;">ชื่อการค้า/ยี่ห้อเฉพาะ (ถ้ามี เช่น บรรจุภัณฑ์คล้ายกันเฉพาะยี่ห้อนี้)</label>
+                <input type="text" id="confirm-trade-name" class="input-field" style="padding: 6px 10px; font-size: 12px;" placeholder="เช่น กล่องสีส้มคล้ายกัน, ยี่ห้อ A vs B" oninput="CatchME.updateTradeName(this.value)">
               </div>
             </div>
           </div>
@@ -483,6 +547,17 @@
         </div>
       </div>
 
+      <!-- LASA Quick Pairs (Displayed for B26/B03/B28/A03) -->
+      <div id="preset-lasa-chips-container" style="display: none; background: #FFF5F7; border: 1.5px solid #FFCCD5; border-radius: 10px; padding: 8px 10px; margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11px; font-weight: 700; color: #9B1138;">⚡ คู่ยา LASA รพ. (แตะเพื่อใส่คู่อัตโนมัติ):</span>
+          <span id="preset-lasa-mode-badge" style="font-size: 10px; font-weight: 700; color: #C9184A;">OPD</span>
+        </div>
+        <div id="preset-lasa-chips-list" class="chip-group" style="margin-top: 6px;">
+          <!-- Dynamically populated according to mode (OPD 10 pairs / IPD 5 pairs) -->
+        </div>
+      </div>
+
       <!-- Detected Stage Selector -->
       <div class="input-group" style="margin-top: 10px;">
         <label class="input-label" for="preset-stage-select">จุดที่ตรวจพบ (Detected Stage)</label>
@@ -591,6 +666,49 @@
         </button>
         <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-customize-presets')" style="width: auto; padding: 7px 18px; font-size: 13px;">
           <span>เสร็จสิ้น</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Emerging LASA Surveillance Dialog -->
+  <div id="modal-emerging-lasa" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 440px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 20px;">⚡</span>
+            <h2 style="font-size: 17px; font-weight: 800; color: var(--color-primary-dark); margin: 0;">
+              คู่ยาเสี่ยงเฝ้าระวังใหม่ (Emerging LASA)
+            </h2>
+          </div>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">
+            ระบบวิเคราะห์คู่ยาที่เกิดข้อผิดพลาดซ้ำใน ME Log (ตั้งแต่ 2 ครั้งขึ้นไป) ที่ยังไม่อยู่ในบัญชีหลัก
+          </p>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-emerging-lasa')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Filter Mode Selector -->
+      <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+        <button type="button" id="btn-emerging-filter-current" class="btn-secondary active" onclick="CatchME.setEmergingFilter('CURRENT')" style="font-size: 11px; padding: 5px 10px; flex: 1;">
+          โหมดปัจจุบัน (<span id="emerging-current-mode-label">OPD</span>)
+        </button>
+        <button type="button" id="btn-emerging-filter-all" class="btn-secondary" onclick="CatchME.setEmergingFilter('ALL')" style="font-size: 11px; padding: 5px 10px; flex: 1;">
+          ทั้งหมด (OPD + IPD)
+        </button>
+      </div>
+
+      <!-- List Container -->
+      <div id="emerging-lasa-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 48vh; overflow-y: auto; padding-right: 4px; margin-bottom: 14px;">
+        <div style="text-align: center; color: var(--color-text-muted); padding: 24px 0; font-size: 13px;">
+          กำลังโหลดข้อมูลคู่ยาเสี่ยง...
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-emerging-lasa')" style="width: auto; padding: 7px 18px; font-size: 13px;">
+          <span>ปิดหน้าต่าง</span>
         </button>
       </div>
     </div>

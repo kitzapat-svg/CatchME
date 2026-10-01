@@ -924,6 +924,166 @@
   .custom-preset-del-btn:hover {
     color: #B91C1C;
   }
+
+  /* Smart LASA Card Styles */
+  .lasa-smart-card {
+    background: #FFF5F7;
+    border: 1.5px solid #FFCCD5;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .lasa-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .lasa-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+
+  .lasa-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .lasa-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #CBD5E1;
+    transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 24px;
+  }
+
+  .lasa-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .lasa-toggle-switch input:checked + .lasa-slider {
+    background-color: #FF4D6D;
+  }
+
+  .lasa-toggle-switch input:checked + .lasa-slider:before {
+    transform: translateX(20px);
+  }
+
+  .lasa-master-badge {
+    background: #FFE5EC;
+    border: 1px solid #FF8FAB;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #9B1138;
+    font-size: 12px;
+  }
+
+  .lasa-pill-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .lasa-pill {
+    flex: 1;
+    min-width: 90px;
+    background: #FFFFFF;
+    border: 1px solid #FFCCD5;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4A1521;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+  }
+
+  .lasa-pill.active {
+    background: #FF4D6D;
+    border-color: #FF4D6D;
+    color: #FFFFFF;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(255, 77, 109, 0.35);
+  }
+
+  /* Emerging LASA Surveillance Styles */
+  .emerging-lasa-banner {
+    background: #FFF0F3;
+    border: 1.5px solid #FF8FAB;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+
+  .badge-emerging-count {
+    background: #C9184A;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 9999px;
+  }
+
+  .btn-emerging-promote {
+    margin-top: 8px;
+    background: #FF4D6D;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: background 0.15s ease;
+  }
+
+  .btn-emerging-promote:hover {
+    background: #C9184A;
+  }
+
+  .emerging-item-card {
+    background: #FFFFFF;
+    border: 1.5px solid #FFE5EC;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
 </style>
 
 </head>
@@ -938,6 +1098,11 @@
       <span class="brand-title">CatchME</span>
     </div>
     <div class="header-actions">
+      <!-- Emerging LASA Surveillance Button -->
+      <button type="button" onclick="CatchME.openEmergingLasaModal()" style="background: none; border: 1px solid rgba(255, 143, 171, 0.4); border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="ตรวจจับคู่ยาเสี่ยงใหม่ (Emerging LASA Surveillance)">
+        <span>⚡</span>
+        <span>LASA เฝ้าระวัง</span>
+      </button>
       <!-- Code Dictionary Help Button -->
       <button type="button" onclick="CatchME.openCodeDictionary()" style="background: none; border: 1px solid rgba(255, 143, 171, 0.4); border-radius: 9999px; font-size: 11px; font-weight: 700; color: var(--color-primary-dark); padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="ดูคู่มือความหมายรหัส DS และ Risk Code">
         <span>📖</span>
@@ -1140,6 +1305,65 @@
               <div class="comparison-row">
                 <span id="confirm-actual" class="val-actual">จัดจริง: -</span>
                 <span id="confirm-expected" class="val-expected">ควรเป็น: -</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Emerging LASA Alert Banner (shown when pair is frequent in ME_Log but not yet in LASA Master) -->
+          <div id="confirm-emerging-lasa-banner" class="emerging-lasa-banner hidden">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">⚠️</span>
+                <span style="font-size: 12px; font-weight: 800; color: #9B1138;">ตรวจพบคู่ยาจัดผิดซ้ำ (Emerging LASA Risk)!</span>
+              </div>
+              <span id="confirm-emerging-count-badge" class="badge-emerging-count">เกิดซ้ำ 2 ครั้ง</span>
+            </div>
+            <div id="confirm-emerging-desc" style="font-size: 11px; color: #7A092B; margin-top: 4px;">
+              คู่ยานี้มีสถิติเกิดข้อผิดพลาดซ้ำ แต่ยังไม่ได้ขึ้นทะเบียนใน Master ของ รพ.
+            </div>
+            <button type="button" class="btn-emerging-promote" onclick="CatchME.promoteCurrentEmergingPair()">
+              <span>+ บรรจุเป็นคู่ยา LASA Master ทันที</span>
+            </button>
+          </div>
+
+          <!-- Smart LASA Card -->
+          <div id="confirm-lasa-card" class="lasa-smart-card hidden">
+            <div class="lasa-card-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 16px;">🏷️</span>
+                <span style="font-size: 13px; font-weight: 700; color: #9B1138;">คู่ยา LASA (Look-alike Sound-alike)</span>
+              </div>
+              <label class="lasa-toggle-switch" title="เปิด/ปิด การจัดเก็บว่าเป็นคู่ยา LASA">
+                <input type="checkbox" id="confirm-lasa-toggle" onchange="CatchME.toggleLasaActive(this.checked)">
+                <span class="lasa-slider"></span>
+              </label>
+            </div>
+            
+            <div id="confirm-lasa-body" class="lasa-card-body">
+              <div id="confirm-lasa-master-pill" class="lasa-master-badge hidden">
+                <span style="font-size: 11px;">⚡ บัญชีคู่ยาเฝ้าระวัง รพ.</span>
+                <strong id="confirm-lasa-pair-display">-</strong>
+              </div>
+
+              <div style="margin-top: 8px;">
+                <span style="font-size: 11px; font-weight: 600; color: var(--color-text-secondary);">ประเภทความคล้ายคลึง:</span>
+                <div class="lasa-pill-group" style="margin-top: 4px;">
+                  <button type="button" id="btn-lasa-sound" class="lasa-pill" onclick="CatchME.selectLasaType('Sound-alike')">
+                    <span>🔊</span> <span>ชื่อคล้าย</span>
+                  </button>
+                  <button type="button" id="btn-lasa-look" class="lasa-pill" onclick="CatchME.selectLasaType('Look-alike')">
+                    <span>👁️</span> <span>รูปคล้าย</span>
+                  </button>
+                  <button type="button" id="btn-lasa-both" class="lasa-pill" onclick="CatchME.selectLasaType('Both')">
+                    <span>🔄</span> <span>ทั้งคู่</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Trade / Brand Name Optional Input -->
+              <div class="input-group" style="margin-top: 8px; margin-bottom: 0;">
+                <label class="input-label" for="confirm-trade-name" style="font-size: 11px;">ชื่อการค้า/ยี่ห้อเฉพาะ (ถ้ามี เช่น บรรจุภัณฑ์คล้ายกันเฉพาะยี่ห้อนี้)</label>
+                <input type="text" id="confirm-trade-name" class="input-field" style="padding: 6px 10px; font-size: 12px;" placeholder="เช่น กล่องสีส้มคล้ายกัน, ยี่ห้อ A vs B" oninput="CatchME.updateTradeName(this.value)">
               </div>
             </div>
           </div>
@@ -1413,6 +1637,17 @@
         </div>
       </div>
 
+      <!-- LASA Quick Pairs (Displayed for B26/B03/B28/A03) -->
+      <div id="preset-lasa-chips-container" style="display: none; background: #FFF5F7; border: 1.5px solid #FFCCD5; border-radius: 10px; padding: 8px 10px; margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11px; font-weight: 700; color: #9B1138;">⚡ คู่ยา LASA รพ. (แตะเพื่อใส่คู่อัตโนมัติ):</span>
+          <span id="preset-lasa-mode-badge" style="font-size: 10px; font-weight: 700; color: #C9184A;">OPD</span>
+        </div>
+        <div id="preset-lasa-chips-list" class="chip-group" style="margin-top: 6px;">
+          <!-- Dynamically populated according to mode (OPD 10 pairs / IPD 5 pairs) -->
+        </div>
+      </div>
+
       <!-- Detected Stage Selector -->
       <div class="input-group" style="margin-top: 10px;">
         <label class="input-label" for="preset-stage-select">จุดที่ตรวจพบ (Detected Stage)</label>
@@ -1521,6 +1756,49 @@
         </button>
         <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-customize-presets')" style="width: auto; padding: 7px 18px; font-size: 13px;">
           <span>เสร็จสิ้น</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Emerging LASA Surveillance Dialog -->
+  <div id="modal-emerging-lasa" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 440px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 20px;">⚡</span>
+            <h2 style="font-size: 17px; font-weight: 800; color: var(--color-primary-dark); margin: 0;">
+              คู่ยาเสี่ยงเฝ้าระวังใหม่ (Emerging LASA)
+            </h2>
+          </div>
+          <p style="font-size: 12px; color: var(--color-text-secondary); margin-top: 4px;">
+            ระบบวิเคราะห์คู่ยาที่เกิดข้อผิดพลาดซ้ำใน ME Log (ตั้งแต่ 2 ครั้งขึ้นไป) ที่ยังไม่อยู่ในบัญชีหลัก
+          </p>
+        </div>
+        <button type="button" onclick="CatchME.closeModal('modal-emerging-lasa')" style="background: none; border: none; font-size: 20px; color: var(--color-text-muted); cursor: pointer; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Filter Mode Selector -->
+      <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+        <button type="button" id="btn-emerging-filter-current" class="btn-secondary active" onclick="CatchME.setEmergingFilter('CURRENT')" style="font-size: 11px; padding: 5px 10px; flex: 1;">
+          โหมดปัจจุบัน (<span id="emerging-current-mode-label">OPD</span>)
+        </button>
+        <button type="button" id="btn-emerging-filter-all" class="btn-secondary" onclick="CatchME.setEmergingFilter('ALL')" style="font-size: 11px; padding: 5px 10px; flex: 1;">
+          ทั้งหมด (OPD + IPD)
+        </button>
+      </div>
+
+      <!-- List Container -->
+      <div id="emerging-lasa-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 48vh; overflow-y: auto; padding-right: 4px; margin-bottom: 14px;">
+        <div style="text-align: center; color: var(--color-text-muted); padding: 24px 0; font-size: 13px;">
+          กำลังโหลดข้อมูลคู่ยาเสี่ยง...
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button type="button" class="btn-primary" onclick="CatchME.closeModal('modal-emerging-lasa')" style="width: auto; padding: 7px 18px; font-size: 13px;">
+          <span>ปิดหน้าต่าง</span>
         </button>
       </div>
     </div>
@@ -1642,7 +1920,232 @@
     { name: 'Lorazepam', key: 'lorazepam', patterns: [/lorazepam/gi, /ลอราซีแพม/gi] },
     { name: 'Alprazolam', key: 'alprazolam', patterns: [/alprazolam/gi, /อัลพราโซแลม/gi] },
     { name: 'Gabapentin', key: 'gabapentin', patterns: [/gabapentin/gi, /กาบาเพนติน/gi] },
-    { name: 'Pregabalin', key: 'pregabalin', patterns: [/pregabalin/gi, /พรีการ์บาลิน/gi] }
+    { name: 'Pregabalin', key: 'pregabalin', patterns: [/pregabalin/gi, /พรีการ์บาลิน/gi] },
+    { name: 'Norepinephrine', key: 'norepinephrine', patterns: [/norepinephrine/gi, /noradrenaline/gi, /นอร์อิพิเนฟริน/gi, /นอร์อะดรีนาลีน/gi, /เลโวเฟด/gi, /levophed/gi] },
+    { name: 'Amiodarone', key: 'amiodarone', patterns: [/amiodarone/gi, /อะมิโอดาโรน/gi, /อามิโอดาโรน/gi, /คอร์ดาโรน/gi, /cordarone/gi] },
+    { name: 'Aminophylline', key: 'aminophylline', patterns: [/aminophylline/gi, /อะมิโนฟิลลีน/gi, /อามิโนฟิลลีน/gi] },
+    { name: 'Phenytoin', key: 'phenytoin', patterns: [/phenytoin/gi, /ฟีนิโทอิน/gi, /ฟีนีโทอิน/gi, /ไดแลนติน/gi, /dilantin/gi] },
+    { name: 'Azathioprine', key: 'azathioprine', patterns: [/azathioprine/gi, /อะซาไธโอพรีน/gi, /อิมูแรน/gi, /imuran/gi] },
+    { name: 'Azithromycin', key: 'azithromycin', patterns: [/azithromycin/gi, /อะซิโทรไมซิน/gi, /ซิโทรแมกซ์/gi, /zithromax/gi] },
+    { name: 'Propranolol', key: 'propranolol', patterns: [/propranolol/gi, /โพรพราโนลอล/gi, /โปรพราโนลอล/gi, /โพรพราน/gi] },
+    { name: 'Manidipine', key: 'manidipine', patterns: [/manidipine/gi, /มานิดิปีน/gi, /มานิดิพีน/gi, /มานิดิ/gi] },
+    { name: 'Urea cream', key: 'urea cream', patterns: [/urea\s*cream/gi, /ยูเรีย\s*ครีม/gi, /ยูเรีย/gi, /urea/gi] },
+    { name: 'TA cream', key: 'ta cream', patterns: [/ta\s*cream/gi, /triamcinolone/gi, /ทีเอ\s*ครีม/gi, /ทีเอ/gi] },
+    { name: 'Risperidone', key: 'risperidone', patterns: [/risperidone/gi, /ริสเพอริโดน/gi, /ริสเพอริดอน/gi, /ริสเพอริ/gi] },
+    { name: 'Seretide', key: 'seretide', patterns: [/seretide(?:\s*evohaler)?/gi, /evohaler/gi, /เซเรไทด์/gi, /เซริไทด์/gi, /ซีรีไทด์/gi] },
+    { name: 'Ferrous sulfate', key: 'ferrous sulfate', patterns: [/ferrous(?:\s*sulfate)?/gi, /เฟอร์รัส(?:\s*ซัลเฟต)?/gi, /เฟอรัส/gi, /ธาตุเหล็ก/gi] },
+    { name: 'Ibuprofen', key: 'ibuprofen', patterns: [/ibuprofen/gi, /ไอบูโพรเฟน/gi, /ไอบูโปรเฟน/gi, /ไอบู/gi] }
+  ];
+
+  // Hospital LASA Master Reference
+  var HOSPITAL_LASA_PAIRS = [
+    // --- ห้องยาผู้ป่วยนอก (OPD) 10 อันดับแรก ---
+    {
+      pairId: 'LASA-OPD-01',
+      drug1: 'propranolol 10 mg',
+      drug2: 'propranolol 40 mg',
+      name1: 'Propranolol 10 mg',
+      name2: 'Propranolol 40 mg',
+      baseDrug: 'propranolol',
+      strength1: '10',
+      strength2: '40',
+      tallman1: 'propranolol 10 mg',
+      tallman2: 'propranolol 40 mg',
+      lasaType: 'Look-alike',
+      scope: 'OPD',
+      riskLevel: 'Standard'
+    },
+    {
+      pairId: 'LASA-OPD-02',
+      drug1: 'amlodipine',
+      drug2: 'manidipine',
+      name1: 'Amlodipine 5 mg',
+      name2: 'Manidipine 20 mg',
+      tallman1: 'amLODIPine 5 mg',
+      tallman2: 'maniDIPine 20 mg',
+      lasaType: 'Sound-alike',
+      scope: 'OPD',
+      riskLevel: 'Standard'
+    },
+    {
+      pairId: 'LASA-OPD-03',
+      drug1: 'urea cream',
+      drug2: 'urea + 0.02% ta cream',
+      name1: 'Urea cream',
+      name2: 'Urea + 0.02% TA cream',
+      tallman1: 'Urea cream',
+      tallman2: 'Urea + 0.02% TA cream',
+      lasaType: 'Look-alike',
+      scope: 'OPD',
+      riskLevel: 'Standard'
+    },
+    {
+      pairId: 'LASA-OPD-04',
+      drug1: 'risperidone 1 mg',
+      drug2: 'risperidone 2 mg',
+      name1: 'Risperidone 1 mg',
+      name2: 'Risperidone 2 mg',
+      baseDrug: 'risperidone',
+      strength1: '1',
+      strength2: '2',
+      tallman1: 'risperidone 1 mg',
+      tallman2: 'risperidone 2 mg',
+      lasaType: 'Look-alike',
+      scope: 'OPD',
+      riskLevel: 'High Alert Drug'
+    },
+    {
+      pairId: 'LASA-OPD-05',
+      drug1: 'seretide evohaler 25/250',
+      drug2: 'seretide evohaler 25/50',
+      name1: 'Seretide Evohaler 25/250',
+      name2: 'Seretide Evohaler 25/50',
+      baseDrug: 'seretide',
+      strength1: '250',
+      strength2: '50',
+      tallman1: 'Seretide 25/250',
+      tallman2: 'Seretide 25/50',
+      lasaType: 'Look-alike',
+      scope: 'OPD',
+      riskLevel: 'Standard'
+    },
+    {
+      pairId: 'LASA-OPD-06',
+      drug1: '0.02% ta cream',
+      drug2: '0.1% ta cream',
+      name1: '0.02% TA cream',
+      name2: '0.1% TA cream',
+      baseDrug: 'ta cream',
+      strength1: '0.02',
+      strength2: '0.1',
+      tallman1: '0.02% TA cream',
+      tallman2: '0.1% TA cream',
+      lasaType: 'Look-alike',
+      scope: 'OPD',
+      riskLevel: 'Standard'
+    },
+    {
+      pairId: 'LASA-OPD-07',
+      drug1: 'diazepam 5 mg',
+      drug2: 'diazepam 2 mg',
+      name1: 'Diazepam 5 mg',
+      name2: 'Diazepam 2 mg',
+      baseDrug: 'diazepam',
+      strength1: '5',
+      strength2: '2',
+      tallman1: 'diazepam 5 mg',
+      tallman2: 'diazepam 2 mg',
+      lasaType: 'Look-alike',
+      scope: 'OPD',
+      riskLevel: 'High Alert Drug'
+    },
+    {
+      pairId: 'LASA-OPD-08',
+      drug1: 'ferrous sulfate',
+      drug2: 'furosemide',
+      name1: 'Ferrous Sulfate 200 mg',
+      name2: 'Furosemide 40 mg',
+      tallman1: 'FERROUS sulfate',
+      tallman2: 'furosemide',
+      lasaType: 'Sound-alike',
+      scope: 'OPD',
+      riskLevel: 'Standard'
+    },
+    {
+      pairId: 'LASA-OPD-09',
+      drug1: 'ibuprofen 200 mg',
+      drug2: 'ibuprofen 400 mg',
+      name1: 'Ibuprofen 200 mg',
+      name2: 'Ibuprofen 400 mg',
+      baseDrug: 'ibuprofen',
+      strength1: '200',
+      strength2: '400',
+      tallman1: 'ibuprofen 200 mg',
+      tallman2: 'ibuprofen 400 mg',
+      lasaType: 'Look-alike',
+      scope: 'OPD',
+      riskLevel: 'Standard'
+    },
+    {
+      pairId: 'LASA-OPD-10',
+      drug1: 'simvastatin 10 mg',
+      drug2: 'simvastatin 20 mg',
+      name1: 'Simvastatin 10 mg',
+      name2: 'Simvastatin 20 mg',
+      baseDrug: 'simvastatin',
+      strength1: '10',
+      strength2: '20',
+      tallman1: 'simvastatin 10 mg',
+      tallman2: 'simvastatin 20 mg',
+      lasaType: 'Look-alike',
+      scope: 'OPD',
+      riskLevel: 'Standard'
+    },
+
+    // --- ห้องยาผู้ป่วยใน (IPD) ---
+    {
+      pairId: 'LASA-IPD-01',
+      drug1: 'ceftriaxone',
+      drug2: 'ceftazidime',
+      name1: 'Ceftriaxone',
+      name2: 'Ceftazidime',
+      tallman1: 'cefTRIAXone',
+      tallman2: 'cefTAZidime',
+      lasaType: 'Both',
+      scope: 'IPD',
+      riskLevel: 'Standard'
+    },
+    {
+      pairId: 'LASA-IPD-02',
+      drug1: 'norepinephrine',
+      drug2: 'amiodarone',
+      name1: 'Norepinephrine',
+      name2: 'Amiodarone',
+      tallman1: 'norEPINephrine',
+      tallman2: 'amiodarone',
+      lasaType: 'Look-alike',
+      scope: 'IPD',
+      riskLevel: 'High Alert Drug'
+    },
+    {
+      pairId: 'LASA-IPD-03',
+      drug1: 'aminophylline',
+      drug2: 'amiodarone',
+      name1: 'Aminophylline',
+      name2: 'Amiodarone',
+      tallman1: 'aminoPHYLLine',
+      tallman2: 'amiodarone',
+      lasaType: 'Sound-alike',
+      scope: 'IPD',
+      riskLevel: 'High Alert Drug'
+    },
+    {
+      pairId: 'LASA-IPD-04',
+      drug1: 'phenytoin 100 mg',
+      drug2: 'phenytoin 50 mg',
+      name1: 'Phenytoin 100 mg',
+      name2: 'Phenytoin 50 mg',
+      baseDrug: 'phenytoin',
+      strength1: '100',
+      strength2: '50',
+      tallman1: 'phenytoin 100 mg',
+      tallman2: 'phenytoin 50 mg',
+      lasaType: 'Look-alike',
+      scope: 'IPD',
+      riskLevel: 'High Alert Drug'
+    },
+    {
+      pairId: 'LASA-IPD-05',
+      drug1: 'azathioprine',
+      drug2: 'azithromycin',
+      name1: 'Azathioprine',
+      name2: 'Azithromycin',
+      tallman1: 'azaTHIOprine',
+      tallman2: 'aziTHROmycin',
+      lasaType: 'Sound-alike',
+      scope: 'IPD',
+      riskLevel: 'High Alert Drug'
+    }
   ];
 
   // Common phrase normalizations
@@ -1804,9 +2307,15 @@
       return { actual: actA, expected: expA };
     }
 
-    // Pattern 2: [actual] แต่ [expected]
+    // Pattern 2: [actual] แต่ [expected] OR [หมอสั่ง expected] แต่ [คีย์ actual]
     var matchB = clean.match(/(.+?)\s*แต่\s*(.+)/);
     if (matchB) {
+      if (/หมอสั่ง|แพทย์สั่ง|หมอโทรสั่ง|โทรสั่ง|ใบสั่ง|order/i.test(matchB[1]) && /คีย์|จัด|หยิบ|สื่อสาร|รับคำสั่ง|จ่าย/.test(matchB[2])) {
+        var expDoc = matchB[1].replace(/^(?:หมอสั่ง|แพทย์สั่ง|หมอโทรสั่ง|โทรสั่ง|ใบสั่ง|order)\s*/i, '').trim();
+        var actDoc = matchB[2].replace(/^(?:คีย์|จัด|หยิบ|สื่อสาร|รับคำสั่ง|จ่าย|เป็น|ห้องยาคีย์|คนจัดหยิบ)\s*/i, '').trim();
+        return { actual: actDoc, expected: expDoc };
+      }
+
       var actB = matchB[1];
       var expB = matchB[2];
 
@@ -1827,7 +2336,232 @@
       return { actual: actB, expected: expB };
     }
 
+    // Pattern 3: [expected] เป็น [actual]
+    var matchC = clean.match(/(.+?)\s+เป็น\s+(.+)/);
+    if (matchC && !/แต่/.test(clean) && !/แทน/.test(clean)) {
+      var expC = matchC[1].replace(/^(?:คนจัด|หมอ|ห้องยา|พยาบาล)?\s*(?:หยิบ|จัด|สั่ง|คีย์|รับคำสั่งโทรศัพท์|รับคำสั่ง|รับ)?\s*/, '').trim();
+      var actC = matchC[2].replace(/^(?:คนจัด|หมอ|ห้องยา|พยาบาล)?\s*(?:หยิบ|จัด|สั่ง|คีย์|รับคำสั่งโทรศัพท์|รับคำสั่ง|รับ)?\s*/, '').trim();
+      return { actual: actC, expected: expC };
+    }
+
     return { actual: '', expected: '' };
+  }
+
+  function detectLasaInfo(text, entities, parseResult, mode) {
+    var lower = text.toLowerCase();
+    var hasLasaKeyword = /lasa|ลาซ่า|ชื่อคล้าย|เสียงคล้าย|หน้าตาคล้าย|แพ็คเกจคล้าย|แผงคล้าย|สีคล้าย|ขวดคล้าย|แอมพูลคล้าย|สับสนคู่ยา|คู่ยา/.test(lower);
+    
+    var isWrongDrugCode = parseResult && (
+      parseResult.legacyCode === 'B26' ||
+      parseResult.legacyCode === 'B03' ||
+      parseResult.legacyCode === 'A03' ||
+      parseResult.legacyCode === 'E08' ||
+      parseResult.legacyCode === 'B28' ||
+      parseResult.legacyCode === 'A05'
+    );
+
+    var matchedMaster = null;
+    var lasaType = '';
+    var prescribed = '';
+    var dispensed = '';
+    var pairKey = '';
+
+    function checkDrugMention(textLower, drugKey, baseName) {
+      if (!drugKey && !baseName) return false;
+      if (drugKey && textLower.indexOf(drugKey) !== -1) return true;
+      if (baseName && textLower.indexOf(baseName.toLowerCase()) !== -1) return true;
+      var aliases = {
+        'propranolol': /propranolol|โพรพราโนลอล|โปรพราโนลอล|โพรพราน/,
+        'amlodipine': /amlodipine|แอมโลดิปีน|แอมโล/,
+        'manidipine': /manidipine|มานิดิปีน|มานิดิ/,
+        'urea': /urea|ยูเรีย/,
+        'urea cream': /urea\s*cream|ยูเรีย\s*ครีม|urea|ยูเรีย/,
+        'urea + 0.02% ta cream': /urea.*ta|ยูเรีย.*ทีเอ|0\.02%?\s*ta/,
+        'ta cream': /ta\s*cream|triamcinolone|ทีเอ\s*ครีม|ทีเอ|0\.02%?\s*ta|0\.1%?\s*ta/,
+        '0.02% ta cream': /0\.02%?\s*ta|ทีเอ\s*0\.02/,
+        '0.1% ta cream': /0\.1%?\s*ta|ทีเอ\s*0\.1/,
+        'risperidone': /risperidone|ริสเพอริโดน|ริสเพอริดอน|ริสเพอริ/,
+        'seretide': /seretide|evohaler|เซเรไทด์|ซีรีไทด์|เซริไทด์/,
+        'diazepam': /diazepam|ไดอะซีแพม/,
+        'ferrous sulfate': /ferrous(?:\s*sulfate)?|เฟอร์รัส|เฟอรัส|ธาตุเหล็ก/,
+        'furosemide': /furosemide|ฟูโรซีไมด์|ฟูโรเซไมด์|ลาซิกซ์/,
+        'ibuprofen': /ibuprofen|ไอบูโพรเฟน|ไอบูโปรเฟน|ไอบู/,
+        'simvastatin': /simvastatin|ซิมวาสแตติน|ซิมวาส/,
+        'ceftriaxone': /ceftriaxone|เซฟไตรอะโซน|เซฟไตร/,
+        'ceftazidime': /ceftazidime|เซฟทาซิดิม|เซฟตาซิดิม/,
+        'norepinephrine': /norepinephrine|noradrenaline|นอร์อิพิเนฟริน|เลโวเฟด|levophed/,
+        'amiodarone': /amiodarone|อะมิโอดาโรน|อามิโอดาโรน|คอร์ดาโรน|cordarone/,
+        'aminophylline': /aminophylline|อะมิโนฟิลลีน|อามิโนฟิลลีน/,
+        'phenytoin': /phenytoin|ฟีนิโทอิน|ไดแลนติน|dilantin/,
+        'azathioprine': /azathioprine|อะซาไธโอพรีน|อิมูแรน|imuran/,
+        'azithromycin': /azithromycin|อะซิโทรไมซิน|ซิโทรแมกซ์|zithromax/
+      };
+      if (drugKey && aliases[drugKey] && aliases[drugKey].test(textLower)) return true;
+      if (baseName && aliases[baseName.toLowerCase()] && aliases[baseName.toLowerCase()].test(textLower)) return true;
+      return false;
+    }
+
+    function matchStrength(str, st) {
+      if (!st) return false;
+      var esc = st.replace(/\./g, '\\.');
+      return new RegExp('(?:^|[^\\d.])' + esc + '(?![\\d.])').test(str);
+    }
+
+    // Sort pairs prioritizing current mode (OPD vs IPD)
+    var pairsToCheck = HOSPITAL_LASA_PAIRS.slice();
+    if (mode) {
+      var currentMode = String(mode).toUpperCase();
+      pairsToCheck.sort(function (a, b) {
+        if (a.scope === currentMode && b.scope !== currentMode) return -1;
+        if (b.scope === currentMode && a.scope !== currentMode) return 1;
+        return 0;
+      });
+    }
+
+    // Check Hospital LASA Master Pairs
+    for (var i = 0; i < pairsToCheck.length; i++) {
+      var pair = pairsToCheck[i];
+      if (pair.baseDrug) {
+        // Different strengths of same base drug
+        var baseMatched = checkDrugMention(lower, pair.baseDrug, pair.baseDrug);
+        var s1Matched = matchStrength(lower, pair.strength1);
+        var s2Matched = matchStrength(lower, pair.strength2);
+
+        if (baseMatched && s1Matched && s2Matched) {
+          matchedMaster = pair;
+          lasaType = pair.lasaType;
+          
+          if (pair.baseDrug === 'phenytoin') {
+            pairKey = 'phenytoin_50_100';
+          } else {
+            var stA = parseFloat(pair.strength1) || 0;
+            var stB = parseFloat(pair.strength2) || 0;
+            pairKey = pair.baseDrug.replace(/\s+/g, '_') + '_' + Math.min(stA, stB) + '_' + Math.max(stA, stB);
+          }
+
+          if (entities && entities.expected && entities.actual) {
+            var expL = entities.expected.toLowerCase();
+            var actL = entities.actual.toLowerCase();
+            if (matchStrength(expL, pair.strength1) || expL.indexOf(pair.strength1) !== -1) {
+              prescribed = pair.tallman1;
+              dispensed = pair.tallman2;
+            } else if (matchStrength(expL, pair.strength2) || expL.indexOf(pair.strength2) !== -1) {
+              prescribed = pair.tallman2;
+              dispensed = pair.tallman1;
+            } else if (matchStrength(actL, pair.strength1) || actL.indexOf(pair.strength1) !== -1) {
+              dispensed = pair.tallman1;
+              prescribed = pair.tallman2;
+            } else if (matchStrength(actL, pair.strength2) || actL.indexOf(pair.strength2) !== -1) {
+              dispensed = pair.tallman2;
+              prescribed = pair.tallman1;
+            }
+          }
+
+          if (!prescribed) {
+            var s1Esc = pair.strength1.replace(/\./g, '\\.');
+            var s2Esc = pair.strength2.replace(/\./g, '\\.');
+            var s2ReplacesS1 = new RegExp(s2Esc + '.*(?:แทน|มาแทน).*' + s1Esc);
+            var s1OrderedS2Dispensed = new RegExp('(?:สั่ง|ควร|ต้อง|เป็น).*' + s1Esc + '.*(?:จัด|หยิบ|คีย์|เป็น).*' + s2Esc);
+            var s1ButS2 = new RegExp(s1Esc + '.*(?:แต่).*' + s2Esc);
+
+            if (s2ReplacesS1.test(lower) || s1OrderedS2Dispensed.test(lower) || s1ButS2.test(lower)) {
+              prescribed = pair.tallman1;
+              dispensed = pair.tallman2;
+            } else {
+              prescribed = pair.tallman2;
+              dispensed = pair.tallman1;
+            }
+          }
+          break;
+        }
+      } else {
+        var d1Match = checkDrugMention(lower, pair.drug1, pair.name1);
+        var d2Match = checkDrugMention(lower, pair.drug2, pair.name2);
+
+        // Special handling for Urea cream vs Urea + TA cream
+        if (pair.pairId === 'LASA-OPD-03') {
+          var hasUrea = checkDrugMention(lower, 'urea', 'Urea cream');
+          var hasTa = checkDrugMention(lower, 'ta cream', 'TA cream') || /0\.02%?\s*ta|ทีเอ/.test(lower) || lower.indexOf('urea ta') !== -1;
+          d1Match = hasUrea;
+          d2Match = hasTa;
+        }
+
+        if (d1Match && d2Match) {
+          matchedMaster = pair;
+          lasaType = pair.lasaType;
+          pairKey = [pair.drug1, pair.drug2].sort().join('_');
+          
+          if (entities && entities.expected && entities.actual) {
+            var expLower = entities.expected.toLowerCase();
+            var actLower = entities.actual.toLowerCase();
+            if (expLower.indexOf(pair.drug1) !== -1 || (pair.name1 && expLower.indexOf(pair.name1.toLowerCase()) !== -1) || checkDrugMention(expLower, pair.drug1, pair.name1)) {
+              prescribed = pair.tallman1;
+              dispensed = pair.tallman2;
+            } else if (expLower.indexOf(pair.drug2) !== -1 || (pair.name2 && expLower.indexOf(pair.name2.toLowerCase()) !== -1) || checkDrugMention(expLower, pair.drug2, pair.name2)) {
+              prescribed = pair.tallman2;
+              dispensed = pair.tallman1;
+            } else if (actLower.indexOf(pair.drug1) !== -1 || (pair.name1 && actLower.indexOf(pair.name1.toLowerCase()) !== -1)) {
+              dispensed = pair.tallman1;
+              prescribed = pair.tallman2;
+            } else if (actLower.indexOf(pair.drug2) !== -1 || (pair.name2 && actLower.indexOf(pair.name2.toLowerCase()) !== -1)) {
+              dispensed = pair.tallman2;
+              prescribed = pair.tallman1;
+            }
+          }
+          
+          if (!prescribed) {
+            var regexSubstitute = new RegExp(pair.drug2 + '.*(?:แทน|มาแทน).*' + pair.drug1, 'i');
+            var regexAs = new RegExp(pair.drug1 + '.*(?:แต่|เป็น).*' + pair.drug2, 'i');
+            if (regexSubstitute.test(lower) || regexAs.test(lower)) {
+              dispensed = pair.tallman2;
+              prescribed = pair.tallman1;
+            } else {
+              dispensed = pair.tallman1;
+              prescribed = pair.tallman2;
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    var isLasa = false;
+    if (matchedMaster) {
+      isLasa = true;
+    } else if (hasLasaKeyword || (isWrongDrugCode && ((entities && entities.drugs && entities.drugs.length >= 2) || (entities && entities.actual && entities.expected)))) {
+      isLasa = true;
+      if (/หน้าตาคล้าย|รูปคล้าย|แพ็คเกจ|แผงคล้าย|สีคล้าย|ขวดคล้าย|แอมพูล|หลอดคล้าย/.test(lower)) {
+        lasaType = 'Look-alike';
+      } else if (/เสียงคล้าย|ชื่อคล้าย|ออกเสียงคล้าย|อ่านคล้าย/.test(lower)) {
+        lasaType = 'Sound-alike';
+      } else {
+        lasaType = 'Both';
+      }
+
+      if (entities && entities.drugs && entities.drugs.length >= 2) {
+        pairKey = [entities.drugs[0].toLowerCase(), entities.drugs[1].toLowerCase()].sort().join('_');
+        if (entities.expected && entities.actual) {
+          prescribed = entities.expected;
+          dispensed = entities.actual;
+        } else {
+          prescribed = entities.drugs[0];
+          dispensed = entities.drugs[1];
+        }
+      } else if (entities && entities.actual && entities.expected) {
+        pairKey = [entities.actual.toLowerCase().trim(), entities.expected.toLowerCase().trim()].sort().join('_');
+        prescribed = entities.expected;
+        dispensed = entities.actual;
+      }
+    }
+
+    return {
+      isLasa: isLasa,
+      lasaType: lasaType,
+      lasaPrescribed: prescribed,
+      lasaDispensed: dispensed,
+      lasaPairKey: pairKey,
+      matchedMaster: matchedMaster
+    };
   }
 
   function extractEntities(text) {
@@ -1835,10 +2569,19 @@
     var drugsFound = [];
 
     DRUG_DICTIONARY.forEach(function (d) {
-      if (lower.indexOf(d.key) !== -1) {
-        if (drugsFound.indexOf(d.name) === -1) {
-          drugsFound.push(d.name);
+      var matched = lower.indexOf(d.key) !== -1;
+      if (!matched && d.patterns && d.patterns.length > 0) {
+        for (var pi = 0; pi < d.patterns.length; pi++) {
+          var p = d.patterns[pi];
+          var re = new RegExp(p.source, 'i');
+          if (re.test(lower)) {
+            matched = true;
+            break;
+          }
         }
+      }
+      if (matched && drugsFound.indexOf(d.name) === -1) {
+        drugsFound.push(d.name);
       }
     });
 
@@ -1905,6 +2648,8 @@
       parseResult = evaluateIpdRules(normalized, entities);
     }
 
+    var lasaInfo = detectLasaInfo(normalized, entities, parseResult, currentMode);
+
     return {
       parserVersion: PARSER_VERSION,
       mode: currentMode,
@@ -1923,11 +2668,18 @@
       needsConfirmation: parseResult.needsConfirmation || (parseResult.confidence !== 'High'),
       requiresClarification: parseResult.requiresClarification || false,
       clarification: parseResult.clarification || null,
+      isLasa: lasaInfo.isLasa,
+      lasaType: lasaInfo.lasaType,
+      lasaPrescribed: lasaInfo.lasaPrescribed,
+      lasaDispensed: lasaInfo.lasaDispensed,
+      lasaPairKey: lasaInfo.lasaPairKey,
+      lasaMatchedMaster: lasaInfo.matchedMaster,
+      tradeName: '',
       extractedEntities: {
         drugs: entities.drugs,
         measurements: entities.measurements,
-        actual: parseResult.actual || entities.actual || '',
-        expected: parseResult.expected || entities.expected || ''
+        actual: parseResult.actual || entities.actual || lasaInfo.lasaDispensed || '',
+        expected: parseResult.expected || entities.expected || lasaInfo.lasaPrescribed || ''
       },
       ruleId: parseResult.ruleId || ''
     };
@@ -1939,8 +2691,9 @@
 
   function evaluateOpdRules(text, entities) {
     // A. Actor detection
-    var isPrescriber = /หมอสั่ง|แพทย์สั่ง|หมอคีย์|หมอลืม|หมอกด/.test(text);
-    var isPharmacyEntry = /ห้องยาคีย์|คีย์ฉลาก|พิมพ์ฉลาก|ตรวจฉลาก|คีย์ยา|คีย์.*เม็ด|คีย์.*วัน/.test(text) && !isPrescriber;
+    var isPrescriberToPharmacyEntry = /(หมอสั่ง|แพทย์สั่ง|ใบสั่ง).*แต่.*(คีย์|พิมพ์|ห้องยา)/.test(text);
+    var isPrescriber = (/หมอสั่ง|แพทย์สั่ง|หมอคีย์|หมอลืม|หมอกด/.test(text)) && !isPrescriberToPharmacyEntry;
+    var isPharmacyEntry = ((/ห้องยาคีย์|คีย์ฉลาก|พิมพ์ฉลาก|ตรวจฉลาก|คีย์ยา|คีย์.*เม็ด|คีย์.*วัน|แต่คีย์/.test(text)) || isPrescriberToPharmacyEntry) && !isPrescriber;
     var isPicker = /คนจัด|จัดยา|หยิบ|คนหยิบ|ตะกร้า|จัด.*เม็ด|จัด.*ส่วน|จัด.*มา|จัด.*แทน|จัด.*ไม่ครบ/.test(text);
     var isTranscribingDoc = /สแกน|สติ๊กเกอร์|ใบนำทาง|ใบสั่งยา/.test(text) && (/สแกนไม่ชัด|ผิดคน|สติ๊กเกอร์.*ผิด/.test(text));
 
@@ -2147,14 +2900,14 @@
       }
 
       // Wrong drug name entry (B03)
-      if (/เป็น|แทน|ผิดตัว|ผิดชนิด/.test(text) && entities.drugs.length >= 2) {
+      if ((/เป็น|แทน|ผิดตัว|ผิดชนิด/.test(text) || isPrescriberToPharmacyEntry) && entities.drugs.length >= 2) {
         return {
           ruleId: 'OPD-B03',
           process: 'Pre-dispensing',
           processStage: 'PS02',
           errorType: 'ผิดชนิดยา',
           legacyCode: 'B03',
-          detectedStage: 'DS02',
+          detectedStage: detectedStage === 'DS01' ? 'DS02' : detectedStage,
           confidence: 'High',
           needsConfirmation: false
         };
@@ -2302,7 +3055,7 @@
     // A. Actor / Stage indicators
     var isPrescriber = /หมอสั่ง|แพทย์สั่ง|หมอคีย์/.test(text);
     var isOrderReception = /รับ order|รับคำสั่ง|drug profile|continue|one day|off/.test(text);
-    var isTranscription = /พยาบาลรับคำสั่ง|รคส|รับคำสั่งโทรศัพท์/.test(text);
+    var isTranscription = /พยาบาลรับคำสั่ง|รคส|รับคำสั่งโทรศัพท์|หมอโทรสั่ง|โทรสั่ง|สื่อสาร.*เป็น|สื่อสาร/.test(text);
     var isPicker = /คนจัด|จัดยา|หยิบ|ตะกร้า|ถุงยา|เตียงข้าง/.test(text);
     var isWardIntercept = /วอร์ดเปิดถุง|วอร์ดเจอ|พยาบาลเจอ|เปิดถุงยาแล้วเจอ/.test(text);
 
@@ -2310,7 +3063,7 @@
     var detectedStage = 'DS01';
     if (isWardIntercept) {
       detectedStage = 'DS06';
-    } else if (/ก่อนส่ง(ยา)?(ให้)?วอร์ด|ก่อนขึ้นวอร์ด/.test(text)) {
+    } else if (/ก่อนส่ง(ยา)?(ให้)?วอร์ด|ก่อนขึ้นวอร์ด|ทวนเจอก่อนส่งวอร์ด/.test(text)) {
       detectedStage = 'DS05';
     } else if (/final check|เช็คเจอก่อนส่งวอร์ด|final check เจอ/.test(text)) {
       detectedStage = 'DS04';
@@ -2471,6 +3224,34 @@
       }
     }
 
+    // 9. Pre-dispensing: Picking Wrong Drug in IPD (B26)
+    if ((isPicker || /แทน|ผิดตัว|ผิดชนิด|หยิบ.*แทน|จัด.*แทน/.test(text)) && (entities.drugs.length >= 2 || /หยิบ.*แทน|จัด.*แทน/.test(text))) {
+      return {
+        ruleId: 'IPD-B26',
+        process: 'Pre-dispensing',
+        processStage: 'PS04',
+        errorType: 'ผิดชนิดยา',
+        legacyCode: 'B26',
+        detectedStage: detectedStage === 'DS01' ? 'DS05' : detectedStage,
+        confidence: 'High',
+        needsConfirmation: false
+      };
+    }
+
+    // 10. Pre-dispensing: Picking Wrong Strength in IPD (B28)
+    if (/ผิดความแรง|100 mg.*50 mg|50 mg.*100 mg|มิล.*แทน|mg.*แทน/.test(text) && /แทน|จัด|หยิบ/.test(text)) {
+      return {
+        ruleId: 'IPD-B28',
+        process: 'Pre-dispensing',
+        processStage: 'PS04',
+        errorType: 'ผิดความแรง',
+        legacyCode: 'B28',
+        detectedStage: detectedStage === 'DS01' ? 'DS04' : detectedStage,
+        confidence: 'High',
+        needsConfirmation: false
+      };
+    }
+
     // Default Fallback
     return {
       ruleId: 'IPD-UNKNOWN',
@@ -2493,6 +3274,8 @@
     normalizeTranscript: normalizeTranscript,
     checkCatBSafetyGate: checkCatBSafetyGate,
     parseMedicationError: parseMedicationError,
+    detectLasaInfo: detectLasaInfo,
+    HOSPITAL_LASA_PAIRS: HOSPITAL_LASA_PAIRS,
     DETECTED_STAGES: DETECTED_STAGES
   };
 });
@@ -2630,7 +3413,10 @@ const CatchME = (function() {
     audioStream: null,
     audioChunks: [],
     recognition: null,
-    capturedTranscript: ''
+    capturedTranscript: '',
+    emergingFilterMode: 'CURRENT',
+    emergingPairsCache: [],
+    currentEmergingPair: null
   };
 
   /**
@@ -2648,6 +3434,7 @@ const CatchME = (function() {
       updateHeaderUI();
       renderRecentReports();
       renderPresets();
+      fetchEmergingLasaPairs(true);
       showScreen('screen-quick-report');
     }
 
@@ -2963,10 +3750,7 @@ const CatchME = (function() {
     const transcript = geminiData.transcript || fallbackText || '';
     const isCatB = geminiData.catBEligible !== false && geminiData.patientReached !== 'Yes';
     const stageCode = geminiData.detectedStage || 'DS02';
-    const stageMeta = DETECTED_STAGES_DICT[stageCode];
-    const stageName = stageMeta ? stageMeta.nameTh : 'ตรวจการคีย์/ฉลาก';
-
-    return {
+    const parsedObj = {
       rawTranscript: transcript,
       normalizedTranscript: transcript,
       catBEligible: isCatB,
@@ -2986,6 +3770,23 @@ const CatchME = (function() {
         expected: geminiData.expected && geminiData.expected !== '-' ? geminiData.expected : ''
       }
     };
+
+    if (typeof detectLasaInfo === 'function') {
+      const lasa = detectLasaInfo(transcript, parsedObj.extractedEntities, parsedObj);
+      parsedObj.isLasa = lasa.isLasa;
+      parsedObj.lasaType = lasa.lasaType;
+      parsedObj.lasaPrescribed = lasa.lasaPrescribed;
+      parsedObj.lasaDispensed = lasa.lasaDispensed;
+      parsedObj.lasaPairKey = lasa.lasaPairKey;
+      parsedObj.lasaMatchedMaster = lasa.matchedMaster;
+      parsedObj.tradeName = '';
+      if (lasa.isLasa && (!parsedObj.extractedEntities.actual || !parsedObj.extractedEntities.expected)) {
+        if (lasa.lasaDispensed) parsedObj.extractedEntities.actual = lasa.lasaDispensed;
+        if (lasa.lasaPrescribed) parsedObj.extractedEntities.expected = lasa.lasaPrescribed;
+      }
+    }
+
+    return parsedObj;
   }
 
   /**
@@ -3282,12 +4083,137 @@ const CatchME = (function() {
     // Raw transcript
     document.getElementById('confirm-raw-transcript').innerText = '"' + (parsed.rawTranscript || '') + '"';
 
+    // Render Smart LASA Card
+    renderLasaCard(parsed);
+
     // Reset save button state
     const saveBtn = document.getElementById('btn-save-report');
     if (saveBtn) {
       saveBtn.disabled = false;
       saveBtn.innerHTML = '<span>บันทึก (Save)</span><span>✓</span>';
     }
+  }
+
+  /**
+   * Renders the Smart LASA Card on confirmation screen.
+   */
+  function renderLasaCard(parsed) {
+    const cardEl = document.getElementById('confirm-lasa-card');
+    const toggleEl = document.getElementById('confirm-lasa-toggle');
+    const masterPillEl = document.getElementById('confirm-lasa-master-pill');
+    const pairDisplayEl = document.getElementById('confirm-lasa-pair-display');
+    const tradeInput = document.getElementById('confirm-trade-name');
+
+    if (!cardEl) return;
+
+    const isLasaCandidate = parsed.isLasa || (parsed.extractedEntities && parsed.extractedEntities.drugs && parsed.extractedEntities.drugs.length >= 2) || (parsed.legacyCode === 'B26' || parsed.legacyCode === 'B03' || parsed.legacyCode === 'A03' || parsed.legacyCode === 'E08' || parsed.legacyCode === 'B28');
+
+    if (isLasaCandidate) {
+      cardEl.classList.remove('hidden');
+    } else {
+      cardEl.classList.add('hidden');
+    }
+
+    const isLasa = !!parsed.isLasa;
+    if (toggleEl) toggleEl.checked = isLasa;
+    state.currentLasaActive = isLasa;
+    state.currentLasaType = parsed.lasaType || (isLasa ? 'Sound-alike' : '');
+    state.currentTradeName = parsed.tradeName || '';
+
+    if (tradeInput) {
+      tradeInput.value = state.currentTradeName;
+    }
+
+    // Master Match Badge
+    if (parsed.lasaMatchedMaster) {
+      masterPillEl.classList.remove('hidden');
+      pairDisplayEl.innerText = parsed.lasaMatchedMaster.tallman1 + ' ⇄ ' + parsed.lasaMatchedMaster.tallman2 + ' (' + (parsed.lasaMatchedMaster.riskLevel || 'Standard') + ')';
+    } else if (parsed.lasaPrescribed && parsed.lasaDispensed) {
+      masterPillEl.classList.remove('hidden');
+      pairDisplayEl.innerText = parsed.lasaPrescribed + ' ⇄ ' + parsed.lasaDispensed;
+    } else {
+      masterPillEl.classList.add('hidden');
+    }
+
+    // Emerging LASA Risk Banner Check
+    const emergingBanner = document.getElementById('confirm-emerging-lasa-banner');
+    const emergingCountBadge = document.getElementById('confirm-emerging-count-badge');
+    const emergingDesc = document.getElementById('confirm-emerging-desc');
+    state.currentEmergingPair = null;
+
+    if (!parsed.lasaMatchedMaster && (parsed.lasaPairKey || (parsed.extractedEntities && parsed.extractedEntities.actual && parsed.extractedEntities.expected))) {
+      var checkKey = parsed.lasaPairKey;
+      if (!checkKey && parsed.extractedEntities && parsed.extractedEntities.actual && parsed.extractedEntities.expected) {
+        checkKey = [parsed.extractedEntities.actual.toLowerCase().trim(), parsed.extractedEntities.expected.toLowerCase().trim()].sort().join('_');
+      }
+      var foundEmerging = (state.emergingPairsCache || []).find(function (e) {
+        return e.pairKey === checkKey;
+      });
+      if (foundEmerging && emergingBanner) {
+        emergingBanner.classList.remove('hidden');
+        if (emergingCountBadge) emergingCountBadge.innerText = 'เกิดซ้ำ ' + foundEmerging.count + ' ครั้ง';
+        if (emergingDesc) emergingDesc.innerText = 'คู่ยานี้ (' + foundEmerging.drug1 + ' ⇄ ' + foundEmerging.drug2 + ') มีสถิติเกิดข้อผิดพลาดซ้ำ แต่ยังไม่ได้ขึ้นทะเบียนใน Master ของ รพ.';
+        state.currentEmergingPair = foundEmerging;
+      } else if (emergingBanner) {
+        emergingBanner.classList.add('hidden');
+      }
+    } else if (emergingBanner) {
+      emergingBanner.classList.add('hidden');
+    }
+
+    updateLasaPillUI();
+  }
+
+  function toggleLasaActive(isActive) {
+    state.currentLasaActive = isActive;
+    if (state.currentParsed) {
+      state.currentParsed.isLasa = isActive;
+      if (isActive && !state.currentLasaType) {
+        state.currentLasaType = 'Sound-alike';
+        state.currentParsed.lasaType = 'Sound-alike';
+      }
+    }
+    updateLasaPillUI();
+  }
+
+  function selectLasaType(type) {
+    state.currentLasaType = type;
+    if (state.currentParsed) {
+      state.currentParsed.isLasa = true;
+      state.currentParsed.lasaType = type;
+    }
+    state.currentLasaActive = true;
+    const toggleEl = document.getElementById('confirm-lasa-toggle');
+    if (toggleEl) toggleEl.checked = true;
+    updateLasaPillUI();
+  }
+
+  function updateLasaPillUI() {
+    const btnSound = document.getElementById('btn-lasa-sound');
+    const btnLook = document.getElementById('btn-lasa-look');
+    const btnBoth = document.getElementById('btn-lasa-both');
+    const bodyEl = document.getElementById('confirm-lasa-body');
+
+    if (bodyEl) {
+      bodyEl.style.opacity = state.currentLasaActive ? '1' : '0.4';
+      bodyEl.style.pointerEvents = state.currentLasaActive ? 'auto' : 'none';
+    }
+
+    if (btnSound) btnSound.classList.toggle('active', state.currentLasaActive && state.currentLasaType === 'Sound-alike');
+    if (btnLook) btnLook.classList.toggle('active', state.currentLasaActive && state.currentLasaType === 'Look-alike');
+    if (btnBoth) btnBoth.classList.toggle('active', state.currentLasaActive && state.currentLasaType === 'Both');
+  }
+
+  function updateTradeName(val) {
+    state.currentTradeName = val;
+    if (state.currentParsed) {
+      state.currentParsed.tradeName = val;
+    }
+  }
+
+  function onEditLasaToggle(checked) {
+    const editLasaFields = document.getElementById('edit-lasa-fields');
+    if (editLasaFields) editLasaFields.classList.toggle('hidden', !checked);
   }
 
   /**
@@ -3406,6 +4332,17 @@ const CatchME = (function() {
     document.getElementById('edit-actual').value = state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.actual : '';
     document.getElementById('edit-expected').value = state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.expected : '';
 
+    const isLasaEdit = document.getElementById('edit-is-lasa');
+    const lasaTypeEdit = document.getElementById('edit-lasa-type');
+    const tradeNameEdit = document.getElementById('edit-trade-name');
+    const editLasaFields = document.getElementById('edit-lasa-fields');
+
+    const isLasaVal = !!(state.currentParsed.isLasa || state.currentLasaActive);
+    if (isLasaEdit) isLasaEdit.checked = isLasaVal;
+    if (editLasaFields) editLasaFields.classList.toggle('hidden', !isLasaVal);
+    if (lasaTypeEdit) lasaTypeEdit.value = state.currentParsed.lasaType || state.currentLasaType || 'Sound-alike';
+    if (tradeNameEdit) tradeNameEdit.value = state.currentParsed.tradeName || state.currentTradeName || '';
+
     openModal('modal-minimal-edit');
   }
 
@@ -3419,11 +4356,22 @@ const CatchME = (function() {
     const newActual = document.getElementById('edit-actual').value.trim();
     const newExpected = document.getElementById('edit-expected').value.trim();
 
+    const isLasaChecked = document.getElementById('edit-is-lasa') ? document.getElementById('edit-is-lasa').checked : false;
+    const editLasaType = document.getElementById('edit-lasa-type') ? document.getElementById('edit-lasa-type').value : '';
+    const editTrade = document.getElementById('edit-trade-name') ? document.getElementById('edit-trade-name').value.trim() : '';
+
     if (newCode) state.currentParsed.legacyCode = newCode;
     if (!state.currentParsed.extractedEntities) state.currentParsed.extractedEntities = {};
     if (newDrug) state.currentParsed.extractedEntities.drugs = [newDrug];
     state.currentParsed.extractedEntities.actual = newActual;
     state.currentParsed.extractedEntities.expected = newExpected;
+
+    state.currentParsed.isLasa = isLasaChecked;
+    state.currentParsed.lasaType = isLasaChecked ? editLasaType : '';
+    state.currentParsed.tradeName = editTrade;
+    state.currentLasaActive = isLasaChecked;
+    state.currentLasaType = state.currentParsed.lasaType;
+    state.currentTradeName = editTrade;
 
     closeModal('modal-minimal-edit');
     renderConfirmationScreen(state.currentParsed);
@@ -3461,7 +4409,13 @@ const CatchME = (function() {
       actual: state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.actual : '',
       expected: state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.expected : '',
       catBEligible: true,
-      patientReached: 'No'
+      patientReached: 'No',
+      isLasa: (state.currentLasaActive || state.currentParsed.isLasa) ? 'Yes' : 'No',
+      lasaType: (state.currentLasaActive || state.currentParsed.isLasa) ? (state.currentLasaType || state.currentParsed.lasaType || '') : '',
+      lasaPrescribed: state.currentParsed.lasaPrescribed || (state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.expected : ''),
+      lasaDispensed: state.currentParsed.lasaDispensed || (state.currentParsed.extractedEntities ? state.currentParsed.extractedEntities.actual : ''),
+      lasaPairKey: state.currentParsed.lasaPairKey || '',
+      tradeName: state.currentTradeName || state.currentParsed.tradeName || ''
     };
 
     const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxcYrhDehjEu0lngU7o64v4ldrhYuXmfnJJnRyTt0x7d7GhK2SEb9G8z1SAWcKLVsGfCA/exec';
@@ -3861,6 +4815,17 @@ const CatchME = (function() {
     if (expectedInput) expectedInput.value = found.defaultExpected || '';
     if (stageSelect) stageSelect.value = found.defaultStage || (found.process === 'Prescribing' ? 'DS01' : 'DS04');
 
+    // Show/hide LASA quick chips container based on code
+    const lasaChips = document.getElementById('preset-lasa-chips-container');
+    if (lasaChips) {
+      const isLasaPreset = found.code === 'B26' || found.code === 'B03' || found.code === 'A03' || found.code === 'B28';
+      lasaChips.style.display = isLasaPreset ? 'block' : 'none';
+      if (isLasaPreset) {
+        renderPresetLasaChips(state.mode);
+      }
+    }
+    state.presetSelectedLasa = null;
+
     openModal('modal-quick-preset-form');
   }
 
@@ -3877,6 +4842,248 @@ const CatchME = (function() {
   function setPresetExpected(val) {
     const input = document.getElementById('preset-expected-input');
     if (input) input.value = val;
+  }
+
+  const OPD_LASA_PRESET_PAIRS = [
+    { name1: 'Propranolol 10 mg', name2: 'Propranolol 40 mg', label: 'Propranolol 10 ⇄ 40mg', type: 'Look-alike' },
+    { name1: 'Amlodipine 5 mg', name2: 'Manidipine 20 mg', label: 'Amlodipine ⇄ Manidipine', type: 'Sound-alike' },
+    { name1: 'Urea cream', name2: 'Urea + 0.02% TA cream', label: 'Urea ⇄ Urea + TA', type: 'Look-alike' },
+    { name1: 'Risperidone 1 mg', name2: 'Risperidone 2 mg', label: 'Risperidone 1 ⇄ 2mg', type: 'Look-alike' },
+    { name1: 'Seretide 25/250', name2: 'Seretide 25/50', label: 'Seretide 25/250 ⇄ 25/50', type: 'Look-alike' },
+    { name1: '0.02% TA cream', name2: '0.1% TA cream', label: '0.02% TA ⇄ 0.1% TA', type: 'Look-alike' },
+    { name1: 'Diazepam 5 mg', name2: 'Diazepam 2 mg', label: 'Diazepam 5 ⇄ 2mg', type: 'Look-alike' },
+    { name1: 'Ferrous Sulfate 200 mg', name2: 'Furosemide 40 mg', label: 'Ferrous ⇄ Furosemide', type: 'Sound-alike' },
+    { name1: 'Ibuprofen 200 mg', name2: 'Ibuprofen 400 mg', label: 'Ibuprofen 200 ⇄ 400mg', type: 'Look-alike' },
+    { name1: 'Simvastatin 10 mg', name2: 'Simvastatin 20 mg', label: 'Simvastatin 10 ⇄ 20mg', type: 'Look-alike' }
+  ];
+
+  const IPD_LASA_PRESET_PAIRS = [
+    { name1: 'Ceftriaxone', name2: 'Ceftazidime', label: 'Ceftriaxone ⇄ Ceftazidime', type: 'Both' },
+    { name1: 'Norepinephrine', name2: 'Amiodarone', label: 'Norepinephrine ⇄ Amiodarone', type: 'Look-alike' },
+    { name1: 'Aminophylline', name2: 'Amiodarone', label: 'Aminophylline ⇄ Amiodarone', type: 'Sound-alike' },
+    { name1: 'Phenytoin 100 mg', name2: 'Phenytoin 50 mg', label: 'Phenytoin 100 ⇄ 50mg', type: 'Look-alike' },
+    { name1: 'Azathioprine', name2: 'Azithromycin', label: 'Azithromycin ⇄ Azathioprine', type: 'Sound-alike' }
+  ];
+
+  function renderPresetLasaChips(mode) {
+    const listEl = document.getElementById('preset-lasa-chips-list');
+    const badgeEl = document.getElementById('preset-lasa-mode-badge');
+    if (!listEl) return;
+
+    const isIpd = (mode && String(mode).toUpperCase() === 'IPD');
+    const pairs = isIpd ? IPD_LASA_PRESET_PAIRS : OPD_LASA_PRESET_PAIRS;
+
+    if (badgeEl) {
+      badgeEl.innerText = isIpd ? 'IPD (5 คู่ยา)' : 'OPD (10 คู่ยา)';
+    }
+
+    let html = '';
+    pairs.forEach(function(p) {
+      html += `<span class="chip-pill" onclick="CatchME.setPresetLasaPair('${p.name2.replace(/'/g, "\\'")}', '${p.name1.replace(/'/g, "\\'")}', '${p.type}')">${p.label}</span>`;
+    });
+    listEl.innerHTML = html;
+  }
+
+  function setPresetLasaPair(actualDrug, expectedDrug, type) {
+    const drugInput = document.getElementById('preset-drug-input');
+    const actualInput = document.getElementById('preset-actual-input');
+    const expectedInput = document.getElementById('preset-expected-input');
+    if (drugInput) drugInput.value = actualDrug + ', ' + expectedDrug;
+    if (actualInput) actualInput.value = actualDrug;
+    if (expectedInput) expectedInput.value = expectedDrug;
+    state.presetSelectedLasa = {
+      isLasa: true,
+      lasaType: type,
+      prescribed: expectedDrug,
+      dispensed: actualDrug,
+      pairKey: [actualDrug.toLowerCase(), expectedDrug.toLowerCase()].sort().join('_')
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Emerging LASA Surveillance Operations
+  // ---------------------------------------------------------------------------
+
+  function openEmergingLasaModal() {
+    state.emergingFilterMode = 'CURRENT';
+    openModal('modal-emerging-lasa');
+    fetchEmergingLasaPairs(false);
+  }
+
+  function setEmergingFilter(filter) {
+    state.emergingFilterMode = filter;
+    const btnCur = document.getElementById('btn-emerging-filter-current');
+    const btnAll = document.getElementById('btn-emerging-filter-all');
+    if (btnCur) btnCur.classList.toggle('active', filter === 'CURRENT');
+    if (btnAll) btnAll.classList.toggle('active', filter === 'ALL');
+    fetchEmergingLasaPairs(false);
+  }
+
+  function fetchEmergingLasaPairs(isBackground) {
+    const listEl = document.getElementById('emerging-lasa-list');
+    const modeLabel = document.getElementById('emerging-current-mode-label');
+    if (modeLabel) modeLabel.innerText = state.mode || 'OPD';
+
+    if (!isBackground && listEl) {
+      listEl.innerHTML = '<div style="text-align: center; color: var(--color-text-muted); padding: 24px 0; font-size: 13px;">⚡ กำลังสแกนฐานข้อมูลเพื่อค้นหาคู่ยาเสี่ยงซ้ำ...</div>';
+    }
+
+    const queryMode = state.emergingFilterMode === 'CURRENT' ? (state.mode || 'OPD') : null;
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function (items) {
+          state.emergingPairsCache = items || [];
+          if (!isBackground) {
+            renderEmergingLasaList(state.emergingPairsCache);
+          }
+        })
+        .withFailureHandler(function (err) {
+          if (!isBackground && listEl) {
+            listEl.innerHTML = '<div style="color: var(--color-alert-text); padding: 12px; text-align: center; font-size: 12px;">เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + (err.message || err) + '</div>';
+          }
+        })
+        .getEmergingLasaPairs(queryMode, 2);
+    } else {
+      // Mock for offline / preview environment
+      setTimeout(function () {
+        if (!state.emergingPairsCache || state.emergingPairsCache.length === 0) {
+          state.emergingPairsCache = [
+            {
+              pairKey: 'paracetamol_tramadol',
+              drug1: 'Tramadol 50 mg',
+              drug2: 'Paracetamol 500 mg',
+              count: 3,
+              mode: state.mode || 'OPD',
+              lasaType: 'Look-alike',
+              riskLevel: 'Standard',
+              lastSeen: new Date().toISOString(),
+              samples: ['คนจัดหยิบ tramadol แทน paracetamol', 'หยิบ tramadol มาแทน para 500']
+            }
+          ];
+        }
+        if (!isBackground) {
+          renderEmergingLasaList(state.emergingPairsCache);
+        }
+      }, 200);
+    }
+  }
+
+  function renderEmergingLasaList(items) {
+    const listEl = document.getElementById('emerging-lasa-list');
+    if (!listEl) return;
+
+    if (!items || items.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align: center; padding: 28px 12px; background: #F8FAFC; border-radius: 12px; border: 1px dashed #CBD5E1;">
+          <div style="font-size: 28px; margin-bottom: 6px;">🎉</div>
+          <strong style="font-size: 13px; color: var(--color-text-primary);">ไม่พบคู่ยาเสี่ยงใหม่ที่เกิดซ้ำเกินเกณฑ์</strong>
+          <p style="font-size: 11px; color: var(--color-text-secondary); margin-top: 4px;">
+            คู่ยาที่มีการสับสนบ่อยทั้งหมดได้รับการบรรจุในบัญชี LASA Master หรือยังไม่พบอุบัติการณ์ซ้ำ &ge; 2 ครั้ง
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = '';
+    items.forEach(function (it, idx) {
+      const sampleText = (it.samples && it.samples.length > 0) ? `"${it.samples[0]}"` : '-';
+      html += `
+        <div class="emerging-item-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <span style="font-size: 10px; font-weight: 700; color: #1E4F8A; text-transform: uppercase;">${it.mode || 'OPD'} • ${it.lasaType || 'Look-alike'}</span>
+              <div style="font-size: 14px; font-weight: 700; color: #9B1138; margin-top: 2px;">
+                ${it.drug1} ⇄ ${it.drug2}
+              </div>
+            </div>
+            <span class="badge-emerging-count">${it.count} เหตุการณ์</span>
+          </div>
+          <div style="font-size: 11px; color: var(--color-text-secondary); background: #FFF5F7; padding: 6px 8px; border-radius: 6px; font-style: italic;">
+            ล่าสุด: ${sampleText}
+          </div>
+          <button type="button" class="btn-emerging-promote" onclick="CatchME.promoteEmergingItem(${idx})">
+            <span>+ บรรจุเป็นคู่ยา LASA Master ของ รพ.</span>
+          </button>
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+  }
+
+  function promoteEmergingItem(index) {
+    const item = state.emergingPairsCache[index];
+    if (!item) return;
+
+    if (!confirm('ยืนยันบรรจุคู่ยา ' + item.drug1 + ' ⇄ ' + item.drug2 + ' เข้าสู่บัญชีคู่ยา LASA Master ของโรงพยาบาล?')) {
+      return;
+    }
+
+    const payload = {
+      drug1: item.drug1,
+      drug2: item.drug2,
+      lasaType: item.lasaType || 'Look-alike',
+      scope: item.mode || state.mode || 'OPD',
+      riskLevel: item.riskLevel || 'Standard',
+      tallman1: item.drug1,
+      tallman2: item.drug2,
+      notes: 'บรรจุจากระบบตรวจจับคู่ยาเสี่ยงใหม่อัตโนมัติ (เกิดซ้ำ ' + item.count + ' ครั้ง)'
+    };
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function (res) {
+          if (res.success) {
+            alert('✓ ' + res.message);
+            fetchEmergingLasaPairs(false);
+          } else {
+            alert('เกิดข้อผิดพลาด: ' + (res.error || 'ไม่สามารถบรรจุได้'));
+          }
+        })
+        .withFailureHandler(function (err) {
+          alert('เกิดข้อผิดพลาด: ' + (err.message || err));
+        })
+        .promoteEmergingToLasaMaster(payload);
+    } else {
+      alert('✓ บรรจุคู่ยา ' + item.drug1 + ' ⇄ ' + item.drug2 + ' สู่ LASA Master สำเร็จ (Mock)');
+      state.emergingPairsCache.splice(index, 1);
+      renderEmergingLasaList(state.emergingPairsCache);
+    }
+  }
+
+  function promoteCurrentEmergingPair() {
+    if (!state.currentEmergingPair) return;
+    const item = state.currentEmergingPair;
+    const payload = {
+      drug1: item.drug1,
+      drug2: item.drug2,
+      lasaType: state.currentLasaType || item.lasaType || 'Look-alike',
+      scope: state.mode || 'OPD',
+      riskLevel: item.riskLevel || 'Standard',
+      tallman1: item.drug1,
+      tallman2: item.drug2,
+      notes: 'บรรจุจากหน้ายืนยันเหตุการณ์ (ตรวจพบคู่ยาเสี่ยงใหม่)'
+    };
+
+    if (window.google && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function (res) {
+          if (res.success) {
+            alert('✓ ' + res.message);
+            const banner = document.getElementById('confirm-emerging-lasa-banner');
+            if (banner) banner.classList.add('hidden');
+          } else {
+            alert('เกิดข้อผิดพลาด: ' + (res.error || 'ไม่สามารถบรรจุได้'));
+          }
+        })
+        .promoteEmergingToLasaMaster(payload);
+    } else {
+      alert('✓ บรรจุคู่ยา ' + item.drug1 + ' ⇄ ' + item.drug2 + ' สู่ LASA Master สำเร็จ (Mock)');
+      const banner = document.getElementById('confirm-emerging-lasa-banner');
+      if (banner) banner.classList.add('hidden');
+    }
   }
 
   /**
@@ -3921,6 +5128,18 @@ const CatchME = (function() {
         expected: expected
       }
     };
+
+    if (state.presetSelectedLasa) {
+      parsed.isLasa = true;
+      parsed.lasaType = state.presetSelectedLasa.lasaType;
+      parsed.lasaPrescribed = state.presetSelectedLasa.prescribed;
+      parsed.lasaDispensed = state.presetSelectedLasa.dispensed;
+      parsed.lasaPairKey = state.presetSelectedLasa.pairKey;
+      state.presetSelectedLasa = null;
+    } else if (preset.code === 'B26') {
+      parsed.isLasa = true;
+      parsed.lasaType = 'Look-alike';
+    }
 
     closeModal('modal-quick-preset-form');
     handleParsedResult(parsed);
@@ -4257,7 +5476,17 @@ const CatchME = (function() {
     onNewPresetCodeChange: onNewPresetCodeChange,
     saveNewCustomPreset: saveNewCustomPreset,
     deleteCustomPreset: deleteCustomPreset,
-    resetPresetsToDefault: resetPresetsToDefault
+    resetPresetsToDefault: resetPresetsToDefault,
+    toggleLasaActive: toggleLasaActive,
+    selectLasaType: selectLasaType,
+    updateTradeName: updateTradeName,
+    onEditLasaToggle: onEditLasaToggle,
+    setPresetLasaPair: setPresetLasaPair,
+    renderPresetLasaChips: renderPresetLasaChips,
+    openEmergingLasaModal: openEmergingLasaModal,
+    setEmergingFilter: setEmergingFilter,
+    promoteEmergingItem: promoteEmergingItem,
+    promoteCurrentEmergingPair: promoteCurrentEmergingPair
   };
 })();
 

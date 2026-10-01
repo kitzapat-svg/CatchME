@@ -448,7 +448,132 @@ const HARD_STOP_CASES = [
 ];
 
 // -----------------------------------------------------------------------------
-// 3. Test Execution & Reporting
+// 3. Hospital LASA Master Test Cases (OPD 10 pairs & IPD 5 pairs)
+// -----------------------------------------------------------------------------
+
+const LASA_TEST_CASES = [
+  // --- OPD 10 Pairs ---
+  {
+    id: 'LASA-OPD-01',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ propranolol 40 mg แทน 10 mg เภสัชตรวจเจอก่อนจ่าย',
+    expectedLasa: true,
+    expectedPairKey: 'propranolol_10_40',
+    expectedType: 'Look-alike'
+  },
+  {
+    id: 'LASA-OPD-02',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ manidipine 20 mg แทน amlodipine 5 mg เภสัชเช็คเจอก่อนจ่าย',
+    expectedLasa: true,
+    expectedPairKey: 'amlodipine_manidipine',
+    expectedType: 'Sound-alike'
+  },
+  {
+    id: 'LASA-OPD-03',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ urea ผสม 0.02% TA cream แทน urea cream ธรรมดา เภสัชทวนเจอ',
+    expectedLasa: true,
+    expectedPairKey: 'urea + 0.02% ta cream_urea cream',
+    expectedType: 'Look-alike'
+  },
+  {
+    id: 'LASA-OPD-04',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ risperidone 2 mg แทน 1 mg เภสัชตรวจเจอก่อนจ่าย',
+    expectedLasa: true,
+    expectedPairKey: 'risperidone_1_2',
+    expectedType: 'Look-alike'
+  },
+  {
+    id: 'LASA-OPD-05',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ seretide 25/50 แทน seretide 25/250 เภสัชทวนเจอ',
+    expectedLasa: true,
+    expectedPairKey: 'seretide_50_250',
+    expectedType: 'Look-alike'
+  },
+  {
+    id: 'LASA-OPD-06',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ 0.1% TA cream แทน 0.02% TA cream เภสัชตรวจเจอก่อนจ่าย',
+    expectedLasa: true,
+    expectedPairKey: 'ta_cream_0.02_0.1',
+    expectedType: 'Look-alike'
+  },
+  {
+    id: 'LASA-OPD-07',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ diazepam 2 mg แทน diazepam 5 mg เภสัชเช็คเจอก่อนจ่าย',
+    expectedLasa: true,
+    expectedPairKey: 'diazepam_2_5',
+    expectedType: 'Look-alike'
+  },
+  {
+    id: 'LASA-OPD-08',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ furosemide 40 mg มาแทน ferrous sulfate เภสัชเช็คเจอก่อนจ่าย',
+    expectedLasa: true,
+    expectedPairKey: 'ferrous sulfate_furosemide',
+    expectedType: 'Sound-alike'
+  },
+  {
+    id: 'LASA-OPD-09',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ ibuprofen 400 mg แทน 200 mg เภสัชตรวจเจอก่อนจ่าย',
+    expectedLasa: true,
+    expectedPairKey: 'ibuprofen_200_400',
+    expectedType: 'Look-alike'
+  },
+  {
+    id: 'LASA-OPD-10',
+    setting: 'OPD',
+    phrase: 'คนจัดหยิบ simvastatin 20 mg แทน 10 mg เภสัชตรวจเจอก่อนจ่าย',
+    expectedLasa: true,
+    expectedPairKey: 'simvastatin_10_20',
+    expectedType: 'Look-alike'
+  },
+
+  // --- IPD 5 Pairs ---
+  {
+    id: 'LASA-IPD-01',
+    setting: 'IPD',
+    phrase: 'ไอพีดี คนจัดหยิบ ceftazidime แทน ceftriaxone เภสัชเช็คเจอก่อนส่งวอร์ด',
+    expectedLasa: true,
+    expectedPairKey: 'ceftazidime_ceftriaxone'
+  },
+  {
+    id: 'LASA-IPD-02',
+    setting: 'IPD',
+    phrase: 'ไอพีดี คนจัดหยิบ amiodarone แทน norepinephrine เภสัชเช็คเจอก่อนส่งวอร์ด',
+    expectedLasa: true,
+    expectedPairKey: 'amiodarone_norepinephrine'
+  },
+  {
+    id: 'LASA-IPD-03',
+    setting: 'IPD',
+    phrase: 'ไอพีดี คนจัดหยิบ amiodarone แทน aminophylline เภสัชเช็คเจอก่อนส่งวอร์ด',
+    expectedLasa: true,
+    expectedPairKey: 'aminophylline_amiodarone'
+  },
+  {
+    id: 'LASA-IPD-04',
+    setting: 'IPD',
+    phrase: 'ไอพีดี คนจัดหยิบ phenytoin 50 mg แทน 100 mg เภสัชเช็คเจอก่อนส่งวอร์ด',
+    expectedLasa: true,
+    expectedPairKey: 'phenytoin_50_100'
+  },
+  {
+    id: 'LASA-IPD-05',
+    setting: 'IPD',
+    phrase: 'ไอพีดี คนจัดหยิบ azithromycin แทน azathioprine เภสัชเช็คเจอก่อนส่งวอร์ด',
+    expectedLasa: true,
+    expectedPairKey: 'azathioprine_azithromycin'
+  }
+];
+
+// -----------------------------------------------------------------------------
+// 4. Test Execution & Reporting
 // -----------------------------------------------------------------------------
 
 let totalPassed = 0;
@@ -504,8 +629,28 @@ HARD_STOP_CASES.forEach((tc) => {
   }
 });
 
+console.log('\n--- RUNNING HOSPITAL LASA MASTER TEST CASES ---\n');
+
+LASA_TEST_CASES.forEach((tc) => {
+  const result = parseMedicationError(tc.phrase, tc.setting);
+  const passLasa = result.isLasa === tc.expectedLasa;
+  const passKey = !tc.expectedPairKey || result.lasaPairKey === tc.expectedPairKey;
+  const passType = !tc.expectedType || result.lasaType === tc.expectedType;
+
+  if (passLasa && passKey && passType) {
+    totalPassed++;
+    console.log(`\x1b[32m[PASS]\x1b[0m ${tc.id} (${tc.setting}) -> LASA: ${result.isLasa} | Key: ${result.lasaPairKey} | Type: ${result.lasaType}`);
+  } else {
+    totalFailed++;
+    console.log(`\x1b[31m[FAIL]\x1b[0m ${tc.id} (${tc.setting}) "${tc.phrase}"`);
+    if (!passLasa) console.log(`   - isLasa:      expected ${tc.expectedLasa}, got ${result.isLasa}`);
+    if (!passKey) console.log(`   - Pair Key:    expected "${tc.expectedPairKey}", got "${result.lasaPairKey}"`);
+    if (!passType) console.log(`   - Type:        expected "${tc.expectedType}", got "${result.lasaType}"`);
+  }
+});
+
 // -----------------------------------------------------------------------------
-// 4. Summary
+// 5. Summary
 // -----------------------------------------------------------------------------
 
 const totalTests = totalPassed + totalFailed;
