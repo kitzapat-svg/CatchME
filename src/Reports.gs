@@ -123,6 +123,13 @@ function saveQuickReport(reportData) {
       auditSheet.appendRow(auditRow);
     }
 
+    // Real-time Telegram Safety Alert (Non-blocking)
+    try {
+      sendTelegramAlert(reportData, recordId, nowIso, mode, reporterAlias);
+    } catch (alertErr) {
+      console.warn('Telegram alert invocation failed:', alertErr);
+    }
+
     return {
       success: true,
       recordId: recordId,
@@ -948,5 +955,494 @@ function saveMedicationReview(reviewData) {
     lock.releaseLock();
   }
 }
+
+// ============================================================================
+// PHASE 3: REAL-TIME SAFETY ALERTING (TELEGRAM BOT API) & ANALYTICS
+// ============================================================================
+
+/**
+ * Escapes characters for Telegram HTML parse mode.
+ */
+function escapeTelegramHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/**
+ * Gets a specific setting value from App_Settings.
+ */
+function getAppSettingValue(key, defaultValue) {
+  try {
+    var ss = getDatabaseSpreadsheet();
+    var sheet = ss.getSheetByName(DB_CONFIG.SHEETS.APP_SETTINGS);
+    if (!sheet || sheet.getLastRow() <= 1) return defaultValue;
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === key) {
+        var val = data[i][1];
+        return (val != null && String(val).trim() !== '') ? String(val).trim() : defaultValue;
+      }
+    }
+  } catch (e) {
+    console.warn('getAppSettingValue error:', e);
+  }
+  return defaultValue;
+}
+
+/**
+ * Verifies the 4-digit admin PIN.
+ */
+function verifyAdminPin(inputPin) {
+  var actualPin = getAppSettingValue('admin_pin', '8888');
+  if (String(inputPin).trim() === actualPin) {
+    return { success: true };
+  }
+  return { success: false, error: 'รหัส PIN ไม่ถูกต้อง' };
+}
+
+/**
+ * Sends a real-time safety alert to Telegram when criteria is met.
+ * Non-blocking, fails gracefully.
+ */
+function sendTelegramAlert(reportData, recordId, timestamp, mode, reporterAlias) {
+  try {
+    var isEnabled = getAppSettingValue('alert_enabled', 'false') === 'true';
+    if (!isEnabled) return;
+
+    var hadOnly = getAppSettingValue('alert_had_only', 'true') === 'true';
+    var isHad = reportData.isHad === true || reportData.isHad === 'Yes';
+
+    // If alert_had_only is true, skip alert for non-HAD records
+    if (hadOnly && !isHad) return;
+
+    var botToken = getAppSettingValue('telegram_bot_token', '');
+    var chatId = getAppSettingValue('telegram_chat_id', '');
+    if (!botToken || !chatId) return;
+
+    var deptName = (mode === 'IPD') ? 'IPD (ห้องยาผู้ป่วยใน)' : 'OPD (ห้องยาผู้ป่วยนอก)';
+    var hadDrug = reportData.hadDrug || (reportData.hadDetails ? reportData.hadDetails.genericName : '') || '-';
+    var hadCat = reportData.hadCategory || (reportData.hadDetails ? (reportData.hadDetails.categoryName || reportData.hadDetails.category) : '') || '-';
+    var errorDesc = (reportData.legacyCode ? reportData.legacyCode + ' | ' : '') + (reportData.errorType || '-');
+    var details = reportData.rawTranscript || reportData.normalizedTranscript || '-';
+    var reporter = reporterAlias || 'ไม่ระบุ';
+
+    var dateFormatted = Utilities.formatDate(new Date(timestamp || new Date()), 'Asia/Bangkok', 'dd/MM/yyyy HH:mm น.');
+
+    var msg = '🚨 <b>[CatchME Safety Alert] ' + (isHad ? 'ตรวจพบ Near Miss ยาความเสี่ยงสูง (HAD)!' : 'รายงาน Near Miss (Cat B)!') + '</b>\n\n' +
+      '🏥 <b>หน่วยงาน:</b> ' + escapeTelegramHtml(deptName) + '\n' +
+      (isHad ? ('💊 <b>ยา HAD:</b> ' + escapeTelegramHtml(hadDrug) + ' (' + escapeTelegramHtml(hadCat) + ')\n') : '') +
+      '⚠️ <b>ข้อผิดพลาด:</b> ' + escapeTelegramHtml(errorDesc) + '\n' +
+      '🔍 <b>รายละเอียด:</b> ' + escapeTelegramHtml(details) + '\n' +
+      '👤 <b>ผู้ตรวจพบ:</b> ' + escapeTelegramHtml(reporter) + '\n' +
+      '⏰ <b>เวลา:</b> ' + dateFormatted + '\n' +
+      '✅ <b>สถานะ:</b> ดักจับได้สำเร็จ (Category B / ไม่ถึงตัวผู้ป่วย)';
+
+    var url = 'https://api.telegram.org/bot' + botToken + '/sendMessage';
+    var payload = {
+      chat_id: chatId,
+      text: msg,
+      parse_mode: 'HTML',
+      disable_web_page_preview: true
+    };
+
+    UrlFetchApp.fetch(url, {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+  } catch (err) {
+    console.warn('sendTelegramAlert non-blocking error:', err);
+  }
+}
+
+/**
+ * Tests Telegram bot alert connection.
+ */
+function testTelegramAlert(token, chatId) {
+  try {
+    var tToken = (token || getAppSettingValue('telegram_bot_token', '')).trim();
+    var tChatId = (chatId || getAppSettingValue('telegram_chat_id', '')).trim();
+
+    if (!tToken || !tChatId) {
+      return { success: false, error: 'กรุณาระบุ Telegram Bot Token และ Chat ID ให้ครบถ้วน' };
+    }
+
+    var nowStr = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'dd/MM/yyyy HH:mm:ss น.');
+    var msg = '🔔 <b>[CatchME] ทดสอบการเชื่อมต่อระบบแจ้งเตือนสำเร็จ!</b>\n\n' +
+      'ระบบ CatchME เชื่อมต่อกับ Telegram Bot เรียบร้อยแล้ว พร้อมส่งการแจ้งเตือนความปลอดภัยทางยาอัตโนมัติเมื่อตรวจพบ Near Miss ยาความเสี่ยงสูง (HAD)\n\n' +
+      '⏰ <i>' + nowStr + '</i>';
+
+    var url = 'https://api.telegram.org/bot' + tToken + '/sendMessage';
+    var payload = {
+      chat_id: tChatId,
+      text: msg,
+      parse_mode: 'HTML'
+    };
+
+    var res = UrlFetchApp.fetch(url, {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+
+    var resCode = res.getResponseCode();
+    var resText = res.getContentText();
+    var parsed = JSON.parse(resText);
+
+    if (resCode === 200 && parsed.ok) {
+      return { success: true, message: 'ส่งข้อความทดสอบไปยัง Telegram สำเร็จแล้ว' };
+    } else {
+      return { success: false, error: 'Telegram API Error (' + resCode + '): ' + (parsed.description || resText) };
+    }
+  } catch (err) {
+    return { success: false, error: err.message || String(err) };
+  }
+}
+
+/**
+ * Aggregates safety analytics data from ME_Log.
+ */
+function getSafetyAnalytics(timeRange, filterMode, pin) {
+  var auth = verifyAdminPin(pin);
+  if (!auth.success) return { success: false, error: auth.error };
+
+  try {
+    var ss = getDatabaseSpreadsheet();
+    var sheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_LOG);
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return {
+        success: true,
+        summary: {
+          totalNearMiss: 0,
+          hadCount: 0,
+          lasaCount: 0,
+          topStage: '-',
+          opdCount: 0,
+          ipdCount: 0,
+          stages: { Prescribing: 0, Transcribing: 0, 'Pre-dispensing': 0, Other: 0 },
+          topErrors: [],
+          hadBreakdown: { cat1: 0, cat2: 0, cat3: 0, topDrugs: [] },
+          reviewedCount: 0,
+          voidCount: 0
+        }
+      };
+    }
+
+    var data = sheet.getDataRange().getValues();
+    var now = new Date();
+    var cutoff = null;
+
+    if (timeRange === '7d') {
+      cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (timeRange === '30d') {
+      cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (timeRange === 'month') {
+      cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    var total = 0;
+    var hadCount = 0;
+    var lasaCount = 0;
+    var opdCount = 0;
+    var ipdCount = 0;
+    var voidCount = 0;
+    var reviewedCount = 0;
+    var stages = { Prescribing: 0, Transcribing: 0, 'Pre-dispensing': 0, Other: 0 };
+    var errorCounts = {};
+    var hadCatCounts = { cat1: 0, cat2: 0, cat3: 0 };
+    var hadDrugCounts = {};
+
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var createdAt = new Date(row[1]);
+      var rowMode = String(row[2] || '').toUpperCase();
+      var voidReason = String(row[41] || '').trim();
+
+      // Time Filter
+      if (cutoff && createdAt < cutoff) continue;
+
+      // Mode Filter
+      if (filterMode && filterMode !== 'ALL' && rowMode !== filterMode.toUpperCase()) continue;
+
+      if (voidReason !== '') {
+        voidCount++;
+        continue; // Do not count voided cases in safety stats
+      }
+
+      total++;
+      if (rowMode === 'IPD') ipdCount++; else opdCount++;
+
+      // Process stage
+      var proc = String(row[11] || '').trim();
+      var code = String(row[15] || '').trim();
+      if (proc === 'Prescribing' || /^A\d+/i.test(code)) {
+        stages.Prescribing++;
+      } else if (proc === 'Transcribing' || /^E\d+/i.test(code)) {
+        stages.Transcribing++;
+      } else if (proc === 'Pre-dispensing' || /^B\d+/i.test(code)) {
+        stages['Pre-dispensing']++;
+      } else {
+        stages.Other++;
+      }
+
+      // HAD
+      var isHad = row[38] === true || String(row[38]).toLowerCase() === 'yes';
+      if (isHad) {
+        hadCount++;
+        var hadCat = String(row[39] || '');
+        var hadDrug = String(row[40] || '').trim();
+        if (/กลุ่มที่ 1|หมวดที่ 1|รุนแรงสูง|แคบ/i.test(hadCat)) hadCatCounts.cat1++;
+        else if (/กลุ่มที่ 2|หมวดที่ 2|เสพติด|จิตประสาท/i.test(hadCat)) hadCatCounts.cat2++;
+        else if (/กลุ่มที่ 3|หมวดที่ 3|scar|รุนแรง/i.test(hadCat)) hadCatCounts.cat3++;
+        else hadCatCounts.cat1++;
+
+        if (hadDrug) {
+          hadDrugCounts[hadDrug] = (hadDrugCounts[hadDrug] || 0) + 1;
+        }
+      }
+
+      // LASA
+      var isLasa = row[32] === true || String(row[32]).toLowerCase() === 'yes';
+      if (isLasa) lasaCount++;
+
+      // Error Type
+      var errLabel = (code ? code + ': ' : '') + String(row[14] || 'ไม่ระบุ');
+      errorCounts[errLabel] = (errorCounts[errLabel] || 0) + 1;
+
+      // Review Status
+      var reviewReq = String(row[29] || '').toLowerCase() === 'yes';
+      var reviewedAt = String(row[30] || '').trim();
+      if (reviewedAt !== '') reviewedCount++;
+    }
+
+    // Sort top errors
+    var topErrors = [];
+    for (var err in errorCounts) {
+      topErrors.push({ name: err, count: errorCounts[err] });
+    }
+    topErrors.sort(function (a, b) { return b.count - a.count; });
+    topErrors = topErrors.slice(0, 5);
+
+    // Sort top HAD drugs
+    var topHadDrugs = [];
+    for (var d in hadDrugCounts) {
+      topHadDrugs.push({ name: d, count: hadDrugCounts[d] });
+    }
+    topHadDrugs.sort(function (a, b) { return b.count - a.count; });
+    topHadDrugs = topHadDrugs.slice(0, 5);
+
+    // Find top stage
+    var maxStageCount = 0;
+    var topStage = '-';
+    for (var s in stages) {
+      if (stages[s] > maxStageCount) {
+        maxStageCount = stages[s];
+        topStage = s;
+      }
+    }
+
+    return {
+      success: true,
+      summary: {
+        totalNearMiss: total,
+        hadCount: hadCount,
+        lasaCount: lasaCount,
+        topStage: topStage,
+        opdCount: opdCount,
+        ipdCount: ipdCount,
+        stages: stages,
+        topErrors: topErrors,
+        hadBreakdown: {
+          cat1: hadCatCounts.cat1,
+          cat2: hadCatCounts.cat2,
+          cat3: hadCatCounts.cat3,
+          topDrugs: topHadDrugs
+        },
+        reviewedCount: reviewedCount,
+        voidCount: voidCount
+      }
+    };
+  } catch (err) {
+    return { success: false, error: err.message || String(err) };
+  }
+}
+
+/**
+ * Generates and exports report data as UTF-8 BOM CSV.
+ */
+function exportReportsCsv(timeRange, filterMode, pin) {
+  var auth = verifyAdminPin(pin);
+  if (!auth.success) return { success: false, error: auth.error };
+
+  try {
+    var ss = getDatabaseSpreadsheet();
+    var sheet = ss.getSheetByName(DB_CONFIG.SHEETS.ME_LOG);
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return { success: false, error: 'ยังไม่มีข้อมูลรายงานในระบบ' };
+    }
+
+    var data = sheet.getDataRange().getValues();
+    var now = new Date();
+    var cutoff = null;
+
+    if (timeRange === '7d') {
+      cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (timeRange === '30d') {
+      cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (timeRange === 'month') {
+      cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    var csvHeaders = [
+      'Record ID', 'วันที่-เวลา', 'แผนก', 'ผู้รายงาน', 'HN', 'AN', 'หอผู้ป่วย/คลินิก',
+      'ขั้นตอนเกิดเหตุ', 'รหัสความเสี่ยง', 'รายละเอียดความคลาดเคลื่อน', 'รหัส DS',
+      'ชื่อยา', 'ความแรง', 'ค่า/จำนวนที่จัดหรือสั่งจริง', 'ค่า/จำนวนที่ถูกต้อง',
+      'ตรวจพบยา HAD', 'หมวดยา HAD', 'ชื่อยา HAD', 'ตรวจพบยา LASA', 'คู่ยา LASA',
+      'สถานะการทบทวน', 'วันที่ทบทวน', 'ผู้ทบทวน', 'สถานะยกเลิก (VOID)', 'เหตุผลที่ยกเลิก'
+    ];
+
+    var csvRows = [csvHeaders];
+
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var createdAt = new Date(row[1]);
+      var rowMode = String(row[2] || '').toUpperCase();
+
+      // Time filter
+      if (cutoff && createdAt < cutoff) continue;
+
+      // Mode filter
+      if (filterMode && filterMode !== 'ALL' && rowMode !== filterMode.toUpperCase()) continue;
+
+      var formattedDate = Utilities.formatDate(createdAt, 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ss');
+
+      var csvRow = [
+        row[0], // record_id
+        formattedDate,
+        row[2], // mode
+        row[3], // reporter_alias
+        row[22], // hn
+        row[23], // an
+        row[24], // ward_clinic
+        row[11], // process
+        row[15], // legacy_code
+        row[14], // error_type_th
+        row[17], // detected_stage_code
+        row[18], // drug_name
+        row[19], // strength
+        row[20], // actual_value
+        row[21], // expected_value
+        row[38], // is_had
+        row[39], // had_category
+        row[40], // had_drug
+        row[32], // is_lasa
+        row[36], // lasa_pair_key
+        row[27], // status
+        row[30] ? Utilities.formatDate(new Date(row[30]), 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ss') : '', // reviewed_at
+        row[31], // reviewed_by
+        row[41] ? 'VOID' : 'ACTIVE', // void status
+        row[41] // void_reason
+      ];
+
+      csvRows.push(csvRow);
+    }
+
+    // Build CSV string with UTF-8 BOM
+    var csvContent = '\uFEFF' + csvRows.map(function (r) {
+      return r.map(function (field) {
+        var str = String(field == null ? '' : field).replace(/"/g, '""');
+        if (str.indexOf(',') !== -1 || str.indexOf('"') !== -1 || str.indexOf('\n') !== -1) {
+          return '"' + str + '"';
+        }
+        return str;
+      }).join(',');
+    }).join('\r\n');
+
+    return {
+      success: true,
+      csvContent: csvContent,
+      filename: 'CatchME_Quality_Report_' + Utilities.formatDate(now, 'Asia/Bangkok', 'yyyyMMdd_HHmmss') + '.csv',
+      rowCount: csvRows.length - 1
+    };
+  } catch (err) {
+    return { success: false, error: err.message || String(err) };
+  }
+}
+
+/**
+ * Gets application settings for the authenticated admin.
+ */
+function getAppSettings(pin) {
+  var auth = verifyAdminPin(pin);
+  if (!auth.success) return { success: false, error: auth.error };
+
+  return {
+    success: true,
+    settings: {
+      alertEnabled: getAppSettingValue('alert_enabled', 'false') === 'true',
+      alertHadOnly: getAppSettingValue('alert_had_only', 'true') === 'true',
+      telegramBotToken: getAppSettingValue('telegram_bot_token', ''),
+      telegramChatId: getAppSettingValue('telegram_chat_id', ''),
+      adminPin: getAppSettingValue('admin_pin', '8888')
+    }
+  };
+}
+
+/**
+ * Updates application settings from the authenticated admin.
+ */
+function updateAppSettings(settingsObj, pin) {
+  var auth = verifyAdminPin(pin);
+  if (!auth.success) return { success: false, error: auth.error };
+
+  try {
+    var ss = getDatabaseSpreadsheet();
+    var sheet = ss.getSheetByName(DB_CONFIG.SHEETS.APP_SETTINGS);
+    if (!sheet) return { success: false, error: 'ไม่พบชีต App_Settings' };
+
+    var nowIso = new Date().toISOString();
+    var data = sheet.getDataRange().getValues();
+    var keyRowMap = {};
+
+    for (var i = 1; i < data.length; i++) {
+      keyRowMap[String(data[i][0]).trim()] = i + 1;
+    }
+
+    function setKey(k, val, desc) {
+      if (keyRowMap[k]) {
+        sheet.getRange(keyRowMap[k], 2).setValue(String(val));
+        sheet.getRange(keyRowMap[k], 4).setValue(nowIso);
+      } else {
+        sheet.appendRow([k, String(val), desc || '', nowIso]);
+      }
+    }
+
+    if (settingsObj.alertEnabled !== undefined) {
+      setKey('alert_enabled', settingsObj.alertEnabled ? 'true' : 'false', 'Real-time Telegram safety alerts enabled');
+    }
+    if (settingsObj.alertHadOnly !== undefined) {
+      setKey('alert_had_only', settingsObj.alertHadOnly ? 'true' : 'false', 'Trigger alerts only for High Alert Drugs (HAD)');
+    }
+    if (settingsObj.telegramBotToken !== undefined) {
+      setKey('telegram_bot_token', settingsObj.telegramBotToken.trim(), 'Telegram Bot Token from @BotFather');
+    }
+    if (settingsObj.telegramChatId !== undefined) {
+      setKey('telegram_chat_id', settingsObj.telegramChatId.trim(), 'Telegram Group or Channel Chat ID');
+    }
+    if (settingsObj.newAdminPin !== undefined && settingsObj.newAdminPin.trim().length >= 4) {
+      setKey('admin_pin', settingsObj.newAdminPin.trim(), 'Admin & Analytics 4-digit PIN protection');
+    }
+
+    return { success: true, message: 'บันทึกการตั้งค่าเรียบร้อยแล้ว' };
+  } catch (err) {
+    return { success: false, error: err.message || String(err) };
+  }
+}
+
 
 

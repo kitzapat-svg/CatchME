@@ -164,20 +164,40 @@ function ensureSheetWithHeaders(ss, sheetName, headers) {
 }
 
 /**
- * Inserts default application settings if the App_Settings sheet is empty.
+ * Inserts default application settings if the App_Settings sheet is empty or missing keys.
  */
 function populateDefaultSettingsIfEmpty(sheet, timestamp) {
+  var defaults = [
+    ['app_name', 'CatchME', 'CatchME Quick Reporter', timestamp],
+    ['app_version', APP_VERSION, 'Database schema and app version', timestamp],
+    ['allow_mode_switch', 'true', 'Allows users to toggle between OPD and IPD', timestamp],
+    ['cat_b_strict_mode', 'true', 'Enforces strict Category B Near-Miss validation', timestamp],
+    ['retention_days', '365', 'Data retention policy in days', timestamp],
+    ['admin_pin', '8888', 'Admin & Analytics 4-digit PIN protection', timestamp],
+    ['alert_enabled', 'false', 'Real-time Telegram safety alerts enabled', timestamp],
+    ['alert_had_only', 'true', 'Trigger alerts only for High Alert Drugs (HAD)', timestamp],
+    ['telegram_bot_token', '', 'Telegram Bot Token from @BotFather', timestamp],
+    ['telegram_chat_id', '', 'Telegram Group or Channel Chat ID', timestamp]
+  ];
+
   if (sheet.getLastRow() <= 1) {
-    var defaults = [
-      ['app_name', 'CatchME', 'CatchME Quick Reporter', timestamp],
-      ['app_version', APP_VERSION, 'Database schema and app version', timestamp],
-      ['allow_mode_switch', 'true', 'Allows users to toggle between OPD and IPD', timestamp],
-      ['cat_b_strict_mode', 'true', 'Enforces strict Category B Near-Miss validation', timestamp],
-      ['retention_days', '365', 'Data retention policy in days', timestamp]
-    ];
     var range = sheet.getRange(2, 1, defaults.length, 4);
     range.setValues(defaults);
+    return;
   }
+
+  // If sheet already has rows, ensure missing default keys are added idempotently
+  var existingData = sheet.getDataRange().getValues();
+  var existingKeys = {};
+  for (var i = 1; i < existingData.length; i++) {
+    existingKeys[String(existingData[i][0]).trim()] = true;
+  }
+
+  defaults.forEach(function(row) {
+    if (!existingKeys[row[0]]) {
+      sheet.appendRow(row);
+    }
+  });
 }
 
 /**

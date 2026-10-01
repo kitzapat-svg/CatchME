@@ -2688,6 +2688,563 @@ const CatchME = (function() {
     listEl.innerHTML = html;
   }
 
+  // ==========================================================================
+  // PHASE 3: PIN AUTHENTICATION, SAFETY ANALYTICS & ADMIN SETTINGS
+  // ==========================================================================
+
+  let enteredPin = '';
+  const ADMIN_PIN_SESSION_KEY = 'catchme_admin_authed_pin';
+  let pendingPinCallback = null;
+  let currentAnalyticsTimeRange = '7d';
+  let currentAnalyticsMode = 'ALL';
+
+  /**
+   * Retrieves the authenticated admin PIN from session storage.
+   */
+  function getAdminPinSession() {
+    return sessionStorage.getItem(ADMIN_PIN_SESSION_KEY) || '';
+  }
+
+  /**
+   * Sets the authenticated admin PIN into session storage.
+   */
+  function setAdminPinSession(pin) {
+    sessionStorage.setItem(ADMIN_PIN_SESSION_KEY, pin);
+  }
+
+  /**
+   * Locks the admin session and clears the stored PIN.
+   */
+  function lockAdminSession() {
+    sessionStorage.removeItem(ADMIN_PIN_SESSION_KEY);
+    closeModal('modal-safety-analytics');
+    closeModal('modal-admin-settings');
+    alert('ล็อกเซสชันความปลอดภัยเรียบร้อยแล้ว');
+  }
+
+  /**
+   * Opens the PIN authentication modal.
+   */
+  function openPinAuthModal(onSuccess) {
+    pendingPinCallback = onSuccess;
+    enteredPin = '';
+    updatePinDots();
+    const errEl = document.getElementById('pin-error-msg');
+    if (errEl) errEl.classList.add('hidden');
+    openModal('modal-pin-auth');
+  }
+
+  /**
+   * Appends a digit to the entered PIN.
+   */
+  function enterPinDigit(digit) {
+    if (enteredPin.length < 4) {
+      enteredPin += digit;
+      updatePinDots();
+    }
+
+    if (enteredPin.length === 4) {
+      setTimeout(verifyPinSubmission, 150);
+    }
+  }
+
+  /**
+   * Removes the last digit from the entered PIN.
+   */
+  function backspacePin() {
+    if (enteredPin.length > 0) {
+      enteredPin = enteredPin.slice(0, -1);
+      updatePinDots();
+    }
+  }
+
+  /**
+   * Clears the entered PIN.
+   */
+  function clearPin() {
+    enteredPin = '';
+    updatePinDots();
+  }
+
+  /**
+   * Updates visual PIN dots.
+   */
+  function updatePinDots() {
+    for (let i = 1; i <= 4; i++) {
+      const dot = document.getElementById('pin-dot-' + i);
+      if (dot) {
+        dot.classList.toggle('filled', i <= enteredPin.length);
+      }
+    }
+  }
+
+  /**
+   * Verifies the entered PIN with the backend or local fallback.
+   */
+  function verifyPinSubmission() {
+    const candidatePin = enteredPin;
+    const errEl = document.getElementById('pin-error-msg');
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            setAdminPinSession(candidatePin);
+            closeModal('modal-pin-auth');
+            if (pendingPinCallback) {
+              const cb = pendingPinCallback;
+              pendingPinCallback = null;
+              cb();
+            }
+          } else {
+            if (errEl) {
+              errEl.innerText = res.error || 'รหัส PIN ไม่ถูกต้อง';
+              errEl.classList.remove('hidden');
+            }
+            setTimeout(clearPin, 500);
+          }
+        })
+        .withFailureHandler(function(err) {
+          if (errEl) {
+            errEl.innerText = 'เกิดข้อผิดพลาดในการตรวจสอบ PIN: ' + (err.message || err);
+            errEl.classList.remove('hidden');
+          }
+          setTimeout(clearPin, 500);
+        })
+        .apiVerifyAdminPin(candidatePin);
+    } else {
+      // Standalone Preview Mode (Default PIN is 8888)
+      const mockPin = localStorage.getItem('catchme_mock_admin_pin') || '8888';
+      if (candidatePin === mockPin) {
+        setAdminPinSession(candidatePin);
+        closeModal('modal-pin-auth');
+        if (pendingPinCallback) {
+          const cb = pendingPinCallback;
+          pendingPinCallback = null;
+          cb();
+        }
+      } else {
+        if (errEl) {
+          errEl.innerText = 'รหัส PIN ไม่ถูกต้อง (ค่าเริ่มต้นทดสอบคือ 8888)';
+          errEl.classList.remove('hidden');
+        }
+        setTimeout(clearPin, 500);
+      }
+    }
+  }
+
+  /**
+   * Entry point for viewing Safety Analytics Dashboard.
+   */
+  function openAnalytics() {
+    const pin = getAdminPinSession();
+    if (!pin) {
+      openPinAuthModal(function() {
+        openAnalytics();
+      });
+      return;
+    }
+
+    openModal('modal-safety-analytics');
+    loadSafetyAnalytics();
+  }
+
+  /**
+   * Changes the analytics time range filter.
+   */
+  function setAnalyticsTimeRange(range) {
+    currentAnalyticsTimeRange = range;
+    ['7d', '30d', 'month', 'all'].forEach(function(r) {
+      const btn = document.getElementById('analytics-filter-' + r);
+      if (btn) btn.classList.toggle('active', r === range);
+    });
+    loadSafetyAnalytics();
+  }
+
+  /**
+   * Changes the analytics department mode filter.
+   */
+  function setAnalyticsMode(mode) {
+    currentAnalyticsMode = mode;
+    ['all', 'opd', 'ipd'].forEach(function(m) {
+      const btn = document.getElementById('analytics-mode-' + m);
+      if (btn) btn.classList.toggle('active', m.toUpperCase() === mode.toUpperCase());
+    });
+    loadSafetyAnalytics();
+  }
+
+  /**
+   * Loads analytics summary data from server or local mock.
+   */
+  function loadSafetyAnalytics() {
+    const loadingEl = document.getElementById('analytics-loading');
+    const contentEl = document.getElementById('analytics-content');
+    if (loadingEl) loadingEl.classList.remove('hidden');
+    if (contentEl) contentEl.classList.add('hidden');
+
+    const pin = getAdminPinSession();
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            renderAnalyticsData(res.summary);
+          } else {
+            alert('ไม่สามารถโหลดข้อมูลสถิติได้: ' + (res.error || 'Unknown error'));
+            if (res.error && res.error.indexOf('PIN') !== -1) {
+              sessionStorage.removeItem(ADMIN_PIN_SESSION_KEY);
+              closeModal('modal-safety-analytics');
+            }
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: ' + (err.message || err));
+        })
+        .apiGetSafetyAnalytics(currentAnalyticsTimeRange, currentAnalyticsMode, pin);
+    } else {
+      // Local Browser Mock Analytics
+      setTimeout(function() {
+        const mockSummary = generateLocalMockAnalytics();
+        renderAnalyticsData(mockSummary);
+      }, 300);
+    }
+  }
+
+  /**
+   * Generates realistic mock analytics data for standalone preview.
+   */
+  function generateLocalMockAnalytics() {
+    const rawReports = JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_REPORTS) || '[]');
+    let hadCount = 0;
+    let lasaCount = 0;
+    let opdCount = 0;
+    let ipdCount = 0;
+    const stages = { Prescribing: 0, Transcribing: 0, 'Pre-dispensing': 0, Other: 0 };
+    const errCounts = {};
+    const hadDrugs = {};
+
+    rawReports.forEach(function(r) {
+      if (r.voidReason) return;
+      if (r.isHad) hadCount++;
+      if (r.isLasa) lasaCount++;
+      if (r.mode === 'IPD') ipdCount++; else opdCount++;
+      const p = r.process || 'Pre-dispensing';
+      if (stages[p] !== undefined) stages[p]++; else stages.Other++;
+      const code = (r.legacyCode ? r.legacyCode + ': ' : '') + (r.errorType || 'ข้อผิดพลาด');
+      errCounts[code] = (errCounts[code] || 0) + 1;
+      if (r.hadDrug) hadDrugs[r.hadDrug] = (hadDrugs[r.hadDrug] || 0) + 1;
+    });
+
+    // Provide baseline numbers if local storage has few reports
+    const total = Math.max(rawReports.length, 18);
+    const mockStages = {
+      Prescribing: stages.Prescribing || 4,
+      Transcribing: stages.Transcribing || 2,
+      'Pre-dispensing': stages['Pre-dispensing'] || 12,
+      Other: 0
+    };
+
+    return {
+      totalNearMiss: total,
+      hadCount: Math.max(hadCount, 5),
+      lasaCount: Math.max(lasaCount, 4),
+      topStage: 'Pre-dispensing (จัดยา)',
+      opdCount: Math.max(opdCount, 11),
+      ipdCount: Math.max(ipdCount, 7),
+      stages: mockStages,
+      topErrors: [
+        { name: 'B29: ผิดจำนวน/ปริมาณ', count: 6 },
+        { name: 'B28: ผิดความแรง', count: 4 },
+        { name: 'A05: แพทย์สั่งผิดความแรง', count: 3 },
+        { name: 'B26: ผิดชนิดยา', count: 3 },
+        { name: 'B22: ตกหล่นคำสั่ง STAT/ด่วน', count: 2 }
+      ],
+      hadBreakdown: {
+        cat1: 4,
+        cat2: 1,
+        cat3: 0,
+        topDrugs: [
+          { name: 'Warfarin', count: 2 },
+          { name: 'Potassium chloride', count: 1 },
+          { name: 'Norepinephrine', count: 1 },
+          { name: 'Regular Insulin', count: 1 }
+        ]
+      }
+    };
+  }
+
+  /**
+   * Renders analytics summary onto UI.
+   */
+  function renderAnalyticsData(s) {
+    const loadingEl = document.getElementById('analytics-loading');
+    const contentEl = document.getElementById('analytics-content');
+    if (loadingEl) loadingEl.classList.add('hidden');
+    if (contentEl) contentEl.classList.remove('hidden');
+
+    if (!s) return;
+
+    // KPI Cards
+    const kpiTotal = document.getElementById('kpi-total');
+    const kpiHad = document.getElementById('kpi-had');
+    const kpiLasa = document.getElementById('kpi-lasa');
+    const kpiTopStage = document.getElementById('kpi-top-stage');
+
+    if (kpiTotal) kpiTotal.innerText = s.totalNearMiss || 0;
+    if (kpiHad) kpiHad.innerText = s.hadCount || 0;
+    if (kpiLasa) kpiLasa.innerText = s.lasaCount || 0;
+    if (kpiTopStage) kpiTopStage.innerText = s.topStage || '-';
+
+    // Stages
+    const totalStages = Math.max(1, (s.stages.Prescribing || 0) + (s.stages.Transcribing || 0) + (s.stages['Pre-dispensing'] || 0) + (s.stages.Other || 0));
+    const pPct = Math.round(((s.stages.Prescribing || 0) / totalStages) * 100);
+    const tPct = Math.round(((s.stages.Transcribing || 0) / totalStages) * 100);
+    const dPct = Math.round(((s.stages['Pre-dispensing'] || 0) / totalStages) * 100);
+
+    const pText = document.getElementById('stage-prescribing-text');
+    const pBar = document.getElementById('stage-prescribing-bar');
+    if (pText) pText.innerText = (s.stages.Prescribing || 0) + ' เคส (' + pPct + '%)';
+    if (pBar) pBar.style.width = pPct + '%';
+
+    const tText = document.getElementById('stage-transcribing-text');
+    const tBar = document.getElementById('stage-transcribing-bar');
+    if (tText) tText.innerText = (s.stages.Transcribing || 0) + ' เคส (' + tPct + '%)';
+    if (tBar) tBar.style.width = tPct + '%';
+
+    const dText = document.getElementById('stage-dispensing-text');
+    const dBar = document.getElementById('stage-dispensing-bar');
+    if (dText) dText.innerText = (s.stages['Pre-dispensing'] || 0) + ' เคส (' + dPct + '%)';
+    if (dBar) dBar.style.width = dPct + '%';
+
+    // Top Errors
+    const errList = document.getElementById('analytics-top-errors-list');
+    if (errList) {
+      if (!s.topErrors || s.topErrors.length === 0) {
+        errList.innerHTML = '<div style="font-size: 11px; color: var(--color-text-muted); text-align: center; padding: 8px;">ไม่มีข้อมูล</div>';
+      } else {
+        let errHtml = '';
+        s.topErrors.forEach(function(item) {
+          errHtml += `
+            <div class="top-list-item">
+              <span class="top-list-item-name" title="${item.name}">${item.name}</span>
+              <span class="top-list-item-badge">${item.count} ครั้ง</span>
+            </div>
+          `;
+        });
+        errList.innerHTML = errHtml;
+      }
+    }
+
+    // HAD Summary
+    const box1 = document.getElementById('had-box-cat1');
+    const box2 = document.getElementById('had-box-cat2');
+    const box3 = document.getElementById('had-box-cat3');
+    if (box1) box1.innerText = (s.hadBreakdown && s.hadBreakdown.cat1) || 0;
+    if (box2) box2.innerText = (s.hadBreakdown && s.hadBreakdown.cat2) || 0;
+    if (box3) box3.innerText = (s.hadBreakdown && s.hadBreakdown.cat3) || 0;
+
+    const hadList = document.getElementById('analytics-top-had-list');
+    if (hadList) {
+      if (!s.hadBreakdown || !s.hadBreakdown.topDrugs || s.hadBreakdown.topDrugs.length === 0) {
+        hadList.innerHTML = '<div style="font-size: 11px; color: var(--color-text-muted); text-align: center; padding: 6px;">ไม่พบอุบัติการณ์ยา HAD ในช่วงเวลานี้</div>';
+      } else {
+        let hadHtml = '';
+        s.hadBreakdown.topDrugs.forEach(function(item) {
+          hadHtml += `
+            <div class="top-list-item">
+              <span class="top-list-item-name" style="color: #B91C1C;">💊 ${item.name}</span>
+              <span class="top-list-item-badge" style="background: #FEE2E2; color: #DC2626;">${item.count} เคส</span>
+            </div>
+          `;
+        });
+        hadList.innerHTML = hadHtml;
+      }
+    }
+  }
+
+  /**
+   * Exports report data to CSV with UTF-8 BOM.
+   */
+  function exportQualityCsv() {
+    const pin = getAdminPinSession();
+    if (!pin) {
+      openPinAuthModal(function() { exportQualityCsv(); });
+      return;
+    }
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            downloadCsvBlob(res.csvContent, res.filename);
+          } else {
+            alert('ส่งออกรายงานล้มเหลว: ' + (res.error || 'Unknown error'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาดในการส่งออกรายงาน: ' + (err.message || err));
+        })
+        .apiExportReportsCsv(currentAnalyticsTimeRange, currentAnalyticsMode, pin);
+    } else {
+      // Local Mock Export
+      const now = new Date();
+      const filename = 'CatchME_Quality_Report_Mock_' + now.toISOString().slice(0, 10) + '.csv';
+      const mockCsv = '\uFEFFRecord ID,วันที่-เวลา,แผนก,ผู้รายงาน,HN,รหัสความเสี่ยง,รายละเอียดความคลาดเคลื่อน,ตรวจพบยา HAD,หมวดยา HAD,ชื่อยา HAD\r\n' +
+        'ME-20261001-0001,2026-10-01 10:20:00,IPD,P03,123456,B16,จัดยาผิดความแรง,Yes,หมวด 1,Potassium Chloride\r\n' +
+        'ME-20261001-0002,2026-10-01 10:45:00,OPD,ARM,654321,A05,ผิดความแรง,Yes,หมวด 1,Warfarin';
+      downloadCsvBlob(mockCsv, filename);
+    }
+  }
+
+  /**
+   * Helper to trigger CSV download in the browser.
+   */
+  function downloadCsvBlob(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Opens Admin & Telegram alert settings modal.
+   */
+  function openAdminSettings() {
+    const pin = getAdminPinSession();
+    if (!pin) {
+      openPinAuthModal(function() { openAdminSettings(); });
+      return;
+    }
+
+    openModal('modal-admin-settings');
+    loadAdminSettings();
+  }
+
+  /**
+   * Loads current admin settings.
+   */
+  function loadAdminSettings() {
+    const pin = getAdminPinSession();
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success && res.settings) {
+            const s = res.settings;
+            const chkEnabled = document.getElementById('setting-alert-enabled');
+            const chkHadOnly = document.getElementById('setting-alert-had-only');
+            const txtToken = document.getElementById('setting-telegram-token');
+            const txtChatId = document.getElementById('setting-telegram-chatid');
+
+            if (chkEnabled) chkEnabled.checked = s.alertEnabled;
+            if (chkHadOnly) chkHadOnly.checked = s.alertHadOnly;
+            if (txtToken) txtToken.value = s.telegramBotToken || '';
+            if (txtChatId) txtChatId.value = s.telegramChatId || '';
+          }
+        })
+        .apiGetAppSettings(pin);
+    } else {
+      // Mock Settings
+      const saved = JSON.parse(localStorage.getItem('catchme_mock_admin_settings') || '{}');
+      const chkEnabled = document.getElementById('setting-alert-enabled');
+      const chkHadOnly = document.getElementById('setting-alert-had-only');
+      const txtToken = document.getElementById('setting-telegram-token');
+      const txtChatId = document.getElementById('setting-telegram-chatid');
+
+      if (chkEnabled) chkEnabled.checked = saved.alertEnabled || false;
+      if (chkHadOnly) chkHadOnly.checked = saved.alertHadOnly !== undefined ? saved.alertHadOnly : true;
+      if (txtToken) txtToken.value = saved.telegramBotToken || '';
+      if (txtChatId) txtChatId.value = saved.telegramChatId || '';
+    }
+  }
+
+  /**
+   * Saves updated admin settings.
+   */
+  function saveAdminSettings() {
+    const pin = getAdminPinSession();
+    const chkEnabled = document.getElementById('setting-alert-enabled');
+    const chkHadOnly = document.getElementById('setting-alert-had-only');
+    const txtToken = document.getElementById('setting-telegram-token');
+    const txtChatId = document.getElementById('setting-telegram-chatid');
+    const txtNewPin = document.getElementById('setting-new-pin');
+
+    const settingsObj = {
+      alertEnabled: chkEnabled ? chkEnabled.checked : false,
+      alertHadOnly: chkHadOnly ? chkHadOnly.checked : true,
+      telegramBotToken: txtToken ? txtToken.value.trim() : '',
+      telegramChatId: txtChatId ? txtChatId.value.trim() : ''
+    };
+
+    if (txtNewPin && txtNewPin.value.trim().length >= 4) {
+      settingsObj.newAdminPin = txtNewPin.value.trim();
+    }
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            if (settingsObj.newAdminPin) {
+              setAdminPinSession(settingsObj.newAdminPin);
+            }
+            alert('บันทึกการตั้งค่าเรียบร้อยแล้ว');
+            closeModal('modal-admin-settings');
+          } else {
+            alert('บันทึกล้มเหลว: ' + (res.error || 'Unknown error'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาดในการบันทึก: ' + (err.message || err));
+        })
+        .apiUpdateAppSettings(settingsObj, pin);
+    } else {
+      // Mock Save
+      localStorage.setItem('catchme_mock_admin_settings', JSON.stringify(settingsObj));
+      if (settingsObj.newAdminPin) {
+        localStorage.setItem('catchme_mock_admin_pin', settingsObj.newAdminPin);
+        setAdminPinSession(settingsObj.newAdminPin);
+      }
+      alert('บันทึกการตั้งค่าเรียบร้อยแล้ว (Mock Mode)');
+      closeModal('modal-admin-settings');
+    }
+  }
+
+  /**
+   * Tests Telegram bot alert connection.
+   */
+  function testTelegramPing() {
+    const txtToken = document.getElementById('setting-telegram-token');
+    const txtChatId = document.getElementById('setting-telegram-chatid');
+    const token = txtToken ? txtToken.value.trim() : '';
+    const chatId = txtChatId ? txtChatId.value.trim() : '';
+
+    if (!token || !chatId) {
+      alert('กรุณากรอก Telegram Bot Token และ Chat ID ก่อนทดสอบ');
+      return;
+    }
+
+    if (typeof google !== 'undefined' && google.script && google.script.run) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res && res.success) {
+            alert('✅ ' + res.message);
+          } else {
+            alert('❌ ' + (res.error || 'ส่งข้อความทดสอบไม่สำเร็จ'));
+          }
+        })
+        .withFailureHandler(function(err) {
+          alert('เกิดข้อผิดพลาดในการส่งข้อความ: ' + (err.message || err));
+        })
+        .apiTestTelegramAlert(token, chatId);
+    } else {
+      alert('🔔 [Mock Preview] ส่งข้อความทดสอบสำเร็จ (Token: ' + token.slice(0, 8) + '... Chat ID: ' + chatId + ')');
+    }
+  }
+
   return {
     init: init,
     toggleMode: toggleMode,
@@ -2748,7 +3305,20 @@ const CatchME = (function() {
     submitSafetyReview: submitSafetyReview,
     openHadDictionary: openHadDictionary,
     filterHadCategory: filterHadCategory,
-    searchHadList: searchHadList
+    searchHadList: searchHadList,
+    // Phase 3 Exports
+    openPinAuthModal: openPinAuthModal,
+    enterPinDigit: enterPinDigit,
+    backspacePin: backspacePin,
+    clearPin: clearPin,
+    openAnalytics: openAnalytics,
+    lockAdminSession: lockAdminSession,
+    setAnalyticsTimeRange: setAnalyticsTimeRange,
+    setAnalyticsMode: setAnalyticsMode,
+    exportQualityCsv: exportQualityCsv,
+    openAdminSettings: openAdminSettings,
+    saveAdminSettings: saveAdminSettings,
+    testTelegramPing: testTelegramPing
   };
 })();
 

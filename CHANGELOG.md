@@ -5,6 +5,29 @@ All notable changes to the CatchME project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-01
+### Added
+- **Safety Analytics Dashboard (`modal-safety-analytics`)**:
+  - Interactive medication safety and Near Miss (Cat B) analytics dashboard accessible from top header.
+  - Time range filters: 7 days, 30 days, current month, and all-time.
+  - Department filters: ALL, OPD (ห้องยาผู้ป่วยนอก), IPD (ห้องยาผู้ป่วยใน).
+  - KPI Cards: Total Near Miss, HAD Interception Count, LASA Events, and Top Interception Stage.
+  - Stage Distribution Progress Meters for Prescribing (A01-A17), Transcribing (E01-E11), and Pre-dispensing (B01-B36).
+  - Top 5 Frequency Error Types and High Alert Drug (HAD) surveillance category breakdown.
+- **PIN Code Protection Layer (`modal-pin-auth`)**:
+  - 4-digit PIN security lock protecting Analytics Dashboard and Admin Settings while keeping Quick Reporter no-login.
+  - Sweet Cotton Candy styled numeric keypad with animated PIN dots and error feedback.
+  - Default PIN `8888` stored securely in `App_Settings` sheet on Google Sheets (server-side verification only).
+  - Session caching in `sessionStorage` with instant manual lock-out button (`🔒`).
+- **Real-Time Safety Alerting via Telegram Bot API**:
+  - Non-blocking real-time alert engine sending HTML formatted messages upon report submission.
+  - Automatic department naming: `IPD (ห้องยาผู้ป่วยใน)` and `OPD (ห้องยาผู้ป่วยนอก)`.
+  - Configurable alert filters: High Alert Drugs (HAD 29 items) priority alerting as default.
+  - Admin settings modal (`modal-admin-settings`) with Telegram Bot Token, Chat ID, and Test Ping button.
+- **Quality & HA Accreditation Report Export**:
+  - Export report data to UTF-8 BOM CSV supporting Thai characters in Microsoft Excel without encoding issues.
+  - Complete incident fields exported for Pharmacy & Therapeutics Committee (PTC) and Risk Management reviews.
+
 ## [0.4.0] - 2026-10-01
 ### Added
 - **Sawankhalok Hospital High Alert Drugs (HAD) Surveillance**:

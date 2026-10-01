@@ -1,6 +1,6 @@
 {
   "name": "catchme",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "CatchME — Medication Error Cat B Quick Reporter",
   "private": true,
   "scripts": {

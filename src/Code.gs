@@ -3,7 +3,7 @@
  * Main Entry Point (Web App)
  */
 
-const APP_VERSION = '0.4.0';
+const APP_VERSION = '0.5.0';
 
 /**
  * Serves the HTML web app for the CatchME user interface.
@@ -121,6 +121,48 @@ function apiGetEmergingLasaPairs(mode, threshold) {
  */
 function apiPromoteEmergingLasa(pairData) {
   return promoteEmergingLasa(pairData);
+}
+
+/**
+ * Client-callable endpoint to verify admin PIN.
+ */
+function apiVerifyAdminPin(pin) {
+  return verifyAdminPin(pin);
+}
+
+/**
+ * Client-callable endpoint to retrieve safety analytics summary.
+ */
+function apiGetSafetyAnalytics(timeRange, filterMode, pin) {
+  return getSafetyAnalytics(timeRange, filterMode, pin);
+}
+
+/**
+ * Client-callable endpoint to export reports as UTF-8 BOM CSV.
+ */
+function apiExportReportsCsv(timeRange, filterMode, pin) {
+  return exportReportsCsv(timeRange, filterMode, pin);
+}
+
+/**
+ * Client-callable endpoint to get admin settings.
+ */
+function apiGetAppSettings(pin) {
+  return getAppSettings(pin);
+}
+
+/**
+ * Client-callable endpoint to update admin settings.
+ */
+function apiUpdateAppSettings(settingsObj, pin) {
+  return updateAppSettings(settingsObj, pin);
+}
+
+/**
+ * Client-callable endpoint to test Telegram bot alert.
+ */
+function apiTestTelegramAlert(token, chatId) {
+  return testTelegramAlert(token, chatId);
 }
 
 /**

@@ -1276,4 +1276,366 @@
     gap: 4px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   }
+
+  /* ==========================================================================
+     PHASE 3: PIN AUTHENTICATION, SAFETY ANALYTICS & ADMIN SETTINGS
+     ========================================================================== */
+
+  /* PIN Authentication Card */
+  .pin-auth-card {
+    max-width: 320px;
+    width: 90%;
+    margin: 0 auto;
+    text-align: center;
+    padding: 24px 20px;
+  }
+
+  .pin-display {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 18px 0;
+  }
+
+  .pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--color-primary);
+    background: transparent;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .pin-dot.filled {
+    background: var(--color-primary-dark);
+    transform: scale(1.2);
+    box-shadow: 0 0 10px rgba(255, 77, 109, 0.5);
+  }
+
+  .pin-error-text {
+    color: #DC2626;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    animation: shake 0.3s ease;
+  }
+
+  .pin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 230px;
+    margin: 0 auto;
+  }
+
+  .pin-key {
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 143, 171, 0.3);
+    background: rgba(255, 255, 255, 0.85);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  .pin-key:hover {
+    background: #FFFFFF;
+    border-color: var(--color-primary);
+    transform: scale(1.06);
+    box-shadow: 0 2px 8px rgba(255, 77, 109, 0.15);
+  }
+
+  .pin-key:active {
+    transform: scale(0.94);
+    background: var(--color-primary-light);
+  }
+
+  .pin-key-action {
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    background: rgba(255, 245, 247, 0.7);
+  }
+
+  /* Safety Analytics Drawer Card */
+  .analytics-drawer-card {
+    max-width: 560px;
+    width: 95%;
+  }
+
+  .filter-pill {
+    background: #FFFFFF;
+    border: 1px solid rgba(255, 143, 171, 0.35);
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .filter-pill:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  .filter-pill.active {
+    background: var(--color-primary-dark);
+    color: #FFFFFF;
+    border-color: var(--color-primary-dark);
+    box-shadow: 0 2px 6px rgba(201, 24, 74, 0.25);
+  }
+
+  /* KPI Grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .kpi-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(255, 143, 171, 0.25);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+
+  .kpi-card-had {
+    border-color: rgba(239, 68, 68, 0.35);
+    background: linear-gradient(135deg, #FFFFFF, rgba(254, 242, 242, 0.85));
+  }
+
+  .kpi-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+
+  .kpi-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--color-primary-dark);
+    line-height: 1.1;
+  }
+
+  .kpi-value-sm {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-primary-dark);
+    line-height: 1.2;
+    padding-top: 4px;
+  }
+
+  .kpi-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+  }
+
+  /* Analytics Section Boxes */
+  .analytics-section {
+    background: #FFFFFF;
+    border: 1px solid rgba(255, 143, 171, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .analytics-section-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    margin: 0 0 8px 0;
+  }
+
+  /* Stage Distribution Bars */
+  .stage-bar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .stage-bar-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .stage-bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .stage-progress-bg {
+    width: 100%;
+    height: 7px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  .stage-progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.4s ease;
+  }
+
+  .stage-fill-prescribing {
+    background: linear-gradient(90deg, #60A5FA, #3B82F6);
+  }
+
+  .stage-fill-transcribing {
+    background: linear-gradient(90deg, #FBBF24, #F59E0B);
+  }
+
+  .stage-fill-dispensing {
+    background: linear-gradient(90deg, #F472B6, #EC4899);
+  }
+
+  /* Top Lists */
+  .top-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .top-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: rgba(255, 248, 249, 0.7);
+    border-radius: var(--radius-xs);
+    font-size: 11.5px;
+  }
+
+  .top-list-item-name {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 6px;
+  }
+
+  .top-list-item-badge {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 9999px;
+    font-size: 10.5px;
+    flex-shrink: 0;
+  }
+
+  /* HAD Category 3-Box Grid */
+  .had-cat-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .had-cat-box {
+    padding: 6px 3px;
+    text-align: center;
+    background: rgba(254, 242, 242, 0.85);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-xs);
+  }
+
+  .had-cat-box-num {
+    display: block;
+    font-size: 15px;
+    font-weight: 800;
+    color: #DC2626;
+  }
+
+  .had-cat-box-lbl {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  /* Admin Settings Box & Switch */
+  .settings-admin-card {
+    max-width: 440px;
+    width: 92%;
+  }
+
+  .settings-box {
+    padding: 12px;
+    background: #FFFFFF;
+    border: 1px solid rgba(255, 143, 171, 0.25);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Switch Toggle */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #CBD5E1;
+    transition: .25s;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .25s;
+  }
+
+  input:checked + .slider {
+    background-color: var(--color-primary-dark);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(18px);
+  }
+
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
 </style>
