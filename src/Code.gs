@@ -3,7 +3,7 @@
  * Main Entry Point (Web App)
  */
 
-const APP_VERSION = '0.5.0';
+const APP_VERSION = '0.5.1';
 
 /**
  * Serves the HTML web app for the CatchME user interface.
